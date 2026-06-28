@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"/Users/trishaanagarwal/Documents/SwapLease/SwapLease Website/backend\")",
+      "Bash(mkdir -p \"/Users/trishaanagarwal/Documents/SwapLease/SwapLease Website/frontend\")",
+      "Bash(npm create *)",
+      "Bash(npm install *)",
+      "Bash(node -e \"require\\('resend'\\); console.log\\('ok'\\)\")",
+      "Bash(node -e \"require\\('./server.js'\\)\")",
+      "Bash(curl -s http://localhost:5001/api/csrf-token)",
+      "Bash(kill %1)"
+    ]
+  }
+}
