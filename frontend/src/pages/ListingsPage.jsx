@@ -62,9 +62,13 @@ export default function ListingsPage() {
   return (
     <div style={{ minHeight: '100vh', background: t.cream }}>
 
-      <div style={{ background: '#fff', borderBottom: `1px solid ${t.border}`, padding: '18px 22px' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <form onSubmit={e => { e.preventDefault(); setSearch(searchInput); }} style={{ display: 'flex', gap: 8, maxWidth: 600, background: t.cream, borderRadius: t.pill, padding: 6, border: `1px solid ${t.border}` }}>
+      <div style={{ position: 'relative', overflow: 'hidden', background: t.ink, padding: '46px 22px 30px' }}>
+        <div className="blob" style={{ width: 360, height: 360, background: t.navy, top: -150, left: -60, opacity: 0.55 }} />
+        <div className="blob" style={{ width: 320, height: 320, background: t.green, top: -120, right: -80, opacity: 0.5 }} />
+        <div style={{ maxWidth: 1200, margin: '0 auto', position: 'relative' }}>
+          <h1 className="font-display" style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 800, color: '#fff', margin: '0 0 6px' }}>Browse student leases</h1>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 15, margin: '0 0 22px' }}>Find your next home across Melbourne — direct from students.</p>
+          <form onSubmit={e => { e.preventDefault(); setSearch(searchInput); }} style={{ display: 'flex', gap: 8, maxWidth: 600, background: '#fff', borderRadius: t.pill, padding: 6, boxShadow: t.shadow }}>
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, paddingLeft: 14 }}>
               <Search size={18} color={t.inkFaint} />
               <input type="text" placeholder="Search suburb, street or university…"

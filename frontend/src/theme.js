@@ -1,28 +1,43 @@
-// Shared warm & friendly design tokens for inline styles.
-// Keep in sync with the CSS variables in index.css.
+// Premium brand design tokens (navy + forest green + gold), matching the logo.
+// Token NAMES are kept stable so existing pages recolor automatically;
+// only the VALUES changed from the old warm/coral scheme.
 export const t = {
-  cream: '#FBF6EE',
-  creamDeep: '#F5EBDD',
+  cream: '#F8F6F1',      // ivory page background
+  creamDeep: '#F1ECE3',  // slightly deeper ivory for alt sections
   card: '#FFFFFF',
-  ink: '#2C2520',
-  inkSoft: '#6B5F54',
-  inkFaint: '#9C9083',
-  border: '#ECE1D2',
-  borderStrong: '#E0D2BE',
+  ink: '#16223B',        // deep navy-charcoal text
+  inkSoft: '#586079',    // muted slate
+  inkFaint: '#9AA0B0',
+  border: '#E7E3DA',
+  borderStrong: '#D9D3C6',
 
-  coral: '#F2654E',
-  coralDeep: '#DC4A33',
-  coralTint: '#FDEAE4',
-  sage: '#5B8C6E',
-  sageTint: '#E4F0E7',
-  plum: '#8A5A8F',
-  plumTint: '#F3E9F4',
-  honey: '#E8A33D',
-  honeyTint: '#FBEED6',
+  // "coral" slot now holds the PRIMARY navy (matches logo) so all buttons update
+  coral: '#1B3A6B',      // brand navy (primary)
+  coralDeep: '#122A52',  // darker navy (hover)
+  coralTint: '#E8EDF6',  // pale navy wash
 
-  shadowSm: '0 1px 2px rgba(58, 42, 28, 0.05)',
-  shadow: '0 4px 18px rgba(58, 42, 28, 0.08)',
-  shadowLg: '0 12px 40px rgba(58, 42, 28, 0.12)',
+  // secondary = logo's forest/pine green
+  sage: '#1C4D3E',
+  sageTint: '#E2ECE6',
+
+  // refined plum kept for variety
+  plum: '#4B3F72',
+  plumTint: '#ECE8F4',
+
+  // accent = luxury gold
+  honey: '#C0934A',
+  honeyTint: '#F4EBD7',
+
+  // brand raw values for gradients
+  navy: '#1B3A6B',
+  navyDeep: '#102A52',
+  green: '#1C4D3E',
+  gold: '#C0934A',
+
+  shadowSm: '0 1px 2px rgba(16, 28, 56, 0.06)',
+  shadow: '0 8px 30px rgba(16, 28, 56, 0.10)',
+  shadowLg: '0 24px 60px rgba(16, 28, 56, 0.16)',
+  shadow3d: '0 30px 60px -20px rgba(16, 28, 56, 0.35), 0 12px 24px -12px rgba(16, 28, 56, 0.25)',
 
   radius: 18,
   radiusLg: 26,

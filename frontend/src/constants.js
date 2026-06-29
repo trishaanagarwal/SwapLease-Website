@@ -36,4 +36,4 @@ export const UNIVERSITIES = [
   'University of Wollongong',
   'Victoria University',
   'Western Sydney University',
-];
+].sort((a, b) => a.localeCompare(b));

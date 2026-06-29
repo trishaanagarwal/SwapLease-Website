@@ -8,6 +8,7 @@ import ListingDetailPage from './pages/ListingDetailPage';
 import CreateListingPage from './pages/CreateListingPage';
 import MessagesPage from './pages/MessagesPage';
 import ProfilePage from './pages/ProfilePage';
+import SavedPage from './pages/SavedPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
@@ -41,6 +42,11 @@ export default function App() {
               <ProtectedRoute><CreateListingPage /></ProtectedRoute>
             </Layout>
           } />
+          <Route path="/listings/:id/edit" element={
+            <Layout>
+              <ProtectedRoute><CreateListingPage /></ProtectedRoute>
+            </Layout>
+          } />
           <Route path="/messages" element={
             <Layout>
               <ProtectedRoute><MessagesPage /></ProtectedRoute>
@@ -49,6 +55,11 @@ export default function App() {
           <Route path="/profile" element={
             <Layout>
               <ProtectedRoute><ProfilePage /></ProtectedRoute>
+            </Layout>
+          } />
+          <Route path="/saved" element={
+            <Layout>
+              <ProtectedRoute><SavedPage /></ProtectedRoute>
             </Layout>
           } />
         </Routes>

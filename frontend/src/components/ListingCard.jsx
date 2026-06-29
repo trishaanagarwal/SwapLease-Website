@@ -1,18 +1,40 @@
 import { Link } from 'react-router-dom';
 import { t, typeLabels } from '../theme';
+import BookmarkButton from './BookmarkButton';
 
 const chip = (bg, color) => ({ fontSize: 11.5, fontWeight: 700, color, background: bg, borderRadius: t.pill, padding: '3px 11px', display: 'inline-block' });
 
+function NoPhoto() {
+  return (
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, background: `linear-gradient(135deg, ${t.creamDeep}, #E8EDF6)`, color: t.inkFaint }}>
+      <span style={{ fontSize: 30 }}>🏠</span>
+      <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.02em' }}>No photo yet</span>
+    </div>
+  );
+}
+
+function TakenTag() {
+  return (
+    <div style={{ position: 'absolute', inset: 0, background: 'rgba(22,34,59,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <span style={{ background: '#fff', color: t.ink, fontWeight: 800, fontSize: 13, padding: '7px 16px', borderRadius: t.pill, letterSpacing: '0.02em' }}>Taken</span>
+    </div>
+  );
+}
+
 export default function ListingCard({ listing, horizontal = false }) {
-  const image = listing.images?.[0] || `https://picsum.photos/seed/${listing.id}/800/500`;
+  const image = listing.images?.[0] || null;
+  const taken = listing.status === 'taken';
 
   if (horizontal) {
     return (
       <Link to={`/listings/${listing.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
         <div className="lift" style={{ background: t.card, borderRadius: t.radius, overflow: 'hidden', marginBottom: 16, display: 'flex', border: `1px solid ${t.border}`, boxShadow: t.shadowSm }}>
           <div style={{ width: 250, minWidth: 250, height: 200, position: 'relative', overflow: 'hidden', background: t.creamDeep, flexShrink: 0 }}>
-            <img src={image} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              onError={e => { e.target.src = `https://picsum.photos/seed/${listing.id}b/800/500`; }} />
+            {image ? (
+              <img src={image} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : <NoPhoto />}
+            {taken && <TakenTag />}
+            <div style={{ position: 'absolute', top: 10, right: 10 }}><BookmarkButton listingId={listing.id} /></div>
           </div>
 
           <div style={{ flex: 1, padding: '20px 24px', display: 'flex', justifyContent: 'space-between', gap: 16, minWidth: 0 }}>
@@ -61,14 +83,17 @@ export default function ListingCard({ listing, horizontal = false }) {
     <Link to={`/listings/${listing.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
       <div className="lift" style={{ background: t.card, borderRadius: t.radius, overflow: 'hidden', border: `1px solid ${t.border}`, boxShadow: t.shadowSm }}>
         <div style={{ position: 'relative', height: 200, overflow: 'hidden', background: t.creamDeep }}>
-          <img src={image} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            onError={e => { e.target.src = `https://picsum.photos/seed/${listing.id}b/800/500`; }} />
+          {image ? (
+            <img src={image} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : <NoPhoto />}
+          {taken && <TakenTag />}
           <div style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(4px)', borderRadius: t.pill, padding: '4px 12px', fontSize: 11.5, fontWeight: 700, color: t.ink }}>
             {typeLabels[listing.type] || listing.type}
           </div>
           {listing.furnished && (
-            <div style={{ position: 'absolute', top: 12, right: 12, background: t.sage, borderRadius: t.pill, padding: '4px 12px', fontSize: 11.5, fontWeight: 700, color: '#fff' }}>Furnished</div>
+            <div style={{ position: 'absolute', bottom: 12, left: 12, background: t.sage, borderRadius: t.pill, padding: '4px 12px', fontSize: 11.5, fontWeight: 700, color: '#fff' }}>Furnished</div>
           )}
+          <div style={{ position: 'absolute', top: 12, right: 12 }}><BookmarkButton listingId={listing.id} /></div>
         </div>
         <div style={{ padding: '16px 18px 18px' }}>
           <h3 className="font-display" style={{ fontSize: 18, fontWeight: 700, color: t.ink, margin: '0 0 4px', lineHeight: 1.25 }}>{listing.title}</h3>

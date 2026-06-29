@@ -4,12 +4,28 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendEmailVerification,
+  verifyBeforeUpdateEmail,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
   signOut,
 } from 'firebase/auth';
-import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, serverTimestamp, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 
 const AuthContext = createContext(null);
+
+// If the verified Auth email differs from the stored profile email
+// (e.g. after a confirmed email change), keep the Firestore doc in sync.
+async function syncEmail(firebaseUser, data) {
+  const authEmail = (firebaseUser.email || '').toLowerCase();
+  if (authEmail && data?.email && data.email.toLowerCase() !== authEmail) {
+    try {
+      await updateDoc(doc(db, 'users', firebaseUser.uid), { email: authEmail });
+      return { ...data, email: authEmail };
+    } catch { /* rules may block until verified; ignore */ }
+  }
+  return data;
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -20,7 +36,12 @@ export function AuthProvider({ children }) {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         const snap = await getDoc(doc(db, 'users', firebaseUser.uid));
-        setUser(snap.exists() ? { id: firebaseUser.uid, emailVerified: firebaseUser.emailVerified, ...snap.data() } : null);
+        if (snap.exists()) {
+          const data = await syncEmail(firebaseUser, snap.data());
+          setUser({ id: firebaseUser.uid, emailVerified: firebaseUser.emailVerified, ...data });
+        } else {
+          setUser(null);
+        }
       } else {
         setUser(null);
       }
@@ -38,7 +59,8 @@ export function AuthProvider({ children }) {
       throw err;
     }
     const snap = await getDoc(doc(db, 'users', cred.user.uid));
-    setUser({ id: cred.user.uid, emailVerified: true, ...snap.data() });
+    const data = await syncEmail(cred.user, snap.data());
+    setUser({ id: cred.user.uid, emailVerified: true, ...data });
   };
 
   const register = async (name, email, password, university) => {
@@ -49,6 +71,7 @@ export function AuthProvider({ children }) {
       university: university || '',
       bio: '',
       phone: '',
+      bookmarks: [],
       createdAt: serverTimestamp(),
     });
     await sendEmailVerification(cred.user);
@@ -72,8 +95,34 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Toggle a listing in the user's bookmarks (optimistic local update).
+  const toggleBookmark = async (listingId) => {
+    if (!auth.currentUser || !user) return;
+    const has = (user.bookmarks || []).includes(listingId);
+    const next = has
+      ? (user.bookmarks || []).filter(id => id !== listingId)
+      : [...(user.bookmarks || []), listingId];
+    setUser(u => ({ ...u, bookmarks: next }));
+    try {
+      await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+        bookmarks: has ? arrayRemove(listingId) : arrayUnion(listingId),
+      });
+    } catch {
+      setUser(u => ({ ...u, bookmarks: user.bookmarks || [] })); // revert on failure
+    }
+  };
+
+  // Change email securely: re-authenticate, then send a verification link to the
+  // NEW address. The email only switches once the user clicks that link.
+  const changeEmail = async (newEmail, currentPassword) => {
+    if (!auth.currentUser) throw new Error('Not signed in.');
+    const cred = EmailAuthProvider.credential(auth.currentUser.email, currentPassword);
+    await reauthenticateWithCredential(auth.currentUser, cred);
+    await verifyBeforeUpdateEmail(auth.currentUser, newEmail.trim().toLowerCase());
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser, resendVerification, pendingVerification }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser, resendVerification, pendingVerification, toggleBookmark, changeEmail }}>
       {children}
     </AuthContext.Provider>
   );

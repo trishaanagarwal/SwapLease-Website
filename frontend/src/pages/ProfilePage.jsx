@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Edit2, Save, X, PlusCircle, User } from 'lucide-react';
+import { Edit2, Save, X, PlusCircle, User, Mail } from 'lucide-react';
 import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
@@ -9,7 +9,7 @@ import ListingCard from '../components/ListingCard';
 import { t } from '../theme';
 
 export default function ProfilePage() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, changeEmail } = useAuth();
   const [editing, setEditing] = useState(false);
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,17 +17,47 @@ export default function ProfilePage() {
   const [error, setError] = useState('');
   const [form, setForm] = useState({ name: '', bio: '', university: '', phone: '' });
 
+  // Email change flow
+  const [emailForm, setEmailForm] = useState({ newEmail: '', password: '' });
+  const [emailBusy, setEmailBusy] = useState(false);
+  const [emailMsg, setEmailMsg] = useState({ type: '', text: '' });
+
   useEffect(() => {
     if (user) setForm({ name: user.name || '', bio: user.bio || '', university: user.university || '', phone: user.phone || '' });
   }, [user]);
 
   useEffect(() => {
     if (!user) return;
-    getDocs(query(collection(db, 'listings'), where('userId', '==', user.id), where('status', '==', 'active')))
-      .then(snap => setListings(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
+    getDocs(query(collection(db, 'listings'), where('userId', '==', user.id)))
+      .then(snap => {
+        const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        items.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        setListings(items);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [user]);
+
+  const handleEmailChange = async () => {
+    setEmailMsg({ type: '', text: '' });
+    const next = emailForm.newEmail.trim().toLowerCase();
+    if (!next.includes('@')) { setEmailMsg({ type: 'err', text: 'Enter a valid new email address.' }); return; }
+    if (next === (user.email || '').toLowerCase()) { setEmailMsg({ type: 'err', text: 'That is already your current email.' }); return; }
+    if (!emailForm.password) { setEmailMsg({ type: 'err', text: 'Enter your current password to confirm.' }); return; }
+    setEmailBusy(true);
+    try {
+      await changeEmail(next, emailForm.password);
+      setEmailMsg({ type: 'ok', text: `Verification link sent to ${next}. Click it to confirm — then sign in with your new email. Your old email stays active until you confirm.` });
+      setEmailForm({ newEmail: '', password: '' });
+    } catch (err) {
+      if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') setEmailMsg({ type: 'err', text: 'Incorrect password.' });
+      else if (err.code === 'auth/email-already-in-use') setEmailMsg({ type: 'err', text: 'That email is already in use by another account.' });
+      else if (err.code === 'auth/too-many-requests') setEmailMsg({ type: 'err', text: 'Too many attempts. Please wait a moment and try again.' });
+      else setEmailMsg({ type: 'err', text: err.message || 'Could not change email. Please try again.' });
+    } finally {
+      setEmailBusy(false);
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -126,6 +156,42 @@ export default function ProfilePage() {
               )}
             </div>
           )}
+        </div>
+
+        {/* ---- Account email & security ---- */}
+        <div style={{ ...card, padding: 28 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+            <Mail size={19} color={t.navy} />
+            <h2 className="font-display" style={{ fontSize: 20, fontWeight: 800, color: t.ink, margin: 0 }}>Login email</h2>
+          </div>
+          <p style={{ color: t.inkSoft, fontSize: 14, margin: '0 0 18px' }}>
+            Current email: <strong style={{ color: t.ink }}>{user?.email}</strong>. Changing it sends a verification link to the new address — your old email keeps working until you confirm.
+          </p>
+
+          {emailMsg.text && (
+            <div style={{
+              background: emailMsg.type === 'ok' ? t.sageTint : t.coralTint,
+              border: `1px solid ${emailMsg.type === 'ok' ? t.sage : t.coral}`,
+              color: emailMsg.type === 'ok' ? t.sage : t.coralDeep,
+              padding: '12px 15px', borderRadius: 12, fontSize: 13.5, marginBottom: 16, fontWeight: 600, lineHeight: 1.5 }}>
+              {emailMsg.text}
+            </div>
+          )}
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+            <div>
+              <label style={lbl}>New email address</label>
+              <input type="email" value={emailForm.newEmail} onChange={e => setEmailForm(f => ({ ...f, newEmail: e.target.value }))} placeholder="new@example.com" style={field} />
+            </div>
+            <div>
+              <label style={lbl}>Confirm current password</label>
+              <input type="password" value={emailForm.password} onChange={e => setEmailForm(f => ({ ...f, password: e.target.value }))} placeholder="Your password" style={field} />
+            </div>
+          </div>
+          <button onClick={handleEmailChange} disabled={emailBusy} className="btn btn-coral"
+            style={{ marginTop: 16, padding: '11px 22px', fontSize: 14.5, opacity: emailBusy ? 0.6 : 1 }}>
+            {emailBusy ? 'Sending…' : 'Update email'}
+          </button>
         </div>
 
         <div>

@@ -85,7 +85,7 @@ export default function MessagesPage() {
     : null;
 
   return (
-    <div style={{ display: 'flex', height: 'calc(100vh - 60px)', background: '#FBF6EE', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', height: 'calc(100vh - 60px)', background: '#F8F6F1', overflow: 'hidden' }}>
 
       <div style={{ width: 300, flexShrink: 0, background: '#fff', borderRight: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '20px 20px 14px', borderBottom: '1px solid #f3f4f6' }}>
@@ -104,9 +104,9 @@ export default function MessagesPage() {
               const isActive = conv.id === activeConvId;
               return (
                 <button key={conv.id} onClick={() => setActiveConvId(conv.id)}
-                  style={{ width: '100%', textAlign: 'left', padding: '14px 20px', background: isActive ? '#FDEAE4' : 'transparent', borderLeft: isActive ? '3px solid #F2654E' : '3px solid transparent', border: 'none', cursor: 'pointer', borderBottom: '1px solid #f9fafb', display: 'block' }}>
+                  style={{ width: '100%', textAlign: 'left', padding: '14px 20px', background: isActive ? '#E8EDF6' : 'transparent', borderLeft: isActive ? '3px solid #1B3A6B' : '3px solid transparent', border: 'none', cursor: 'pointer', borderBottom: '1px solid #f9fafb', display: 'block' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#F2654E', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 16, flexShrink: 0 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#1B3A6B', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 16, flexShrink: 0 }}>
                       {other.name?.[0]?.toUpperCase()}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -114,7 +114,7 @@ export default function MessagesPage() {
                         <span style={{ fontWeight: 700, fontSize: 14, color: '#111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{other.name}</span>
                         {conv.lastMessageAt && <span style={{ fontSize: 11, color: '#9ca3af', flexShrink: 0, marginLeft: 4 }}>{fmtTime(conv.lastMessageAt)}</span>}
                       </div>
-                      {conv.listingTitle && <div style={{ fontSize: 12, color: '#F2654E', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 }}>{conv.listingTitle}</div>}
+                      {conv.listingTitle && <div style={{ fontSize: 12, color: '#1B3A6B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 }}>{conv.listingTitle}</div>}
                       {conv.lastMessage && <div style={{ fontSize: 12, color: '#9ca3af', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 }}>{conv.lastMessage}</div>}
                     </div>
                   </div>
@@ -129,7 +129,7 @@ export default function MessagesPage() {
         {activeConvId && otherUser ? (
           <>
             <div style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#F2654E', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 15 }}>
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#1B3A6B', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 15 }}>
                 {otherUser.name?.[0]?.toUpperCase()}
               </div>
               <div>
@@ -150,7 +150,7 @@ export default function MessagesPage() {
                   return (
                     <div key={msg.id} style={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
                       <div style={{ maxWidth: '65%' }}>
-                        <div style={{ padding: '10px 16px', borderRadius: 18, fontSize: 14, lineHeight: 1.5, background: isMe ? '#F2654E' : '#fff', color: isMe ? '#fff' : '#111', borderBottomRightRadius: isMe ? 4 : 18, borderBottomLeftRadius: isMe ? 18 : 4, boxShadow: isMe ? 'none' : '0 1px 4px rgba(0,0,0,0.08)', border: isMe ? 'none' : '1px solid #f3f4f6' }}>
+                        <div style={{ padding: '10px 16px', borderRadius: 18, fontSize: 14, lineHeight: 1.5, background: isMe ? '#1B3A6B' : '#fff', color: isMe ? '#fff' : '#111', borderBottomRightRadius: isMe ? 4 : 18, borderBottomLeftRadius: isMe ? 18 : 4, boxShadow: isMe ? 'none' : '0 1px 4px rgba(0,0,0,0.08)', border: isMe ? 'none' : '1px solid #f3f4f6' }}>
                           {msg.content}
                         </div>
                         <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 4, textAlign: isMe ? 'right' : 'left' }}>
@@ -168,7 +168,7 @@ export default function MessagesPage() {
               <input value={newMsg} onChange={e => setNewMsg(e.target.value)} placeholder="Type a message..."
                 style={{ flex: 1, border: '1px solid #e5e7eb', borderRadius: 24, padding: '10px 18px', fontSize: 14, outline: 'none', color: '#111' }} />
               <button type="submit" disabled={!newMsg.trim() || sending}
-                style={{ background: newMsg.trim() && !sending ? '#F2654E' : '#d1d5db', color: '#fff', border: 'none', borderRadius: '50%', width: 42, height: 42, cursor: newMsg.trim() ? 'pointer' : 'not-allowed', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                style={{ background: newMsg.trim() && !sending ? '#1B3A6B' : '#d1d5db', color: '#fff', border: 'none', borderRadius: '50%', width: 42, height: 42, cursor: newMsg.trim() ? 'pointer' : 'not-allowed', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 ↑
               </button>
             </form>

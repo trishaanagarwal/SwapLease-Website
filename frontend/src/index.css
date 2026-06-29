@@ -1,32 +1,38 @@
-/* Warm & friendly type: Fraunces (characterful display serif) + Plus Jakarta Sans (friendly body) */
+/* Premium type: Fraunces (characterful display serif) + Plus Jakarta Sans (clean body) */
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 :root {
-  /* Warm palette */
-  --cream: #FBF6EE;
-  --cream-deep: #F5EBDD;
+  /* Ivory base */
+  --cream: #F8F6F1;
+  --cream-deep: #F1ECE3;
   --card: #FFFFFF;
-  --ink: #2C2520;        /* warm near-black text */
-  --ink-soft: #6B5F54;   /* muted warm grey-brown */
-  --ink-faint: #9C9083;
-  --border: #ECE1D2;
-  --border-strong: #E0D2BE;
+  --ink: #16223B;        /* deep navy-charcoal text */
+  --ink-soft: #586079;   /* muted slate */
+  --ink-faint: #9AA0B0;
+  --border: #E7E3DA;
+  --border-strong: #D9D3C6;
 
-  /* Accents */
-  --coral: #F2654E;
-  --coral-deep: #DC4A33;
-  --coral-tint: #FDEAE4;
-  --sage: #5B8C6E;
-  --sage-tint: #E4F0E7;
-  --plum: #8A5A8F;
-  --plum-tint: #F3E9F4;
-  --honey: #E8A33D;
-  --honey-tint: #FBEED6;
+  /* Brand */
+  --coral: #1B3A6B;       /* primary navy (kept name for compatibility) */
+  --coral-deep: #122A52;
+  --coral-tint: #E8EDF6;
+  --sage: #1C4D3E;        /* forest green */
+  --sage-tint: #E2ECE6;
+  --plum: #4B3F72;
+  --plum-tint: #ECE8F4;
+  --honey: #C0934A;       /* gold accent */
+  --honey-tint: #F4EBD7;
 
-  --shadow-sm: 0 1px 2px rgba(58, 42, 28, 0.05);
-  --shadow: 0 4px 18px rgba(58, 42, 28, 0.08);
-  --shadow-lg: 0 12px 40px rgba(58, 42, 28, 0.12);
+  --navy: #1B3A6B;
+  --navy-deep: #102A52;
+  --green: #1C4D3E;
+  --gold: #C0934A;
+
+  --shadow-sm: 0 1px 2px rgba(16, 28, 56, 0.06);
+  --shadow: 0 8px 30px rgba(16, 28, 56, 0.10);
+  --shadow-lg: 0 24px 60px rgba(16, 28, 56, 0.16);
+  --shadow-3d: 0 30px 60px -20px rgba(16, 28, 56, 0.35), 0 12px 24px -12px rgba(16, 28, 56, 0.25);
 
   --radius: 18px;
   --radius-lg: 26px;
@@ -34,6 +40,8 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
@@ -48,11 +56,23 @@ body {
 #root { min-height: 100vh; width: 100%; }
 img { display: block; max-width: 100%; }
 
-/* Display headings use Fraunces for warmth/character */
+::selection { background: rgba(192, 147, 74, 0.25); }
+
+/* Display headings use Fraunces for character */
 .font-display {
   font-family: 'Fraunces', Georgia, serif;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
+
+/* Gradient text (navy -> green) for premium accents */
+.grad-text {
+  background: linear-gradient(105deg, var(--navy) 0%, var(--green) 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.gold-text { color: var(--gold); }
 
 /* Buttons */
 .btn {
@@ -61,35 +81,51 @@ img { display: block; max-width: 100%; }
   border: none;
   cursor: pointer;
   border-radius: var(--radius-pill);
-  transition: transform 0.12s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition: transform 0.14s ease, box-shadow 0.22s ease, background 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   text-decoration: none;
+  white-space: nowrap;
 }
 .btn:active { transform: translateY(1px); }
 
 .btn-coral {
-  background: var(--coral);
+  background: linear-gradient(135deg, #234982 0%, var(--navy) 55%, var(--navy-deep) 100%);
   color: #fff;
-  box-shadow: 0 6px 16px rgba(242, 101, 78, 0.28);
+  box-shadow: 0 10px 24px rgba(27, 58, 107, 0.30);
 }
-.btn-coral:hover { background: var(--coral-deep); box-shadow: 0 8px 22px rgba(242, 101, 78, 0.36); }
+.btn-coral:hover { transform: translateY(-2px); box-shadow: 0 16px 34px rgba(27, 58, 107, 0.40); }
+
+.btn-gold {
+  background: linear-gradient(135deg, #D8AE5E 0%, var(--gold) 60%, #A87C33 100%);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(192, 147, 74, 0.34);
+}
+.btn-gold:hover { transform: translateY(-2px); box-shadow: 0 16px 34px rgba(192, 147, 74, 0.44); }
 
 .btn-ink { background: var(--ink); color: #fff; }
-.btn-ink:hover { background: #1c1813; }
+.btn-ink:hover { background: #0e1626; transform: translateY(-2px); }
 
 .btn-soft {
   background: #fff;
   color: var(--ink);
   border: 1.5px solid var(--border-strong);
 }
-.btn-soft:hover { border-color: var(--ink); }
+.btn-soft:hover { border-color: var(--navy); color: var(--navy); transform: translateY(-2px); }
+
+/* Glassmorphism surface */
+.glass {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
 
 /* Card hover lift */
-.lift { transition: transform 0.18s ease, box-shadow 0.2s ease; }
-.lift:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.lift { transition: transform 0.2s ease, box-shadow 0.24s ease; }
+.lift:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
 
 /* Inputs */
 .field {
@@ -105,20 +141,38 @@ img { display: block; max-width: 100%; }
   box-sizing: border-box;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.field:focus { border-color: var(--coral); box-shadow: 0 0 0 4px var(--coral-tint); }
+.field:focus { border-color: var(--navy); box-shadow: 0 0 0 4px var(--coral-tint); }
 .field::placeholder { color: var(--ink-faint); }
 
-/* Subtle grain-free warm gradient blob helper */
+/* Soft gradient blob helper */
 .blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(60px);
-  opacity: 0.5;
+  filter: blur(70px);
+  opacity: 0.45;
   pointer-events: none;
 }
 
 @keyframes floaty {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(1deg); }
 }
-.floaty { animation: floaty 6s ease-in-out infinite; }
+.floaty { animation: floaty 7s ease-in-out infinite; }
+
+@keyframes floaty-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-18px); }
+}
+.floaty-slow { animation: floaty-slow 9s ease-in-out infinite; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* Hero stacks on smaller screens; the 3D card hides on mobile to keep it clean */
+@media (max-width: 880px) {
+  .hero-grid { grid-template-columns: 1fr !important; gap: 36px !important; }
+  .hero-grid > div:last-child { display: none; }
+}

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import { useAuth } from '../context/AuthContext';
 import { UNIVERSITIES } from '../constants';
-import logo from '../assets/logo.png';
+import logoMark from '../assets/logo-mark.png';
 import { t } from '../theme';
 
 const purify = (str) => DOMPurify.sanitize(str, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
@@ -29,6 +29,8 @@ export default function SignupPage() {
   const [serverError, setServerError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [agreed, setAgreed] = useState(false);
+  const [agreeError, setAgreeError] = useState(false);
 
   const set = (k, v) => {
     setForm(f => ({ ...f, [k]: v }));
@@ -40,6 +42,7 @@ export default function SignupPage() {
     setServerError('');
     const validationErrors = validate(form);
     if (Object.keys(validationErrors).length > 0) { setErrors(validationErrors); return; }
+    if (!agreed) { setAgreeError(true); return; }
     setLoading(true);
     try {
       await register(purify(form.name.trim()), form.email.trim().toLowerCase(), form.password, form.university || '');
@@ -80,18 +83,24 @@ export default function SignupPage() {
   );
 
   return (
-    <div style={{ minHeight: '100vh', background: t.cream, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div style={{ width: '100%', maxWidth: 460 }}>
+    <div style={{ minHeight: '100vh', background: t.cream, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, position: 'relative', overflow: 'hidden' }}>
+      <div className="blob floaty" style={{ width: 400, height: 400, background: t.navy, top: -150, right: -110 }} />
+      <div className="blob floaty-slow" style={{ width: 340, height: 340, background: t.green, bottom: -130, left: -90 }} />
+
+      <div className="fade-up" style={{ width: '100%', maxWidth: 460, position: 'relative' }}>
 
         <div style={{ textAlign: 'center', marginBottom: 30 }}>
-          <Link to="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
-            <img src={logo} alt="SwapLease" style={{ height: 50, width: 'auto' }} />
+          <Link to="/" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+            <img src={logoMark} alt="" style={{ height: 38, width: 'auto' }} />
+            <span className="font-display" style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.02em' }}>
+              <span style={{ color: t.navy }}>Swap</span><span style={{ color: t.green }}>Lease</span>
+            </span>
           </Link>
-          <h1 className="font-display" style={{ fontSize: 30, fontWeight: 800, color: t.ink, margin: '22px 0 6px' }}>Create your account</h1>
-          <p style={{ color: t.inkSoft, fontSize: 15.5, margin: 0 }}>Join Melbourne students transferring leases 🌿</p>
+          <h1 className="font-display" style={{ fontSize: 32, fontWeight: 800, margin: '24px 0 6px' }}><span className="grad-text">Create your account</span></h1>
+          <p style={{ color: t.inkSoft, fontSize: 15.5, margin: 0 }}>Join Melbourne students transferring leases</p>
         </div>
 
-        <div style={{ background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}`, padding: 34, boxShadow: t.shadow }}>
+        <div className="glass" style={{ borderRadius: t.radiusLg, padding: 34, boxShadow: t.shadowLg }}>
           {serverError && (
             <div style={{ background: t.coralTint, border: `1px solid ${t.coral}`, color: t.coralDeep, borderRadius: 12, padding: '11px 15px', fontSize: 14, marginBottom: 20, fontWeight: 600 }}>
               {serverError}
@@ -154,6 +163,19 @@ export default function SignupPage() {
               </select>
             </div>
 
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 18, cursor: 'pointer' }}>
+              <input type="checkbox" checked={agreed}
+                onChange={e => { setAgreed(e.target.checked); if (e.target.checked) setAgreeError(false); }}
+                style={{ marginTop: 2, width: 17, height: 17, accentColor: t.coral, flexShrink: 0, cursor: 'pointer' }} />
+              <span style={{ fontSize: 13, color: t.inkSoft, lineHeight: 1.5 }}>
+                I have read and agree to SwapLease's{' '}
+                <Link to="/terms" target="_blank" style={{ color: t.coralDeep, fontWeight: 700, textDecoration: 'none' }}>Terms &amp; Conditions</Link>
+                {' '}and{' '}
+                <Link to="/privacy" target="_blank" style={{ color: t.coralDeep, fontWeight: 700, textDecoration: 'none' }}>Privacy Policy</Link>.
+              </span>
+            </label>
+            {agreeError && <div style={{ ...errStyle, marginTop: -8, marginBottom: 14 }}>Please accept the Terms &amp; Conditions and Privacy Policy to continue.</div>}
+
             <button type="submit" disabled={loading} className="btn btn-coral"
               style={{ width: '100%', padding: 14, fontSize: 16, opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}>
               {loading ? 'Creating account…' : 'Create account'}
@@ -167,10 +189,7 @@ export default function SignupPage() {
         </div>
 
         <p style={{ fontSize: 12, color: t.inkFaint, textAlign: 'center', marginTop: 16 }}>
-          By signing up you agree to our{' '}
-          <Link to="/terms" style={{ color: t.coralDeep, fontWeight: 700, textDecoration: 'none' }}>Terms &amp; Conditions</Link>
-          {' '}and{' '}
-          <Link to="/privacy" style={{ color: t.coralDeep, fontWeight: 700, textDecoration: 'none' }}>Privacy Policy</Link>.
+          You can read these any time from the footer of every page.
         </p>
       </div>
     </div>

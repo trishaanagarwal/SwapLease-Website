@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { doc, getDoc, deleteDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, deleteDoc, updateDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
+import BookmarkButton from '../components/BookmarkButton';
+import SafetyTips from '../components/SafetyTips';
 
 const typeLabels = { apartment: 'Apartment', house: 'House', studio: 'Studio', student_accom: 'Student Accommodation' };
 
@@ -71,6 +73,35 @@ export default function ListingDetailPage() {
     }
   };
 
+  const [reported, setReported] = useState(false);
+  const handleReport = async () => {
+    if (!user) return navigate('/login');
+    const reason = prompt('Why are you reporting this listing? (e.g. scam, fake, inappropriate)');
+    if (!reason || !reason.trim()) return;
+    try {
+      await addDoc(collection(db, 'reports'), {
+        listingId: id,
+        listingTitle: listing.title || '',
+        reporterId: user.id,
+        reason: reason.trim().slice(0, 1000),
+        createdAt: serverTimestamp(),
+      });
+      setReported(true);
+    } catch {
+      alert('Could not submit report. Please try again.');
+    }
+  };
+
+  const toggleStatus = async () => {
+    const next = listing.status === 'taken' ? 'active' : 'taken';
+    try {
+      await updateDoc(doc(db, 'listings', id), { status: next });
+      setListing(l => ({ ...l, status: next }));
+    } catch {
+      alert('Could not update status. Please try again.');
+    }
+  };
+
   const handleDelete = async () => {
     if (!confirm('Delete this listing?')) return;
     setDeleting(true);
@@ -85,17 +116,18 @@ export default function ListingDetailPage() {
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-      <div style={{ width: 40, height: 40, border: '3px solid #e5e7eb', borderTopColor: '#F2654E', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ width: 40, height: 40, border: '3px solid #e5e7eb', borderTopColor: '#1B3A6B', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
     </div>
   );
 
   if (!listing) return null;
 
-  const images = listing.images?.length > 0 ? listing.images : [`https://picsum.photos/seed/${id}/800/500`];
+  const images = listing.images?.length > 0 ? listing.images : [];
+  const hasImages = images.length > 0;
   const isOwner = user?.id === listing.userId;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#FBF6EE' }}>
+    <div style={{ minHeight: '100vh', background: '#F8F6F1' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 20px' }}>
 
         <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, marginBottom: 20, padding: 0 }}>
@@ -106,9 +138,15 @@ export default function ListingDetailPage() {
 
           <div style={{ flex: 1, minWidth: 320 }}>
             <div style={{ borderRadius: 12, overflow: 'hidden', position: 'relative', background: '#e5e7eb', marginBottom: 20, height: 380 }}>
-              <img src={images[imgIdx]} alt={listing.title}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                onError={e => { e.target.src = `https://picsum.photos/seed/${id}err/800/500`; }} />
+              {hasImages ? (
+                <img src={images[imgIdx]} alt={listing.title}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              ) : (
+                <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'linear-gradient(135deg, #F1ECE3, #E8EDF6)', color: '#9AA0B0' }}>
+                  <span style={{ fontSize: 46 }}>🏠</span>
+                  <span style={{ fontSize: 14, fontWeight: 700 }}>No photos provided</span>
+                </div>
+              )}
               {images.length > 1 && (
                 <>
                   <button onClick={() => setImgIdx(i => (i - 1 + images.length) % images.length)}
@@ -129,9 +167,12 @@ export default function ListingDetailPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: '#F2654E', background: '#FDEAE4', borderRadius: 20, padding: '3px 12px' }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: '#1B3A6B', background: '#E8EDF6', borderRadius: 20, padding: '3px 12px' }}>
                       {typeLabels[listing.type] || listing.type}
                     </span>
+                    {listing.status === 'taken' && (
+                      <span style={{ fontSize: 12, fontWeight: 700, color: '#fff', background: '#A87C33', borderRadius: 20, padding: '3px 12px' }}>Taken</span>
+                    )}
                     {listing.furnished && (
                       <span style={{ fontSize: 12, fontWeight: 600, color: '#059669', background: '#d1fae5', borderRadius: 20, padding: '3px 12px' }}>Furnished</span>
                     )}
@@ -141,12 +182,25 @@ export default function ListingDetailPage() {
                     📍 {[listing.address, listing.suburb, listing.city].filter(Boolean).join(', ')}
                   </p>
                 </div>
-                {isOwner && (
-                  <button onClick={handleDelete} disabled={deleting}
-                    style={{ background: 'none', border: '1px solid #fecaca', color: '#dc2626', borderRadius: 8, padding: '7px 16px', fontSize: 13, cursor: 'pointer', fontWeight: 600 }}>
-                    {deleting ? 'Deleting...' : 'Delete'}
-                  </button>
-                )}
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  {!isOwner && <BookmarkButton listingId={listing.id} variant="button" />}
+                  {isOwner && (
+                    <>
+                      <Link to={`/listings/${id}/edit`}
+                        style={{ textDecoration: 'none', background: '#fff', border: '1.5px solid #D9D3C6', color: '#16223B', borderRadius: 8, padding: '7px 16px', fontSize: 13, fontWeight: 700 }}>
+                        Edit
+                      </Link>
+                      <button onClick={toggleStatus}
+                        style={{ background: listing.status === 'taken' ? '#E2ECE6' : '#F4EBD7', border: 'none', color: listing.status === 'taken' ? '#1C4D3E' : '#A87C33', borderRadius: 8, padding: '8px 16px', fontSize: 13, cursor: 'pointer', fontWeight: 700 }}>
+                        {listing.status === 'taken' ? 'Mark as available' : 'Mark as taken'}
+                      </button>
+                      <button onClick={handleDelete} disabled={deleting}
+                        style={{ background: 'none', border: '1px solid #fecaca', color: '#dc2626', borderRadius: 8, padding: '7px 16px', fontSize: 13, cursor: 'pointer', fontWeight: 600 }}>
+                        {deleting ? 'Deleting...' : 'Delete'}
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -169,9 +223,9 @@ export default function ListingDetailPage() {
                 ))}
               </div>
               {listing.nearbyUni && (
-                <div style={{ marginTop: 16, background: '#F3E9F4', borderRadius: 10, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ marginTop: 16, background: '#E2ECE6', borderRadius: 10, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: 16 }}>🎓</span>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: '#8A5A8F' }}>Near {listing.nearbyUni}</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#1C4D3E' }}>Near {listing.nearbyUni}</span>
                 </div>
               )}
             </div>
@@ -194,7 +248,7 @@ export default function ListingDetailPage() {
 
               {!isOwner ? (
                 <button onClick={handleContact} disabled={contacting}
-                  style={{ width: '100%', background: contacting ? '#F7A595' : '#F2654E', color: '#fff', border: 'none', borderRadius: 10, padding: 13, fontWeight: 700, fontSize: 16, cursor: contacting ? 'not-allowed' : 'pointer', marginBottom: 20 }}>
+                  style={{ width: '100%', background: contacting ? '#5C7AA8' : '#1B3A6B', color: '#fff', border: 'none', borderRadius: 10, padding: 13, fontWeight: 700, fontSize: 16, cursor: contacting ? 'not-allowed' : 'pointer', marginBottom: 20 }}>
                   {contacting ? 'Opening chat...' : `💬 Message ${listing.userName?.split(' ')[0]}`}
                 </button>
               ) : (
@@ -205,7 +259,7 @@ export default function ListingDetailPage() {
 
               {!user && (
                 <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                  <Link to="/login" style={{ color: '#F2654E', fontWeight: 700, textDecoration: 'none', fontSize: 14 }}>Sign in</Link>
+                  <Link to="/login" style={{ color: '#1B3A6B', fontWeight: 700, textDecoration: 'none', fontSize: 14 }}>Sign in</Link>
                   <span style={{ color: '#6b7280', fontSize: 14 }}> to message the lister</span>
                 </div>
               )}
@@ -213,7 +267,7 @@ export default function ListingDetailPage() {
               <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: 20 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 }}>Listed by</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#F2654E', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 18, flexShrink: 0 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#1B3A6B', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 18, flexShrink: 0 }}>
                     {listing.userName?.[0]?.toUpperCase()}
                   </div>
                   <div>
@@ -223,7 +277,22 @@ export default function ListingDetailPage() {
                 </div>
                 {listing.userBio && <p style={{ fontSize: 13, color: '#6b7280', marginTop: 12, lineHeight: 1.5 }}>{listing.userBio}</p>}
               </div>
+
+              {!isOwner && (
+                <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: 14, marginTop: 18, textAlign: 'center' }}>
+                  {reported ? (
+                    <span style={{ fontSize: 13, color: '#1C4D3E', fontWeight: 600 }}>✓ Reported — thank you</span>
+                  ) : (
+                    <button onClick={handleReport}
+                      style={{ background: 'none', border: 'none', color: '#9ca3af', fontSize: 13, cursor: 'pointer', fontWeight: 600, textDecoration: 'underline' }}>
+                      🚩 Report this listing
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
+
+            <div style={{ marginTop: 16 }}><SafetyTips compact /></div>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useNavigate, useParams } from 'react-router-dom';
+import { collection, addDoc, updateDoc, getDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import { UNIVERSITIES } from '../constants';
@@ -8,7 +8,7 @@ import { UNIVERSITIES } from '../constants';
 const CLOUDINARY_CLOUD = 'deewvfzpl';
 const CLOUDINARY_PRESET = 'slease';
 
-// ── Address Autocomplete using OpenStreetMap Nominatim (free, no API key) ──
+// ── Address Autocomplete using Photon (Komoot) — free, CORS-friendly, no API key ──
 function AddressAutocomplete({ value, onChange, onSelect }) {
   const [suggestions, setSuggestions] = useState([]);
   const [open, setOpen] = useState(false);
@@ -25,38 +25,39 @@ function AddressAutocomplete({ value, onChange, onSelect }) {
   }, []);
 
   const fetchSuggestions = useCallback((q) => {
-    if (q.length < 3) { setSuggestions([]); setOpen(false); return; }
+    if (q.trim().length < 3) { setSuggestions([]); setOpen(false); return; }
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
       try {
-        const MELBOURNE_BBOX = '144.5935,-38.2032,145.6010,-37.5113';
-        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&countrycodes=au&viewbox=${MELBOURNE_BBOX}&bounded=1&format=json&addressdetails=1&limit=7`;
-        const res = await fetch(url, { headers: { 'Accept-Language': 'en-AU' } });
+        // Bias results around Melbourne CBD; filter to Australian Victoria results.
+        const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lat=-37.8136&lon=144.9631&limit=8&lang=en`;
+        const res = await fetch(url);
         const data = await res.json();
-        const vic = data.filter(r =>
-          r.address?.state === 'Victoria' &&
-          !['Geelong', 'Ballarat', 'Bendigo', 'Shepparton', 'Wodonga', 'Wangaratta'].includes(r.address?.city || r.address?.town || r.address?.county || '')
-        );
-        setSuggestions(vic);
-        setOpen(vic.length > 0);
-      } catch { setSuggestions([]); }
+        const feats = (data.features || []).filter(f => {
+          const p = f.properties || {};
+          return p.countrycode === 'AU' && (p.state === 'Victoria' || /victoria/i.test(p.state || ''));
+        });
+        setSuggestions(feats);
+        setOpen(feats.length > 0);
+      } catch { setSuggestions([]); setOpen(false); }
       finally { setLoading(false); }
-    }, 350);
+    }, 300);
   }, []);
 
   const handleSelect = (item) => {
-    const a = item.address;
-    const streetAddr = [a.house_number, a.road || a.pedestrian || a.path].filter(Boolean).join(' ');
-    const suburb = a.suburb || a.neighbourhood || a.village || a.town || a.city_district || '';
-    const city = a.city || a.town || a.county || '';
-    onSelect({ address: streetAddr, suburb, city, state: a.state || '' });
+    const p = item.properties || {};
+    const streetAddr = [p.housenumber, p.street || p.name].filter(Boolean).join(' ') || p.name || '';
+    const suburb = p.district || p.suburb || p.locality || p.city || '';
+    const city = p.city || p.county || '';
+    onSelect({ address: streetAddr, suburb, city, state: p.state || '' });
     setOpen(false); setSuggestions([]);
   };
 
   const formatLabel = (item) => {
-    const a = item.address;
-    return [[a.house_number, a.road].filter(Boolean).join(' '), a.suburb || a.neighbourhood || '', a.city || a.town || '', a.state || ''].filter(Boolean).join(', ');
+    const p = item.properties || {};
+    return [[p.housenumber, p.street || p.name].filter(Boolean).join(' '), p.district || p.suburb || '', p.city || '', p.postcode || '']
+      .filter(Boolean).join(', ');
   };
 
   return (
@@ -72,7 +73,7 @@ function AddressAutocomplete({ value, onChange, onSelect }) {
           {suggestions.map((item, i) => (
             <li key={item.place_id || i} onMouseDown={() => handleSelect(item)}
               style={{ padding: '10px 14px', cursor: 'pointer', fontSize: 13, color: '#111', borderBottom: i < suggestions.length - 1 ? '1px solid #f3f4f6' : 'none', display: 'flex', alignItems: 'flex-start', gap: 8 }}
-              onMouseEnter={e => e.currentTarget.style.background = '#FDEAE4'}
+              onMouseEnter={e => e.currentTarget.style.background = '#E8EDF6'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
               <span style={{ flexShrink: 0 }}>📍</span>
               <span style={{ lineHeight: 1.4 }}>{formatLabel(item)}</span>
@@ -111,6 +112,8 @@ const inputStyle = { width: '100%', border: '1px solid #d1d5db', borderRadius: 8
 
 export default function CreateListingPage() {
   const navigate = useNavigate();
+  const { id: editId } = useParams();
+  const isEdit = !!editId;
   const { user } = useAuth();
   const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -122,6 +125,23 @@ export default function CreateListingPage() {
     type: 'apartment', furnished: false, bedrooms: 1, bathrooms: 1, tenants: 1,
     nearbyUni: '', images: [],
   });
+
+  // Load existing listing when editing; only the owner may edit.
+  useEffect(() => {
+    if (!isEdit || !user) return;
+    getDoc(doc(db, 'listings', editId)).then(snap => {
+      if (!snap.exists()) { navigate('/listings'); return; }
+      const d = snap.data();
+      if (d.userId !== user.id) { navigate(`/listings/${editId}`); return; }
+      setForm({
+        title: d.title || '', description: d.description || '', address: d.address || '',
+        suburb: d.suburb || '', city: d.city || '', state: d.state || '',
+        rent: d.rent ?? '', bond: d.bond ?? '', availableFrom: d.availableFrom || '', availableTo: d.availableTo || '',
+        type: d.type || 'apartment', furnished: !!d.furnished, bedrooms: d.bedrooms || 1,
+        bathrooms: d.bathrooms || 1, tenants: d.tenants || 1, nearbyUni: d.nearbyUni || '', images: d.images || [],
+      });
+    });
+  }, [isEdit, editId, user, navigate]);
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
@@ -169,44 +189,52 @@ export default function CreateListingPage() {
     if (!form.title.trim()) { setError('Title is required'); return; }
     if (!form.rent) { setError('Rent is required'); return; }
     setLoading(true);
+    const fields = {
+      title: form.title.trim(),
+      description: form.description.trim(),
+      address: form.address.trim(),
+      suburb: form.suburb.trim(),
+      city: form.city.trim(),
+      rent: Number(form.rent),
+      bond: form.bond ? Number(form.bond) : null,
+      availableFrom: form.availableFrom || null,
+      availableTo: form.availableTo || null,
+      type: form.type,
+      furnished: form.furnished,
+      bedrooms: Number(form.bedrooms),
+      bathrooms: Number(form.bathrooms),
+      tenants: Number(form.tenants),
+      nearbyUni: form.nearbyUni || '',
+      images: form.images,
+    };
     try {
-      const ref_ = await addDoc(collection(db, 'listings'), {
-        userId: user.id,
-        userName: user.name,
-        userUniversity: user.university || '',
-        userBio: user.bio || '',
-        title: form.title.trim(),
-        description: form.description.trim(),
-        address: form.address.trim(),
-        suburb: form.suburb.trim(),
-        city: form.city.trim(),
-        rent: Number(form.rent),
-        bond: form.bond ? Number(form.bond) : null,
-        availableFrom: form.availableFrom || null,
-        availableTo: form.availableTo || null,
-        type: form.type,
-        furnished: form.furnished,
-        bedrooms: Number(form.bedrooms),
-        bathrooms: Number(form.bathrooms),
-        tenants: Number(form.tenants),
-        nearbyUni: form.nearbyUni || '',
-        images: form.images,
-        status: 'active',
-        createdAt: serverTimestamp(),
-      });
-      navigate(`/listings/${ref_.id}`);
+      if (isEdit) {
+        await updateDoc(doc(db, 'listings', editId), fields);
+        navigate(`/listings/${editId}`);
+      } else {
+        const ref_ = await addDoc(collection(db, 'listings'), {
+          userId: user.id,
+          userName: user.name,
+          userUniversity: user.university || '',
+          userBio: user.bio || '',
+          ...fields,
+          status: 'active',
+          createdAt: serverTimestamp(),
+        });
+        navigate(`/listings/${ref_.id}`);
+      }
     } catch (err) {
-      setError('Failed to create listing. Please try again.');
+      setError(`Failed to ${isEdit ? 'update' : 'create'} listing. Please try again.`);
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#FBF6EE', padding: '32px 20px' }}>
+    <div style={{ minHeight: '100vh', background: '#F8F6F1', padding: '32px 20px' }}>
       <div style={{ maxWidth: 680, margin: '0 auto' }}>
         <div style={{ marginBottom: 28 }}>
-          <h1 style={{ fontSize: 28, fontWeight: 800, color: '#111', margin: '0 0 6px' }}>List your lease</h1>
-          <p style={{ color: '#6b7280', fontSize: 15, margin: 0 }}>Fill in the details to post your lease transfer listing</p>
+          <h1 style={{ fontSize: 28, fontWeight: 800, color: '#111', margin: '0 0 6px' }}>{isEdit ? 'Edit your listing' : 'List your lease'}</h1>
+          <p style={{ color: '#6b7280', fontSize: 15, margin: 0 }}>{isEdit ? 'Update the details of your lease transfer listing' : 'Fill in the details to post your lease transfer listing'}</p>
         </div>
 
         {error && (
@@ -221,14 +249,14 @@ export default function CreateListingPage() {
               <label style={labelStyle}>Listing title *</label>
               <input value={form.title} onChange={e => set('title', e.target.value)}
                 placeholder="e.g. Modern 2BR Apartment Near Melbourne Uni" required style={inputStyle}
-                onFocus={e => e.target.style.borderColor = '#F2654E'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
+                onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
             </div>
             <div>
               <label style={labelStyle}>Description</label>
               <textarea value={form.description} onChange={e => set('description', e.target.value)}
                 rows={5} placeholder="Describe the property, its features, why you're transferring your lease..."
                 style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.5 }}
-                onFocus={e => e.target.style.borderColor = '#F2654E'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
+                onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
             </div>
           </Section>
 
@@ -243,12 +271,12 @@ export default function CreateListingPage() {
               <div>
                 <label style={labelStyle}>Suburb</label>
                 <input value={form.suburb} onChange={e => set('suburb', e.target.value)} placeholder="e.g. Carlton" style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = '#F2654E'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
+                  onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
               </div>
               <div>
                 <label style={labelStyle}>City</label>
                 <input value={form.city} onChange={e => set('city', e.target.value)} placeholder="e.g. Melbourne" style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = '#F2654E'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
+                  onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
               </div>
             </div>
             <div>
@@ -269,7 +297,7 @@ export default function CreateListingPage() {
                   <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', fontSize: 14 }}>$</span>
                   <input type="number" value={form.rent} onChange={e => set('rent', e.target.value)} placeholder="350" min="0" required
                     style={{ ...inputStyle, paddingLeft: 26 }}
-                    onFocus={e => e.target.style.borderColor = '#F2654E'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
+                    onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
                 </div>
               </div>
               <div>
@@ -278,7 +306,7 @@ export default function CreateListingPage() {
                   <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', fontSize: 14 }}>$</span>
                   <input type="number" value={form.bond} onChange={e => set('bond', e.target.value)} placeholder="1400" min="0"
                     style={{ ...inputStyle, paddingLeft: 26 }}
-                    onFocus={e => e.target.style.borderColor = '#F2654E'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
+                    onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
                 </div>
               </div>
             </div>
@@ -289,12 +317,12 @@ export default function CreateListingPage() {
               <div>
                 <label style={labelStyle}>Available from</label>
                 <input type="date" value={form.availableFrom} onChange={e => set('availableFrom', e.target.value)} style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = '#F2654E'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
+                  onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
               </div>
               <div>
                 <label style={labelStyle}>Lease ends</label>
                 <input type="date" value={form.availableTo} onChange={e => set('availableTo', e.target.value)} style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = '#F2654E'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
+                  onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
               </div>
             </div>
           </Section>
@@ -320,7 +348,7 @@ export default function CreateListingPage() {
             </div>
             <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
               <div onClick={() => set('furnished', !form.furnished)}
-                style={{ width: 44, height: 24, borderRadius: 12, background: form.furnished ? '#F2654E' : '#d1d5db', position: 'relative', transition: 'background 0.2s', cursor: 'pointer', flexShrink: 0 }}>
+                style={{ width: 44, height: 24, borderRadius: 12, background: form.furnished ? '#1B3A6B' : '#d1d5db', position: 'relative', transition: 'background 0.2s', cursor: 'pointer', flexShrink: 0 }}>
                 <div style={{ position: 'absolute', top: 3, left: form.furnished ? 23 : 3, width: 18, height: 18, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
               </div>
               <span style={{ fontSize: 14, fontWeight: 600, color: '#374151' }}>Furnished</span>
@@ -331,7 +359,7 @@ export default function CreateListingPage() {
             <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple style={{ display: 'none' }} onChange={handleFileChange} />
             <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading}
               style={{ width: '100%', border: '2px dashed #d1d5db', borderRadius: 10, padding: '28px 20px', textAlign: 'center', cursor: uploading ? 'not-allowed' : 'pointer', background: uploading ? '#f9fafb' : '#fafafa', marginBottom: form.images.length > 0 ? 16 : 0 }}
-              onMouseEnter={e => !uploading && (e.currentTarget.style.borderColor = '#F2654E')}
+              onMouseEnter={e => !uploading && (e.currentTarget.style.borderColor = '#1B3A6B')}
               onMouseLeave={e => (e.currentTarget.style.borderColor = '#d1d5db')}>
               {uploading ? (
                 <div><div style={{ fontSize: 28, marginBottom: 8 }}>⏳</div><div style={{ fontSize: 14, color: '#6b7280', fontWeight: 600 }}>Uploading…</div></div>
@@ -357,8 +385,8 @@ export default function CreateListingPage() {
           </Section>
 
           <button type="submit" disabled={loading}
-            style={{ width: '100%', background: loading ? '#F7A595' : '#F2654E', color: '#fff', border: 'none', borderRadius: 10, padding: 14, fontWeight: 700, fontSize: 16, cursor: loading ? 'not-allowed' : 'pointer', marginTop: 8 }}>
-            {loading ? 'Publishing…' : 'Publish listing'}
+            style={{ width: '100%', background: loading ? '#5C7AA8' : '#1B3A6B', color: '#fff', border: 'none', borderRadius: 10, padding: 14, fontWeight: 700, fontSize: 16, cursor: loading ? 'not-allowed' : 'pointer', marginTop: 8 }}>
+            {loading ? (isEdit ? 'Saving…' : 'Publishing…') : (isEdit ? 'Save changes' : 'Publish listing')}
           </button>
         </form>
       </div>

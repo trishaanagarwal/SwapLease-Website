@@ -4,7 +4,7 @@ import DOMPurify from 'dompurify';
 import { sendEmailVerification, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 import { useAuth } from '../context/AuthContext';
-import logo from '../assets/logo.png';
+import logoMark from '../assets/logo-mark.png';
 import { t } from '../theme';
 
 const purify = (str) => DOMPurify.sanitize(str, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
@@ -61,18 +61,24 @@ export default function LoginPage() {
   const lbl = { fontSize: 14, fontWeight: 700, color: t.ink };
 
   return (
-    <div style={{ minHeight: '100vh', background: t.cream, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div style={{ width: '100%', maxWidth: 410 }}>
+    <div style={{ minHeight: '100vh', background: t.cream, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, position: 'relative', overflow: 'hidden' }}>
+      <div className="blob floaty" style={{ width: 380, height: 380, background: t.navy, top: -140, left: -100 }} />
+      <div className="blob floaty-slow" style={{ width: 340, height: 340, background: t.green, bottom: -130, right: -90 }} />
+
+      <div className="fade-up" style={{ width: '100%', maxWidth: 410, position: 'relative' }}>
 
         <div style={{ textAlign: 'center', marginBottom: 30 }}>
-          <Link to="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
-            <img src={logo} alt="SwapLease" style={{ height: 50, width: 'auto' }} />
+          <Link to="/" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+            <img src={logoMark} alt="" style={{ height: 38, width: 'auto' }} />
+            <span className="font-display" style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.02em' }}>
+              <span style={{ color: t.navy }}>Swap</span><span style={{ color: t.green }}>Lease</span>
+            </span>
           </Link>
-          <h1 className="font-display" style={{ fontSize: 30, fontWeight: 800, color: t.ink, margin: '22px 0 6px' }}>Welcome back 👋</h1>
+          <h1 className="font-display" style={{ fontSize: 32, fontWeight: 800, margin: '24px 0 6px' }}><span className="grad-text">Welcome back</span></h1>
           <p style={{ color: t.inkSoft, fontSize: 15.5, margin: 0 }}>Sign in to your account</p>
         </div>
 
-        <div style={{ background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}`, padding: 34, boxShadow: t.shadow }}>
+        <div className="glass" style={{ borderRadius: t.radiusLg, padding: 34, boxShadow: t.shadowLg }}>
           {error && (
             <div style={{ background: t.coralTint, border: `1px solid ${t.coral}`, color: t.coralDeep, borderRadius: 12, padding: '12px 15px', fontSize: 14, marginBottom: 20, fontWeight: 600 }}>
               {error}

@@ -24,13 +24,17 @@ service cloud.firestore {
         && request.resource.data.email is string
         && request.resource.data.email.size() <= 320;
 
-      // Profile edits: cannot change email or uid; bounded field sizes.
+      // Profile edits: email may only stay the same OR be synced to the
+      // user's own verified Auth email (after a confirmed email change).
       allow update: if isOwner(userId)
-        && request.resource.data.email == resource.data.email
+        && (request.resource.data.email == resource.data.email
+            || request.resource.data.email == request.auth.token.email)
         && strLen(request.resource.data.name, 1, 100)
         && (!('bio' in request.resource.data) || request.resource.data.bio.size() <= 1000)
         && (!('phone' in request.resource.data) || request.resource.data.phone.size() <= 40)
-        && (!('university' in request.resource.data) || request.resource.data.university.size() <= 120);
+        && (!('university' in request.resource.data) || request.resource.data.university.size() <= 120)
+        && (!('bookmarks' in request.resource.data)
+            || (request.resource.data.bookmarks is list && request.resource.data.bookmarks.size() <= 1000));
 
       allow delete: if false;
     }
@@ -58,6 +62,16 @@ service cloud.firestore {
         && request.resource.data.createdAt == resource.data.createdAt;
 
       allow delete: if signedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // ---------- reports ----------
+    // Signed-in users can file a report; only admins read them (via console).
+    match /reports/{reportId} {
+      allow read, update, delete: if false;
+      allow create: if signedIn()
+        && request.resource.data.reporterId == request.auth.uid
+        && strLen(request.resource.data.listingId, 1, 200)
+        && strLen(request.resource.data.reason, 1, 1000);
     }
 
     // ---------- conversations ----------
