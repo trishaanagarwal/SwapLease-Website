@@ -1,25 +1,124 @@
+/* Warm & friendly type: Fraunces (characterful display serif) + Plus Jakarta Sans (friendly body) */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
-*, *::before, *::after {
-  box-sizing: border-box;
+:root {
+  /* Warm palette */
+  --cream: #FBF6EE;
+  --cream-deep: #F5EBDD;
+  --card: #FFFFFF;
+  --ink: #2C2520;        /* warm near-black text */
+  --ink-soft: #6B5F54;   /* muted warm grey-brown */
+  --ink-faint: #9C9083;
+  --border: #ECE1D2;
+  --border-strong: #E0D2BE;
+
+  /* Accents */
+  --coral: #F2654E;
+  --coral-deep: #DC4A33;
+  --coral-tint: #FDEAE4;
+  --sage: #5B8C6E;
+  --sage-tint: #E4F0E7;
+  --plum: #8A5A8F;
+  --plum-tint: #F3E9F4;
+  --honey: #E8A33D;
+  --honey-tint: #FBEED6;
+
+  --shadow-sm: 0 1px 2px rgba(58, 42, 28, 0.05);
+  --shadow: 0 4px 18px rgba(58, 42, 28, 0.08);
+  --shadow-lg: 0 12px 40px rgba(58, 42, 28, 0.12);
+
+  --radius: 18px;
+  --radius-lg: 26px;
+  --radius-pill: 999px;
 }
+
+*, *::before, *::after { box-sizing: border-box; }
 
 body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background-color: #f5f5f5;
-  color: #222222;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--cream);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#root {
-  min-height: 100vh;
-  width: 100%;
+#root { min-height: 100vh; width: 100%; }
+img { display: block; max-width: 100%; }
+
+/* Display headings use Fraunces for warmth/character */
+.font-display {
+  font-family: 'Fraunces', Georgia, serif;
+  letter-spacing: -0.01em;
 }
 
-img {
-  display: block;
-  max-width: 100%;
+/* Buttons */
+.btn {
+  font-family: inherit;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+  transition: transform 0.12s ease, box-shadow 0.2s ease, background 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
 }
+.btn:active { transform: translateY(1px); }
+
+.btn-coral {
+  background: var(--coral);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(242, 101, 78, 0.28);
+}
+.btn-coral:hover { background: var(--coral-deep); box-shadow: 0 8px 22px rgba(242, 101, 78, 0.36); }
+
+.btn-ink { background: var(--ink); color: #fff; }
+.btn-ink:hover { background: #1c1813; }
+
+.btn-soft {
+  background: #fff;
+  color: var(--ink);
+  border: 1.5px solid var(--border-strong);
+}
+.btn-soft:hover { border-color: var(--ink); }
+
+/* Card hover lift */
+.lift { transition: transform 0.18s ease, box-shadow 0.2s ease; }
+.lift:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+
+/* Inputs */
+.field {
+  width: 100%;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  background: #fff;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 14px;
+  padding: 12px 16px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.field:focus { border-color: var(--coral); box-shadow: 0 0 0 4px var(--coral-tint); }
+.field::placeholder { color: var(--ink-faint); }
+
+/* Subtle grain-free warm gradient blob helper */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.floaty { animation: floaty 6s ease-in-out infinite; }

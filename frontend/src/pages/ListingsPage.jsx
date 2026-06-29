@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import api from '../api/axios';
+import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { db } from '../firebase';
 import ListingCard from '../components/ListingCard';
+import { t } from '../theme';
+import { Search } from 'lucide-react';
 
 const TYPES = [
   { value: '', label: 'All types' },
@@ -11,170 +14,143 @@ const TYPES = [
   { value: 'student_accom', label: 'Student accom' },
 ];
 
+const SUBURBS = ['Carlton', 'Fitzroy', 'Southbank', 'Parkville', 'Brunswick', 'Clayton', 'Richmond', 'St Kilda', 'Docklands', 'Footscray', 'Hawthorn', 'Box Hill'];
+
 export default function ListingsPage() {
   const [searchParams] = useSearchParams();
-  const [listings, setListings] = useState([]);
+  const [allListings, setAllListings] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState(searchParams.get('search') || '');
+  const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
   const [type, setType] = useState('');
   const [maxRent, setMaxRent] = useState(2000);
   const [furnished, setFurnished] = useState(false);
   const [sort, setSort] = useState('newest');
 
-  const fetchListings = () => {
+  useEffect(() => {
     setLoading(true);
-    const params = {};
-    if (search) params.search = search;
-    if (type) params.type = type;
-    if (maxRent < 2000) params.maxRent = maxRent;
-    if (furnished) params.furnished = 'true';
-    if (sort) params.sort = sort;
-    api.get('/listings', { params })
-      .then(res => setListings(res.data))
+    getDocs(query(collection(db, 'listings'), where('status', '==', 'active'), orderBy('createdAt', 'desc')))
+      .then(snap => setAllListings(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
       .catch(console.error)
       .finally(() => setLoading(false));
-  };
+  }, []);
 
-  useEffect(() => { fetchListings(); }, [type, maxRent, furnished, sort]);
+  const listings = allListings
+    .filter(l => {
+      if (type && l.type !== type) return false;
+      if (maxRent < 2000 && l.rent > maxRent) return false;
+      if (furnished && !l.furnished) return false;
+      if (search) {
+        const s = search.toLowerCase();
+        const searchable = [l.title, l.suburb, l.city, l.description, l.nearbyUni].filter(Boolean).join(' ').toLowerCase();
+        if (!searchable.includes(s)) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      if (sort === 'cheapest') return (a.rent || 0) - (b.rent || 0);
+      if (sort === 'expensive') return (b.rent || 0) - (a.rent || 0);
+      return 0;
+    });
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    fetchListings();
-  };
+  const inputStyle = { border: `1.5px solid ${t.borderStrong}`, borderRadius: 12, padding: '9px 13px', fontSize: 14, color: t.ink, background: '#fff', outline: 'none', width: '100%', fontFamily: 'inherit' };
+  const labelStyle = { display: 'block', fontSize: 12.5, fontWeight: 700, color: t.ink, marginBottom: 8 };
 
-  const inputStyle = {
-    border: '1px solid #d1d5db', borderRadius: 8, padding: '8px 12px', fontSize: 14,
-    color: '#374151', background: '#fff', outline: 'none', width: '100%',
-  };
-
-  const labelStyle = { display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 6 };
+  const clearAll = () => { setType(''); setFurnished(false); setMaxRent(2000); setSearch(''); setSearchInput(''); };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+    <div style={{ minHeight: '100vh', background: t.cream }}>
 
-      {/* Top search bar */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', padding: '14px 20px' }}>
+      <div style={{ background: '#fff', borderBottom: `1px solid ${t.border}`, padding: '18px 22px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, maxWidth: 600 }}>
-            <input
-              type="text"
-              placeholder="Search Melbourne suburb, street or university..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              style={{ ...inputStyle, flex: 1, padding: '9px 14px' }}
-            />
-            <button type="submit" style={{ background: '#0ea5e9', color: '#fff', border: 'none', borderRadius: 8, padding: '9px 22px', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
-              Search
-            </button>
+          <form onSubmit={e => { e.preventDefault(); setSearch(searchInput); }} style={{ display: 'flex', gap: 8, maxWidth: 600, background: t.cream, borderRadius: t.pill, padding: 6, border: `1px solid ${t.border}` }}>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, paddingLeft: 14 }}>
+              <Search size={18} color={t.inkFaint} />
+              <input type="text" placeholder="Search suburb, street or university…"
+                value={searchInput} onChange={e => setSearchInput(e.target.value)}
+                style={{ flex: 1, border: 'none', outline: 'none', padding: '9px 4px', fontSize: 14.5, background: 'transparent', color: t.ink, fontFamily: 'inherit' }} />
+            </div>
+            <button type="submit" className="btn btn-coral" style={{ padding: '9px 24px', fontSize: 14.5 }}>Search</button>
           </form>
         </div>
       </div>
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 20px', display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '26px 22px', display: 'flex', gap: 26, alignItems: 'flex-start' }}>
 
-        {/* Sidebar filters */}
-        <aside style={{ width: 220, flexShrink: 0, background: '#fff', borderRadius: 10, border: '1px solid #e5e7eb', padding: 20 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: '#111', margin: '0 0 20px' }}>Filters</h3>
+        <aside style={{ width: 230, flexShrink: 0, background: '#fff', borderRadius: t.radius, border: `1px solid ${t.border}`, padding: 22, boxShadow: t.shadowSm }}>
+          <h3 className="font-display" style={{ fontSize: 18, fontWeight: 700, color: t.ink, margin: '0 0 20px' }}>Filters</h3>
 
           <div style={{ marginBottom: 20 }}>
             <label style={labelStyle}>Property type</label>
-            {TYPES.map(t => (
-              <label key={t.value} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, cursor: 'pointer', fontSize: 14, color: type === t.value ? '#0ea5e9' : '#374151', fontWeight: type === t.value ? 600 : 400 }}>
-                <input
-                  type="radio"
-                  name="type"
-                  value={t.value}
-                  checked={type === t.value}
-                  onChange={() => setType(t.value)}
-                  style={{ accentColor: '#0ea5e9' }}
-                />
-                {t.label}
+            {TYPES.map(opt => (
+              <label key={opt.value} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 9, cursor: 'pointer', fontSize: 14, color: type === opt.value ? t.coralDeep : t.inkSoft, fontWeight: type === opt.value ? 700 : 500 }}>
+                <input type="radio" name="type" value={opt.value} checked={type === opt.value} onChange={() => setType(opt.value)} style={{ accentColor: t.coral }} />
+                {opt.label}
               </label>
             ))}
           </div>
 
-          <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: 20, marginBottom: 20 }}>
-            <label style={labelStyle}>Max rent: ${maxRent === 2000 ? 'Any' : `${maxRent}/wk`}</label>
-            <input
-              type="range" min={100} max={2000} step={50}
-              value={maxRent}
-              onChange={e => setMaxRent(Number(e.target.value))}
-              style={{ width: '100%', accentColor: '#0ea5e9' }}
-            />
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#9ca3af', marginTop: 4 }}>
+          <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 20, marginBottom: 20 }}>
+            <label style={labelStyle}>Max rent: {maxRent === 2000 ? 'Any' : `$${maxRent}/wk`}</label>
+            <input type="range" min={100} max={2000} step={50} value={maxRent} onChange={e => setMaxRent(Number(e.target.value))} style={{ width: '100%', accentColor: t.coral }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: t.inkFaint, marginTop: 4 }}>
               <span>$100</span><span>$2000+</span>
             </div>
           </div>
 
-          <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: 20, marginBottom: 20 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 14, color: '#374151' }}>
-              <input
-                type="checkbox"
-                checked={furnished}
-                onChange={e => setFurnished(e.target.checked)}
-                style={{ accentColor: '#0ea5e9', width: 16, height: 16 }}
-              />
+          <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 20, marginBottom: 20 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 14, color: t.inkSoft, fontWeight: 600 }}>
+              <input type="checkbox" checked={furnished} onChange={e => setFurnished(e.target.checked)} style={{ accentColor: t.coral, width: 16, height: 16 }} />
               Furnished only
             </label>
           </div>
 
-          <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: 20 }}>
+          <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 20 }}>
             <label style={labelStyle}>Sort by</label>
-            <select value={sort} onChange={e => setSort(e.target.value)} style={{ ...inputStyle }}>
+            <select value={sort} onChange={e => setSort(e.target.value)} style={inputStyle}>
               <option value="newest">Newest first</option>
               <option value="cheapest">Cheapest first</option>
               <option value="expensive">Most expensive</option>
             </select>
           </div>
 
-          {(type || furnished || maxRent < 2000) && (
-            <button
-              onClick={() => { setType(''); setFurnished(false); setMaxRent(2000); }}
-              style={{ marginTop: 16, background: 'none', border: '1px solid #e5e7eb', borderRadius: 8, padding: '7px 14px', fontSize: 13, color: '#6b7280', cursor: 'pointer', width: '100%' }}
-            >
+          {(type || furnished || maxRent < 2000 || search) && (
+            <button onClick={clearAll}
+              style={{ marginTop: 16, background: 'none', border: `1.5px solid ${t.borderStrong}`, borderRadius: t.pill, padding: '8px 14px', fontSize: 13, color: t.inkSoft, cursor: 'pointer', width: '100%', fontWeight: 600, fontFamily: 'inherit' }}>
               Clear filters
             </button>
           )}
         </aside>
 
-        {/* Listings */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          {/* Melbourne suburb quick-picks */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
-            {['Carlton', 'Fitzroy', 'Southbank', 'Parkville', 'Brunswick', 'Clayton', 'Richmond', 'St Kilda', 'Docklands', 'Footscray', 'Hawthorn', 'Box Hill'].map(s => (
-              <button key={s} onClick={() => { setSearch(s); fetchListings(); }}
-                style={{ background: search === s ? '#0ea5e9' : '#fff', color: search === s ? '#fff' : '#374151', border: `1px solid ${search === s ? '#0ea5e9' : '#e5e7eb'}`, borderRadius: 20, padding: '5px 14px', fontSize: 13, cursor: 'pointer', fontWeight: search === s ? 600 : 400 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 18 }}>
+            {SUBURBS.map(s => (
+              <button key={s} onClick={() => { setSearch(s); setSearchInput(s); }}
+                style={{ background: search === s ? t.coral : '#fff', color: search === s ? '#fff' : t.inkSoft, border: `1.5px solid ${search === s ? t.coral : t.border}`, borderRadius: t.pill, padding: '6px 15px', fontSize: 13, cursor: 'pointer', fontWeight: search === s ? 700 : 600, fontFamily: 'inherit' }}>
                 {s}
               </button>
             ))}
           </div>
 
-          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 16 }}>
-            {loading ? 'Searching...' : `${listings.length} ${listings.length === 1 ? 'listing' : 'listings'} found`}
+          <div style={{ fontSize: 14.5, color: t.inkSoft, marginBottom: 18, fontWeight: 600 }}>
+            {loading ? 'Searching…' : `${listings.length} ${listings.length === 1 ? 'listing' : 'listings'} found`}
           </div>
 
           {loading ? (
             <div>
-              {[...Array(5)].map((_, i) => (
-                <div key={i} style={{ background: '#fff', borderRadius: 10, height: 180, marginBottom: 12, border: '1px solid #e5e7eb', animation: 'pulse 1.5s ease-in-out infinite' }} />
+              {[...Array(4)].map((_, i) => (
+                <div key={i} style={{ background: '#fff', borderRadius: t.radius, height: 200, marginBottom: 16, border: `1px solid ${t.border}` }} />
               ))}
             </div>
           ) : listings.length > 0 ? (
-            <div>
-              {listings.map(l => <ListingCard key={l.id} listing={l} horizontal />)}
-            </div>
+            <div>{listings.map(l => <ListingCard key={l.id} listing={l} horizontal />)}</div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '80px 20px', background: '#fff', borderRadius: 10, border: '1px solid #e5e7eb' }}>
+            <div style={{ textAlign: 'center', padding: '80px 20px', background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}` }}>
               <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: '#111', marginBottom: 8 }}>No listings found</h3>
-              <p style={{ color: '#6b7280', fontSize: 14, marginBottom: 16 }}>Try a different search or clear your filters</p>
-              <button
-                onClick={() => { setSearch(''); setType(''); setMaxRent(2000); setFurnished(false); }}
-                style={{ background: '#0ea5e9', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 24px', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}
-              >
-                Clear all
-              </button>
+              <h3 className="font-display" style={{ fontSize: 21, fontWeight: 700, color: t.ink, marginBottom: 8 }}>No listings found</h3>
+              <p style={{ color: t.inkSoft, fontSize: 14.5, marginBottom: 18 }}>Try a different search or clear your filters</p>
+              <button onClick={clearAll} className="btn btn-coral" style={{ padding: '11px 26px', fontSize: 14.5 }}>Clear all</button>
             </div>
           )}
         </div>

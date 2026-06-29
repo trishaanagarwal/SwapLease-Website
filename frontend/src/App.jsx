@@ -11,6 +11,8 @@ import ProfilePage from './pages/ProfilePage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
 
 function Layout({ children }) {
   return (
@@ -29,6 +31,8 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/terms" element={<Layout><TermsPage /></Layout>} />
+          <Route path="/privacy" element={<Layout><PrivacyPage /></Layout>} />
           <Route path="/" element={<Layout><HomePage /></Layout>} />
           <Route path="/listings" element={<Layout><ListingsPage /></Layout>} />
           <Route path="/listings/:id" element={<Layout><ListingDetailPage /></Layout>} />

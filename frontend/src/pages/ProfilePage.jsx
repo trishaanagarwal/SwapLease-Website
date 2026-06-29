@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { User, Edit2, Save, X, PlusCircle } from 'lucide-react';
-import api from '../api/axios';
+import { Edit2, Save, X, PlusCircle, User } from 'lucide-react';
+import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
+import { UNIVERSITIES } from '../constants';
 import ListingCard from '../components/ListingCard';
+import { t } from '../theme';
 
 export default function ProfilePage() {
   const { user, updateUser } = useAuth();
@@ -15,11 +18,13 @@ export default function ProfilePage() {
   const [form, setForm] = useState({ name: '', bio: '', university: '', phone: '' });
 
   useEffect(() => {
-    if (user) {
-      setForm({ name: user.name || '', bio: user.bio || '', university: user.university || '', phone: user.phone || '' });
-    }
-    api.get('/listings', { params: {} })
-      .then(res => setListings(res.data.filter(l => l.userId === user?.id)))
+    if (user) setForm({ name: user.name || '', bio: user.bio || '', university: user.university || '', phone: user.phone || '' });
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    getDocs(query(collection(db, 'listings'), where('userId', '==', user.id), where('status', '==', 'active')))
+      .then(snap => setListings(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [user]);
@@ -28,118 +33,126 @@ export default function ProfilePage() {
     setSaving(true);
     setError('');
     try {
-      const res = await api.put('/users/me', form);
-      updateUser(res.data);
+      await updateDoc(doc(db, 'users', user.id), form);
+      updateUser(form);
       setEditing(false);
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to save');
+    } catch {
+      setError('Failed to save. Please try again.');
     } finally {
       setSaving(false);
     }
   };
 
+  const card = { background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}`, boxShadow: t.shadowSm };
+  const lbl = { display: 'block', fontSize: 13, fontWeight: 700, color: t.ink, marginBottom: 7 };
+  const field = { width: '100%', fontFamily: 'inherit', fontSize: 14.5, color: t.ink, background: '#fff', border: `1.5px solid ${t.borderStrong}`, borderRadius: 12, padding: '10px 14px', outline: 'none', boxSizing: 'border-box' };
+  const smallBtn = { display: 'flex', alignItems: 'center', gap: 6, fontSize: 13.5, fontWeight: 700, padding: '9px 16px', borderRadius: t.pill, cursor: 'pointer', fontFamily: 'inherit' };
+  const infoBox = { padding: '14px 16px', background: t.cream, borderRadius: 14 };
+
   return (
-    <div className="min-h-screen bg-slate-50 py-10">
-      <div className="max-w-4xl mx-auto px-4 space-y-6">
-        {/* Profile Card */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-100">
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center">
-                <span className="text-indigo-600 font-bold text-2xl">{user?.name?.[0]?.toUpperCase()}</span>
+    <div style={{ minHeight: '100vh', background: t.cream, padding: '40px 0' }}>
+      <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 22px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+
+        <div style={{ ...card, padding: 28 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, gap: 16, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+              <div style={{ width: 68, height: 68, borderRadius: 22, background: `linear-gradient(135deg, ${t.coral}, ${t.honey})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 28 }}>
+                {user?.name?.[0]?.toUpperCase()}
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-800">{user?.name}</h1>
-                <p className="text-slate-500 text-sm">{user?.email}</p>
+                <h1 className="font-display" style={{ fontSize: 27, fontWeight: 800, color: t.ink, margin: 0 }}>{user?.name}</h1>
+                <p style={{ color: t.inkSoft, fontSize: 14.5, margin: '4px 0 0' }}>{user?.email}</p>
               </div>
             </div>
             {!editing ? (
-              <button onClick={() => setEditing(true)} className="flex items-center gap-1.5 text-sm text-slate-600 border border-slate-200 px-3 py-2 rounded-lg hover:border-indigo-400 hover:text-indigo-600 transition-colors">
+              <button onClick={() => setEditing(true)} style={{ ...smallBtn, color: t.ink, background: '#fff', border: `1.5px solid ${t.borderStrong}` }}>
                 <Edit2 size={14} /> Edit Profile
               </button>
             ) : (
-              <div className="flex gap-2">
-                <button onClick={() => setEditing(false)} className="flex items-center gap-1 text-sm text-slate-600 border border-slate-200 px-3 py-2 rounded-lg">
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => setEditing(false)} style={{ ...smallBtn, color: t.inkSoft, background: '#fff', border: `1.5px solid ${t.borderStrong}` }}>
                   <X size={14} /> Cancel
                 </button>
-                <button onClick={handleSave} disabled={saving} className="flex items-center gap-1 text-sm text-white bg-indigo-600 px-3 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
-                  <Save size={14} /> {saving ? 'Saving...' : 'Save'}
+                <button onClick={handleSave} disabled={saving} className="btn btn-coral" style={{ ...smallBtn, color: '#fff', opacity: saving ? 0.6 : 1 }}>
+                  <Save size={14} /> {saving ? 'Saving…' : 'Save'}
                 </button>
               </div>
             )}
           </div>
 
-          {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-4">{error}</div>}
+          {error && <div style={{ background: t.coralTint, border: `1px solid ${t.coral}`, color: t.coralDeep, padding: '11px 15px', borderRadius: 12, fontSize: 14, marginBottom: 16, fontWeight: 600 }}>{error}</div>}
 
           {editing ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Full Name</label>
-                <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+                <label style={lbl}>Full Name</label>
+                <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} style={field} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">University</label>
-                <input value={form.university} onChange={e => setForm(f => ({ ...f, university: e.target.value }))} placeholder="e.g. University of Melbourne" className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+                <label style={lbl}>University</label>
+                <select value={form.university} onChange={e => setForm(f => ({ ...f, university: e.target.value }))} style={{ ...field, cursor: 'pointer', appearance: 'auto' }}>
+                  <option value="">Select your university...</option>
+                  {UNIVERSITIES.map(u => <option key={u} value={u}>{u}</option>)}
+                </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Phone</label>
-                <input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="04XX XXX XXX" className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+                <label style={lbl}>Phone</label>
+                <input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="04XX XXX XXX" style={field} />
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Bio</label>
-                <textarea value={form.bio} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} rows={3} placeholder="Tell others a bit about yourself..." className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none" />
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={lbl}>Bio</label>
+                <textarea value={form.bio} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} rows={3} placeholder="Tell others a bit about yourself..." style={{ ...field, resize: 'vertical', lineHeight: 1.5 }} />
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
               {user?.university && (
-                <div className="p-3 bg-slate-50 rounded-xl">
-                  <div className="text-xs text-slate-500 mb-1">University</div>
-                  <div className="text-slate-800 font-medium">{user.university}</div>
+                <div style={infoBox}>
+                  <div style={{ fontSize: 12, color: t.inkFaint, marginBottom: 3, fontWeight: 600 }}>University</div>
+                  <div style={{ color: t.ink, fontWeight: 700, fontSize: 14.5 }}>{user.university}</div>
                 </div>
               )}
               {user?.phone && (
-                <div className="p-3 bg-slate-50 rounded-xl">
-                  <div className="text-xs text-slate-500 mb-1">Phone</div>
-                  <div className="text-slate-800 font-medium">{user.phone}</div>
+                <div style={infoBox}>
+                  <div style={{ fontSize: 12, color: t.inkFaint, marginBottom: 3, fontWeight: 600 }}>Phone</div>
+                  <div style={{ color: t.ink, fontWeight: 700, fontSize: 14.5 }}>{user.phone}</div>
                 </div>
               )}
               {user?.bio && (
-                <div className="p-3 bg-slate-50 rounded-xl md:col-span-2">
-                  <div className="text-xs text-slate-500 mb-1">Bio</div>
-                  <div className="text-slate-800">{user.bio}</div>
+                <div style={{ ...infoBox, gridColumn: '1 / -1' }}>
+                  <div style={{ fontSize: 12, color: t.inkFaint, marginBottom: 3, fontWeight: 600 }}>Bio</div>
+                  <div style={{ color: t.ink, fontSize: 14.5, lineHeight: 1.5 }}>{user.bio}</div>
                 </div>
               )}
             </div>
           )}
         </div>
 
-        {/* My Listings */}
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-slate-800">My Listings</h2>
-            <Link to="/create-listing" className="flex items-center gap-1.5 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+            <h2 className="font-display" style={{ fontSize: 24, fontWeight: 800, color: t.ink, margin: 0 }}>My Listings</h2>
+            <Link to="/create-listing" className="btn btn-coral" style={{ fontSize: 14, padding: '10px 18px' }}>
               <PlusCircle size={16} /> New Listing
             </Link>
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {[...Array(2)].map((_, i) => <div key={i} className="h-72 bg-white rounded-2xl animate-pulse border border-slate-100"></div>)}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 22 }}>
+              {[...Array(2)].map((_, i) => <div key={i} style={{ height: 300, background: '#fff', borderRadius: t.radius, border: `1px solid ${t.border}` }} />)}
             </div>
           ) : listings.length === 0 ? (
-            <div className="bg-white rounded-2xl p-12 border border-slate-100 text-center">
-              <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <User size={24} className="text-slate-400" />
+            <div style={{ ...card, padding: 56, textAlign: 'center' }}>
+              <div style={{ width: 60, height: 60, background: t.cream, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}>
+                <User size={26} color={t.inkFaint} />
               </div>
-              <h3 className="font-semibold text-slate-700 mb-2">No listings yet</h3>
-              <p className="text-slate-500 text-sm mb-4">Post your first lease transfer listing</p>
-              <Link to="/create-listing" className="inline-flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
+              <h3 className="font-display" style={{ fontWeight: 700, fontSize: 20, color: t.ink, marginBottom: 8 }}>No listings yet</h3>
+              <p style={{ color: t.inkSoft, fontSize: 14.5, marginBottom: 18 }}>Post your first lease transfer listing</p>
+              <Link to="/create-listing" className="btn btn-coral" style={{ padding: '11px 24px', fontSize: 14.5 }}>
                 <PlusCircle size={16} /> Create Listing
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 22 }}>
               {listings.map(l => <ListingCard key={l.id} listing={l} />)}
             </div>
           )}

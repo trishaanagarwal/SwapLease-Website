@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import api from '../api/axios';
+import { doc, getDoc, deleteDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 
 const typeLabels = { apartment: 'Apartment', house: 'House', studio: 'Studio', student_accom: 'Student Accommodation' };
@@ -22,8 +23,11 @@ export default function ListingDetailPage() {
   const [contacting, setContacting] = useState(false);
 
   useEffect(() => {
-    api.get(`/listings/${id}`)
-      .then(res => setListing(res.data))
+    getDoc(doc(db, 'listings', id))
+      .then(snap => {
+        if (!snap.exists()) { navigate('/listings'); return; }
+        setListing({ id: snap.id, ...snap.data() });
+      })
       .catch(() => navigate('/listings'))
       .finally(() => setLoading(false));
   }, [id]);
@@ -32,10 +36,36 @@ export default function ListingDetailPage() {
     if (!user) return navigate('/login');
     setContacting(true);
     try {
-      const res = await api.post(`/listings/${id}/contact`);
-      navigate(`/messages?conv=${res.data.id}`);
+      // Find or create conversation for this listing between current user and owner
+      const q = query(
+        collection(db, 'conversations'),
+        where('listingId', '==', id),
+        where('participants', 'array-contains', user.id)
+      );
+      const snap = await getDocs(q);
+      let convId;
+      if (!snap.empty) {
+        convId = snap.docs[0].id;
+      } else {
+        const ownerSnap = await getDoc(doc(db, 'users', listing.userId));
+        const ownerName = ownerSnap.exists() ? ownerSnap.data().name : 'Unknown';
+        const ref = await addDoc(collection(db, 'conversations'), {
+          listingId: id,
+          listingTitle: listing.title,
+          participants: [user.id, listing.userId],
+          user1Id: user.id,
+          user2Id: listing.userId,
+          user1Name: user.name,
+          user2Name: ownerName,
+          lastMessage: '',
+          lastMessageAt: serverTimestamp(),
+          createdAt: serverTimestamp(),
+        });
+        convId = ref.id;
+      }
+      navigate(`/messages?conv=${convId}`);
     } catch (err) {
-      alert(err.response?.data?.error || 'Error');
+      alert('Could not open conversation. Please try again.');
     } finally {
       setContacting(false);
     }
@@ -45,17 +75,17 @@ export default function ListingDetailPage() {
     if (!confirm('Delete this listing?')) return;
     setDeleting(true);
     try {
-      await api.delete(`/listings/${id}`);
+      await deleteDoc(doc(db, 'listings', id));
       navigate('/listings');
-    } catch (err) {
-      alert(err.response?.data?.error || 'Error');
+    } catch {
+      alert('Could not delete listing. Please try again.');
       setDeleting(false);
     }
   };
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-      <div style={{ width: 40, height: 40, border: '3px solid #e5e7eb', borderTopColor: '#0ea5e9', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ width: 40, height: 40, border: '3px solid #e5e7eb', borderTopColor: '#F2654E', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
     </div>
   );
 
@@ -65,37 +95,26 @@ export default function ListingDetailPage() {
   const isOwner = user?.id === listing.userId;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+    <div style={{ minHeight: '100vh', background: '#FBF6EE' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 20px' }}>
 
-        {/* Back link */}
         <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, marginBottom: 20, padding: 0 }}>
           ← Back to listings
         </button>
 
         <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
-          {/* Main content */}
-          <div style={{ flex: 1, minWidth: 0, minWidth: 320 }}>
-
-            {/* Image gallery */}
+          <div style={{ flex: 1, minWidth: 320 }}>
             <div style={{ borderRadius: 12, overflow: 'hidden', position: 'relative', background: '#e5e7eb', marginBottom: 20, height: 380 }}>
-              <img
-                src={images[imgIdx]}
-                alt={listing.title}
+              <img src={images[imgIdx]} alt={listing.title}
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                onError={e => { e.target.src = `https://picsum.photos/seed/${id}err/800/500`; }}
-              />
+                onError={e => { e.target.src = `https://picsum.photos/seed/${id}err/800/500`; }} />
               {images.length > 1 && (
                 <>
                   <button onClick={() => setImgIdx(i => (i - 1 + images.length) % images.length)}
-                    style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.4)', color: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    ‹
-                  </button>
+                    style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.4)', color: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>‹</button>
                   <button onClick={() => setImgIdx(i => (i + 1) % images.length)}
-                    style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.4)', color: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    ›
-                  </button>
+                    style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.4)', color: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>›</button>
                   <div style={{ position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6 }}>
                     {images.map((_, i) => (
                       <button key={i} onClick={() => setImgIdx(i)}
@@ -106,12 +125,11 @@ export default function ListingDetailPage() {
               )}
             </div>
 
-            {/* Title card */}
             <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #e5e7eb', padding: '24px 28px', marginBottom: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: '#0ea5e9', background: '#e0f2fe', borderRadius: 20, padding: '3px 12px' }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: '#F2654E', background: '#FDEAE4', borderRadius: 20, padding: '3px 12px' }}>
                       {typeLabels[listing.type] || listing.type}
                     </span>
                     {listing.furnished && (
@@ -124,17 +142,14 @@ export default function ListingDetailPage() {
                   </p>
                 </div>
                 {isOwner && (
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={handleDelete} disabled={deleting}
-                      style={{ background: 'none', border: '1px solid #fecaca', color: '#dc2626', borderRadius: 8, padding: '7px 16px', fontSize: 13, cursor: 'pointer', fontWeight: 600 }}>
-                      {deleting ? 'Deleting...' : 'Delete'}
-                    </button>
-                  </div>
+                  <button onClick={handleDelete} disabled={deleting}
+                    style={{ background: 'none', border: '1px solid #fecaca', color: '#dc2626', borderRadius: 8, padding: '7px 16px', fontSize: 13, cursor: 'pointer', fontWeight: 600 }}>
+                    {deleting ? 'Deleting...' : 'Delete'}
+                  </button>
                 )}
               </div>
             </div>
 
-            {/* Details grid */}
             <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #e5e7eb', padding: '24px 28px', marginBottom: 16 }}>
               <h2 style={{ fontSize: 17, fontWeight: 700, color: '#111', margin: '0 0 20px' }}>Property details</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 16 }}>
@@ -144,7 +159,6 @@ export default function ListingDetailPage() {
                   { label: 'Bedrooms', value: `🛏 ${listing.bedrooms}` },
                   { label: 'Bathrooms', value: `🚿 ${listing.bathrooms}` },
                   { label: 'Total tenants', value: `👥 ${listing.tenants || 1}` },
-                  listing.tenants > 0 && { label: 'Bath per person', value: `${((listing.bathrooms || 1) / (listing.tenants || 1) % 1 === 0 ? (listing.bathrooms || 1) / (listing.tenants || 1) : ((listing.bathrooms || 1) / (listing.tenants || 1)).toFixed(2))}` },
                   listing.availableFrom && { label: 'Available from', value: fmtDate(listing.availableFrom) },
                   listing.availableTo && { label: 'Lease ends', value: fmtDate(listing.availableTo) },
                 ].filter(Boolean).map((item, i) => (
@@ -155,14 +169,13 @@ export default function ListingDetailPage() {
                 ))}
               </div>
               {listing.nearbyUni && (
-                <div style={{ marginTop: 16, background: '#f5f3ff', borderRadius: 10, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ marginTop: 16, background: '#F3E9F4', borderRadius: 10, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: 16 }}>🎓</span>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: '#7c3aed' }}>Near {listing.nearbyUni}</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#8A5A8F' }}>Near {listing.nearbyUni}</span>
                 </div>
               )}
             </div>
 
-            {/* Description */}
             {listing.description && (
               <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #e5e7eb', padding: '24px 28px' }}>
                 <h2 style={{ fontSize: 17, fontWeight: 700, color: '#111', margin: '0 0 14px' }}>About this place</h2>
@@ -171,7 +184,6 @@ export default function ListingDetailPage() {
             )}
           </div>
 
-          {/* Sidebar */}
           <div style={{ width: 300, flexShrink: 0 }}>
             <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #e5e7eb', padding: 24, position: 'sticky', top: 80 }}>
               <div style={{ marginBottom: 20 }}>
@@ -181,11 +193,8 @@ export default function ListingDetailPage() {
               </div>
 
               {!isOwner ? (
-                <button
-                  onClick={handleContact}
-                  disabled={contacting}
-                  style={{ width: '100%', background: contacting ? '#93c5fd' : '#0ea5e9', color: '#fff', border: 'none', borderRadius: 10, padding: '13px', fontWeight: 700, fontSize: 16, cursor: contacting ? 'not-allowed' : 'pointer', marginBottom: 20 }}
-                >
+                <button onClick={handleContact} disabled={contacting}
+                  style={{ width: '100%', background: contacting ? '#F7A595' : '#F2654E', color: '#fff', border: 'none', borderRadius: 10, padding: 13, fontWeight: 700, fontSize: 16, cursor: contacting ? 'not-allowed' : 'pointer', marginBottom: 20 }}>
                   {contacting ? 'Opening chat...' : `💬 Message ${listing.userName?.split(' ')[0]}`}
                 </button>
               ) : (
@@ -196,16 +205,15 @@ export default function ListingDetailPage() {
 
               {!user && (
                 <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                  <Link to="/login" style={{ color: '#0ea5e9', fontWeight: 700, textDecoration: 'none', fontSize: 14 }}>Sign in</Link>
+                  <Link to="/login" style={{ color: '#F2654E', fontWeight: 700, textDecoration: 'none', fontSize: 14 }}>Sign in</Link>
                   <span style={{ color: '#6b7280', fontSize: 14 }}> to message the lister</span>
                 </div>
               )}
 
-              {/* Lister */}
               <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: 20 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 }}>Listed by</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#0ea5e9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 18, flexShrink: 0 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#F2654E', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 18, flexShrink: 0 }}>
                     {listing.userName?.[0]?.toUpperCase()}
                   </div>
                   <div>

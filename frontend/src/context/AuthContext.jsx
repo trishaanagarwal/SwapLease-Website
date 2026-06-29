@@ -1,50 +1,79 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import api from '../api/axios';
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  signOut,
+} from 'firebase/auth';
+import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from '../firebase';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
+  const [pendingVerification, setPendingVerification] = useState(null); // { email, password }
 
   useEffect(() => {
-    if (token) {
-      api.get('/auth/me')
-        .then(res => setUser(res.data))
-        .catch(() => { localStorage.removeItem('token'); setToken(null); })
-        .finally(() => setLoading(false));
-    } else {
+    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        const snap = await getDoc(doc(db, 'users', firebaseUser.uid));
+        setUser(snap.exists() ? { id: firebaseUser.uid, emailVerified: firebaseUser.emailVerified, ...snap.data() } : null);
+      } else {
+        setUser(null);
+      }
       setLoading(false);
-    }
-  }, [token]);
+    });
+    return unsub;
+  }, []);
 
   const login = async (email, password) => {
-    const res = await api.post('/auth/login', { email, password });
-    localStorage.setItem('token', res.data.token);
-    setToken(res.data.token);
-    setUser(res.data.user);
-    return res.data;
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    if (!cred.user.emailVerified) {
+      await signOut(auth);
+      const err = new Error('Please verify your email before logging in.');
+      err.needsVerification = true;
+      throw err;
+    }
+    const snap = await getDoc(doc(db, 'users', cred.user.uid));
+    setUser({ id: cred.user.uid, emailVerified: true, ...snap.data() });
   };
 
   const register = async (name, email, password, university) => {
-    const res = await api.post('/auth/register', { name, email, password, university });
-    localStorage.setItem('token', res.data.token);
-    setToken(res.data.token);
-    setUser(res.data.user);
-    return res.data;
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await setDoc(doc(db, 'users', cred.user.uid), {
+      name,
+      email: email.toLowerCase(),
+      university: university || '',
+      bio: '',
+      phone: '',
+      createdAt: serverTimestamp(),
+    });
+    await sendEmailVerification(cred.user);
+    await signOut(auth);
+    setPendingVerification({ email: email.toLowerCase(), password });
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    setToken(null);
-    setUser(null);
+  const resendVerification = async () => {
+    if (!pendingVerification) return;
+    const cred = await signInWithEmailAndPassword(auth, pendingVerification.email, pendingVerification.password);
+    await sendEmailVerification(cred.user);
+    await signOut(auth);
   };
 
-  const updateUser = (updatedUser) => setUser(updatedUser);
+  const logout = () => signOut(auth);
+
+  const updateUser = (updates) => {
+    setUser(u => ({ ...u, ...updates }));
+    if (auth.currentUser) {
+      updateDoc(doc(db, 'users', auth.currentUser.uid), updates).catch(() => {});
+    }
+  };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser, resendVerification, pendingVerification }}>
       {children}
     </AuthContext.Provider>
   );
