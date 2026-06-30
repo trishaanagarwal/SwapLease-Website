@@ -1,6 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Edit2, Save, X, PlusCircle, User, Mail, Trash2, Pencil, AlertTriangle } from 'lucide-react';
+import { Edit2, Save, X, PlusCircle, User, Mail, Trash2, Pencil, AlertTriangle, Camera } from 'lucide-react';
+
+const CLOUDINARY_CLOUD = 'deewvfzpl';
+const CLOUDINARY_PRESET = 'slease';
 import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
@@ -109,6 +112,30 @@ export default function ProfilePage() {
     }
   };
 
+  const avatarInputRef = useRef(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { alert('Please use a JPG, PNG or WEBP image.'); return; }
+    if (file.size > 5 * 1024 * 1024) { alert('Image must be under 5MB.'); return; }
+    setAvatarUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('upload_preset', CLOUDINARY_PRESET);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!data.secure_url) throw new Error('upload failed');
+      updateUser({ photoURL: data.secure_url });
+    } catch {
+      alert('Could not upload photo. Please try again.');
+    } finally {
+      setAvatarUploading(false);
+      e.target.value = '';
+    }
+  };
+
   const toggleListingStatus = async (id, current) => {
     const next = current === 'taken' ? 'active' : 'taken';
     try {
@@ -132,8 +159,19 @@ export default function ProfilePage() {
         <div style={{ ...card, padding: 28 }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, gap: 16, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-              <div style={{ width: 68, height: 68, borderRadius: 22, background: `linear-gradient(135deg, ${t.coral}, ${t.honey})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 28 }}>
-                {user?.name?.[0]?.toUpperCase()}
+              <div style={{ position: 'relative', width: 68, height: 68, flexShrink: 0 }}>
+                {user?.photoURL ? (
+                  <img src={user.photoURL} alt="" style={{ width: 68, height: 68, borderRadius: 22, objectFit: 'cover' }} />
+                ) : (
+                  <div style={{ width: 68, height: 68, borderRadius: 22, background: `linear-gradient(135deg, ${t.coral}, ${t.honey})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 28 }}>
+                    {user?.name?.[0]?.toUpperCase()}
+                  </div>
+                )}
+                <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }} onChange={handleAvatarChange} />
+                <button onClick={() => avatarInputRef.current?.click()} disabled={avatarUploading} aria-label="Change photo"
+                  style={{ position: 'absolute', bottom: -4, right: -4, width: 28, height: 28, borderRadius: '50%', background: t.navy, border: '2px solid #fff', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: avatarUploading ? 'wait' : 'pointer' }}>
+                  <Camera size={14} />
+                </button>
               </div>
               <div>
                 <h1 className="font-display" style={{ fontSize: 27, fontWeight: 800, color: t.ink, margin: 0 }}>{user?.name}</h1>

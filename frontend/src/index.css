@@ -192,3 +192,12 @@ img { display: block; max-width: 100%; }
   .listings-wrap { flex-direction: column !important; }
   .listings-aside { width: 100% !important; }
 }
+
+/* Navbar: hide secondary text links on small screens to avoid crowding */
+@media (max-width: 640px) {
+  .nav-hide-sm { display: none !important; }
+  .nav-wordmark { font-size: 19px !important; }
+}
+@media (max-width: 380px) {
+  .nav-wordmark { display: none; }
+}

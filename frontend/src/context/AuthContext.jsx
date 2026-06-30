@@ -85,33 +85,33 @@ export function AuthProvider({ children }) {
     return unsub;
   }, []);
 
+  // Login is allowed even if the email isn't verified yet. Verification is
+  // only required to create listings or send messages (enforced in the UI
+  // and in Firestore rules).
   const login = async (email, password) => {
     const cred = await signInWithEmailAndPassword(auth, email, password);
-    if (!cred.user.emailVerified) {
-      await signOut(auth);
-      const err = new Error('Please verify your email before logging in.');
-      err.needsVerification = true;
-      throw err;
-    }
     const snap = await getDoc(doc(db, 'users', cred.user.uid));
     const data = await syncEmail(cred.user, snap.data());
-    setUser({ id: cred.user.uid, emailVerified: true, ...data });
+    setUser({ id: cred.user.uid, emailVerified: cred.user.emailVerified, ...data });
   };
 
   const register = async (name, email, password, university) => {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
-    await setDoc(doc(db, 'users', cred.user.uid), {
+    const data = {
       name,
       email: email.toLowerCase(),
       university: university || '',
       bio: '',
       phone: '',
+      photoURL: '',
       bookmarks: [],
       createdAt: serverTimestamp(),
-    });
+    };
+    await setDoc(doc(db, 'users', cred.user.uid), data);
     await sendEmailVerification(cred.user);
-    await signOut(auth);
-    setPendingVerification({ email: email.toLowerCase(), password });
+    // Keep the user signed in (unverified); they can browse but must verify
+    // before listing or messaging.
+    setUser({ id: cred.user.uid, emailVerified: false, ...data });
   };
 
   // Sign in / sign up with Google (or Facebook). Social accounts are
@@ -127,10 +127,21 @@ export function AuthProvider({ children }) {
   const socialLoginRedirect = (providerName) => signInWithRedirect(auth, makeProvider(providerName));
 
   const resendVerification = async () => {
-    if (!pendingVerification) return;
-    const cred = await signInWithEmailAndPassword(auth, pendingVerification.email, pendingVerification.password);
-    await sendEmailVerification(cred.user);
-    await signOut(auth);
+    if (auth.currentUser) { await sendEmailVerification(auth.currentUser); return; }
+    if (pendingVerification) {
+      const cred = await signInWithEmailAndPassword(auth, pendingVerification.email, pendingVerification.password);
+      await sendEmailVerification(cred.user);
+      await signOut(auth);
+    }
+  };
+
+  // Re-check verification status after the user clicks the email link.
+  const refreshUser = async () => {
+    if (!auth.currentUser) return false;
+    await auth.currentUser.reload();
+    const verified = auth.currentUser.emailVerified;
+    setUser(u => (u ? { ...u, emailVerified: verified } : u));
+    return verified;
   };
 
   const logout = () => signOut(auth);
@@ -198,7 +209,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser, resendVerification, pendingVerification, toggleBookmark, changeEmail, socialLogin, socialLoginRedirect, resetPassword, deleteAccount, isPasswordUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser, resendVerification, pendingVerification, toggleBookmark, changeEmail, socialLogin, socialLoginRedirect, resetPassword, deleteAccount, isPasswordUser, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

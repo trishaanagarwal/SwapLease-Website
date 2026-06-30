@@ -72,13 +72,13 @@ export default function SignupPage() {
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20, color: t.coral }}><MailCheck size={52} /></div>
         <h2 className="font-display" style={{ fontSize: 26, fontWeight: 800, color: t.ink, margin: '0 0 12px' }}>Check your email</h2>
         <p style={{ color: t.inkSoft, fontSize: 15, lineHeight: 1.65, margin: '0 0 8px' }}>
-          We sent a verification link to <strong style={{ color: t.ink }}>{form.email}</strong>.
+          You're all signed up! We sent a verification link to <strong style={{ color: t.ink }}>{form.email}</strong>. You can browse now, but you'll need to verify before posting a listing or messaging.
         </p>
-        <p style={{ color: t.inkFaint, fontSize: 13, lineHeight: 1.6, margin: '0 0 26px' }}>
-          Click it to activate your account, then come back to sign in. Check your spam folder if you don't see it.
+        <p style={{ color: t.ink, fontSize: 14, lineHeight: 1.6, margin: '0 0 26px', fontWeight: 800 }}>
+          Can't find the email? Please check your spam or junk folder.
         </p>
-        <button onClick={() => navigate('/login')} className="btn btn-coral" style={{ padding: '13px 36px', fontSize: 15.5 }}>
-          Go to login
+        <button onClick={() => navigate('/')} className="btn btn-coral" style={{ padding: '13px 36px', fontSize: 15.5 }}>
+          Start browsing
         </button>
       </div>
     </div>

@@ -37,6 +37,7 @@ export default function ListingDetailPage() {
 
   const handleContact = async () => {
     if (!user) return navigate('/login');
+    if (!user.emailVerified) return navigate('/messages'); // shows the verify prompt
     setContacting(true);
     try {
       // Find or create conversation for this listing between current user and owner

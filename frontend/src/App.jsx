@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
+import RequireVerified from './components/RequireVerified';
 import NotFoundPage from './pages/NotFoundPage';
 import HomePage from './pages/HomePage';
 import ListingsPage from './pages/ListingsPage';
@@ -42,17 +43,17 @@ export default function App() {
           <Route path="/listings/:id" element={<Layout><ListingDetailPage /></Layout>} />
           <Route path="/create-listing" element={
             <Layout>
-              <ProtectedRoute><CreateListingPage /></ProtectedRoute>
+              <ProtectedRoute><RequireVerified action="post a listing"><CreateListingPage /></RequireVerified></ProtectedRoute>
             </Layout>
           } />
           <Route path="/listings/:id/edit" element={
             <Layout>
-              <ProtectedRoute><CreateListingPage /></ProtectedRoute>
+              <ProtectedRoute><RequireVerified action="edit a listing"><CreateListingPage /></RequireVerified></ProtectedRoute>
             </Layout>
           } />
           <Route path="/messages" element={
             <Layout>
-              <ProtectedRoute><MessagesPage /></ProtectedRoute>
+              <ProtectedRoute><RequireVerified action="send messages"><MessagesPage /></RequireVerified></ProtectedRoute>
             </Layout>
           } />
           <Route path="/profile" element={

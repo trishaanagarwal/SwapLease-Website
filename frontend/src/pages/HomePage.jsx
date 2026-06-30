@@ -31,7 +31,7 @@ export default function HomePage() {
     <div style={{ minHeight: '100vh', background: t.cream, overflow: 'hidden' }}>
 
       {/* ===== HERO ===== */}
-      <section style={{ position: 'relative', padding: '64px 22px 90px' }}>
+      <section style={{ position: 'relative', padding: 'clamp(36px, 6vw, 64px) 22px clamp(56px, 8vw, 90px)' }}>
         {/* layered mesh gradient blobs for depth */}
         <div className="blob floaty" style={{ width: 460, height: 460, background: t.navy, top: -140, right: -60 }} />
         <div className="blob floaty-slow" style={{ width: 380, height: 380, background: t.green, bottom: -120, left: -120 }} />
@@ -45,12 +45,12 @@ export default function HomePage() {
               <MapPin size={15} color={t.gold} /> Melbourne, Victoria · Student-to-student
             </div>
 
-            <h1 className="font-display" style={{ fontSize: 'clamp(42px, 5.6vw, 72px)', fontWeight: 900, color: t.ink, lineHeight: 1.04, margin: '0 0 22px', letterSpacing: '-0.02em' }}>
+            <h1 className="font-display" style={{ fontSize: 'clamp(34px, 7vw, 72px)', fontWeight: 900, color: t.ink, lineHeight: 1.06, margin: '0 0 20px', letterSpacing: '-0.02em' }}>
               Transfer your lease,<br />
               <span className="grad-text">without the agent.</span>
             </h1>
 
-            <p style={{ fontSize: 19, color: t.inkSoft, margin: '0 0 34px', lineHeight: 1.6, maxWidth: 500, fontWeight: 500 }}>
+            <p style={{ fontSize: 'clamp(16px, 2.4vw, 19px)', color: t.inkSoft, margin: '0 0 32px', lineHeight: 1.6, maxWidth: 500, fontWeight: 500 }}>
               Melbourne's trusted marketplace for student lease transfers. List in minutes, browse verified homes, and swap directly, no agents, no fees.
             </p>
 
