@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import { useAuth } from '../context/AuthContext';
 import { UNIVERSITIES } from '../constants';
+import { MailCheck } from 'lucide-react';
 import SocialAuth from '../components/SocialAuth';
 import logoMark from '../assets/logo-mark.png';
 import { t } from '../theme';
@@ -68,7 +69,7 @@ export default function SignupPage() {
   if (success) return (
     <div style={{ minHeight: '100vh', background: t.cream, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
       <div style={{ width: '100%', maxWidth: 440, background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}`, padding: 44, textAlign: 'center', boxShadow: t.shadow }}>
-        <div style={{ fontSize: 56, marginBottom: 20 }}>📬</div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20, color: t.coral }}><MailCheck size={52} /></div>
         <h2 className="font-display" style={{ fontSize: 26, fontWeight: 800, color: t.ink, margin: '0 0 12px' }}>Check your email</h2>
         <p style={{ color: t.inkSoft, fontSize: 15, lineHeight: 1.65, margin: '0 0 8px' }}>
           We sent a verification link to <strong style={{ color: t.ink }}>{form.email}</strong>.

@@ -5,6 +5,7 @@ import {
   addDoc, doc, updateDoc, serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { MessageSquare } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function fmtTime(ts) {
@@ -96,7 +97,7 @@ export default function MessagesPage() {
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {conversations.length === 0 ? (
             <div style={{ padding: '48px 24px', textAlign: 'center' }}>
-              <div style={{ fontSize: 36, marginBottom: 12 }}>💬</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12, color: '#9ca3af' }}><MessageSquare size={34} /></div>
               <p style={{ color: '#6b7280', fontSize: 14, margin: 0 }}>No conversations yet</p>
               <p style={{ color: '#9ca3af', fontSize: 12, marginTop: 4 }}>Message a lister to get started</p>
             </div>
@@ -143,7 +144,7 @@ export default function MessagesPage() {
             <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: 12 }}>
               {messages.length === 0 ? (
                 <div style={{ textAlign: 'center', color: '#9ca3af', fontSize: 14, margin: 'auto' }}>
-                  <div style={{ fontSize: 36, marginBottom: 12 }}>👋</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}><MessageSquare size={34} /></div>
                   <p>No messages yet, say hello!</p>
                 </div>
               ) : (
@@ -178,7 +179,7 @@ export default function MessagesPage() {
         ) : (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ textAlign: 'center', color: '#9ca3af' }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>💬</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}><MessageSquare size={46} /></div>
               <h3 style={{ fontSize: 18, fontWeight: 700, color: '#374151', margin: '0 0 8px' }}>Select a conversation</h3>
               <p style={{ fontSize: 14, margin: 0 }}>Choose from the list on the left to start chatting</p>
             </div>

@@ -269,7 +269,6 @@ export default function CreateListingPage() {
               <div><label style={labelStyle}>Total tenants</label><Counter value={form.tenants} onChange={v => set('tenants', v)} max={50} /></div>
             </div>
             <div style={{ background: '#f9fafb', borderRadius: 8, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
-              <span style={{ fontSize: 16 }}>🚿</span>
               <span style={{ fontSize: 13, color: ratioColor, fontWeight: 600 }}>{ratioLabel}</span>
             </div>
             <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
@@ -291,7 +290,6 @@ export default function CreateListingPage() {
                 <div><div style={{ fontSize: 28, marginBottom: 8 }}>⏳</div><div style={{ fontSize: 14, color: '#6b7280', fontWeight: 600 }}>Uploading…</div></div>
               ) : (
                 <div>
-                  <div style={{ fontSize: 32, marginBottom: 8 }}>📷</div>
                   <div style={{ fontSize: 15, fontWeight: 700, color: '#111', marginBottom: 4 }}>Click to upload photos</div>
                   <div style={{ fontSize: 13, color: '#9ca3af' }}>JPG, PNG, WEBP or GIF · Max 5MB each</div>
                 </div>

@@ -5,7 +5,7 @@ import { db } from '../firebase';
 import ListingCard from '../components/ListingCard';
 import logoMark from '../assets/logo-mark.png';
 import { t } from '../theme';
-import { Search, ShieldCheck, Users, Sparkles, MapPin, ArrowRight } from 'lucide-react';
+import { Search, ShieldCheck, Users, Sparkles, MapPin, ArrowRight, Home, FileText, MessageCircle } from 'lucide-react';
 
 const SUBURBS = ['Carlton', 'Fitzroy', 'Southbank', 'Parkville', 'Brunswick', 'Clayton', 'Richmond', 'St Kilda'];
 
@@ -141,7 +141,7 @@ export default function HomePage() {
           </div>
         ) : (
           <div style={{ textAlign: 'center', padding: '64px 20px', background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}`, boxShadow: t.shadowSm }}>
-            <div style={{ fontSize: 46, marginBottom: 14 }}>🏠</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14, color: t.inkFaint }}><Home size={42} /></div>
             <p style={{ fontSize: 17, color: t.inkSoft, marginBottom: 8, fontWeight: 600 }}>No listings yet, be the first to post!</p>
             <Link to="/create-listing" style={{ color: t.navy, textDecoration: 'none', fontWeight: 700 }}>List your lease →</Link>
           </div>
@@ -159,13 +159,13 @@ export default function HomePage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 24 }}>
             {[
-              { n: '01', icon: '📝', title: 'List your lease', desc: 'Post your place in minutes, photos, rent, dates and your nearby uni.', tint: t.navy },
-              { n: '02', icon: '🔍', title: 'Browse & filter', desc: 'Search by suburb, price or property type to find your perfect home.', tint: t.green },
-              { n: '03', icon: '💬', title: 'Message & swap', desc: 'Chat directly, arrange an inspection and transfer the lease.', tint: t.gold },
+              { n: '01', icon: FileText, title: 'List your lease', desc: 'Post your place in minutes, photos, rent, dates and your nearby uni.', tint: t.navy },
+              { n: '02', icon: Search, title: 'Browse & filter', desc: 'Search by suburb, price or property type to find your perfect home.', tint: t.green },
+              { n: '03', icon: MessageCircle, title: 'Message & swap', desc: 'Chat directly, arrange an inspection and transfer the lease.', tint: t.gold },
             ].map((step) => (
               <div key={step.n} className="lift" style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', borderRadius: t.radiusLg, padding: '32px 28px', border: '1px solid rgba(255,255,255,0.12)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-                  <div style={{ width: 58, height: 58, borderRadius: 16, background: step.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, boxShadow: `0 12px 26px ${step.tint}66` }}>{step.icon}</div>
+                  <div style={{ width: 58, height: 58, borderRadius: 16, background: step.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 12px 26px ${step.tint}66` }}><step.icon size={26} color="#fff" /></div>
                   <span className="font-display" style={{ fontSize: 40, fontWeight: 900, color: 'rgba(255,255,255,0.12)' }}>{step.n}</span>
                 </div>
                 <h3 className="font-display" style={{ fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 10 }}>{step.title}</h3>

@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { doc, getDoc, deleteDoc, updateDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
+import { MapPin, GraduationCap, MessageCircle, Flag, ImageOff } from 'lucide-react';
 import BookmarkButton from '../components/BookmarkButton';
 import SafetyTips from '../components/SafetyTips';
 
@@ -143,7 +144,7 @@ export default function ListingDetailPage() {
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
               ) : (
                 <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'linear-gradient(135deg, #F1ECE3, #E8EDF6)', color: '#9AA0B0' }}>
-                  <span style={{ fontSize: 46 }}>🏠</span>
+                  <ImageOff size={42} />
                   <span style={{ fontSize: 14, fontWeight: 700 }}>No photos provided</span>
                 </div>
               )}
@@ -178,8 +179,8 @@ export default function ListingDetailPage() {
                     )}
                   </div>
                   <h1 style={{ fontSize: 26, fontWeight: 800, color: '#111', margin: '0 0 8px', lineHeight: 1.2 }}>{listing.title}</h1>
-                  <p style={{ fontSize: 15, color: '#6b7280', margin: 0 }}>
-                    📍 {[listing.address, listing.suburb, listing.city].filter(Boolean).join(', ')}
+                  <p style={{ fontSize: 15, color: '#6b7280', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <MapPin size={15} /> {[listing.address, listing.suburb, listing.city].filter(Boolean).join(', ')}
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -210,9 +211,9 @@ export default function ListingDetailPage() {
                 {[
                   { label: 'Weekly rent', value: `$${listing.rent?.toLocaleString()}/wk` },
                   listing.bond && { label: 'Bond', value: `$${listing.bond?.toLocaleString()}` },
-                  { label: 'Bedrooms', value: `🛏 ${listing.bedrooms}` },
-                  { label: 'Bathrooms', value: `🚿 ${listing.bathrooms}` },
-                  { label: 'Total tenants', value: `👥 ${listing.tenants || 1}` },
+                  { label: 'Bedrooms', value: `${listing.bedrooms}` },
+                  { label: 'Bathrooms', value: `${listing.bathrooms}` },
+                  { label: 'Total tenants', value: `${listing.tenants || 1}` },
                   listing.availableFrom && { label: 'Available from', value: fmtDate(listing.availableFrom) },
                   listing.availableTo && { label: 'Lease ends', value: fmtDate(listing.availableTo) },
                 ].filter(Boolean).map((item, i) => (
@@ -224,7 +225,7 @@ export default function ListingDetailPage() {
               </div>
               {listing.nearbyUni && (
                 <div style={{ marginTop: 16, background: '#E2ECE6', borderRadius: 10, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 16 }}>🎓</span>
+                  <GraduationCap size={17} color="#1C4D3E" />
                   <span style={{ fontSize: 14, fontWeight: 600, color: '#1C4D3E' }}>Near {listing.nearbyUni}</span>
                 </div>
               )}
@@ -248,8 +249,8 @@ export default function ListingDetailPage() {
 
               {!isOwner ? (
                 <button onClick={handleContact} disabled={contacting}
-                  style={{ width: '100%', background: contacting ? '#5C7AA8' : '#1B3A6B', color: '#fff', border: 'none', borderRadius: 10, padding: 13, fontWeight: 700, fontSize: 16, cursor: contacting ? 'not-allowed' : 'pointer', marginBottom: 20 }}>
-                  {contacting ? 'Opening chat...' : `💬 Message ${listing.userName?.split(' ')[0]}`}
+                  style={{ width: '100%', background: contacting ? '#5C7AA8' : '#1B3A6B', color: '#fff', border: 'none', borderRadius: 10, padding: 13, fontWeight: 700, fontSize: 16, cursor: contacting ? 'not-allowed' : 'pointer', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <MessageCircle size={18} /> {contacting ? 'Opening chat...' : `Message ${listing.userName?.split(' ')[0]}`}
                 </button>
               ) : (
                 <div style={{ background: '#f0fdf4', borderRadius: 10, padding: '12px 16px', marginBottom: 20, fontSize: 14, color: '#059669', fontWeight: 600, textAlign: 'center' }}>
@@ -284,8 +285,8 @@ export default function ListingDetailPage() {
                     <span style={{ fontSize: 13, color: '#1C4D3E', fontWeight: 600 }}>✓ Reported, thank you</span>
                   ) : (
                     <button onClick={handleReport}
-                      style={{ background: 'none', border: 'none', color: '#9ca3af', fontSize: 13, cursor: 'pointer', fontWeight: 600, textDecoration: 'underline' }}>
-                      🚩 Report this listing
+                      style={{ background: 'none', border: 'none', color: '#9ca3af', fontSize: 13, cursor: 'pointer', fontWeight: 600, textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                      <Flag size={13} /> Report this listing
                     </button>
                   )}
                 </div>

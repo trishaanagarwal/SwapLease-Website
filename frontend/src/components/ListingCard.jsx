@@ -1,13 +1,16 @@
 import { Link } from 'react-router-dom';
+import { Bed, Bath, Users, GraduationCap, ImageOff } from 'lucide-react';
 import { t, typeLabels } from '../theme';
 import BookmarkButton from './BookmarkButton';
+
+const ico = { display: 'inline-flex', alignItems: 'center', gap: 5 };
 
 const chip = (bg, color) => ({ fontSize: 11.5, fontWeight: 700, color, background: bg, borderRadius: t.pill, padding: '3px 11px', display: 'inline-block' });
 
 function NoPhoto() {
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, background: `linear-gradient(135deg, ${t.creamDeep}, #E8EDF6)`, color: t.inkFaint }}>
-      <span style={{ fontSize: 30 }}>🏠</span>
+      <ImageOff size={28} />
       <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.02em' }}>No photo yet</span>
     </div>
   );
@@ -48,13 +51,13 @@ export default function ListingCard({ listing, horizontal = false }) {
               <div style={{ fontSize: 13.5, color: t.inkSoft, marginBottom: 12 }}>{listing.suburb}, {listing.city}</div>
 
               <div style={{ display: 'flex', gap: 16, fontSize: 13.5, color: t.ink, fontWeight: 600 }}>
-                <span>🛏 {listing.bedrooms} bed</span>
-                <span>🚿 {listing.bathrooms} bath</span>
-                {listing.tenants > 1 && <span style={{ color: t.plum }}>👥 {listing.tenants} tenants</span>}
+                <span style={ico}><Bed size={16} /> {listing.bedrooms} bed</span>
+                <span style={ico}><Bath size={16} /> {listing.bathrooms} bath</span>
+                {listing.tenants > 1 && <span style={{ ...ico, color: t.plum }}><Users size={16} /> {listing.tenants} tenants</span>}
               </div>
 
               {listing.nearbyUni && (
-                <div style={{ marginTop: 12 }}><span style={chip(t.plumTint, t.plum)}>🎓 {listing.nearbyUni}</span></div>
+                <div style={{ marginTop: 12 }}><span style={{ ...chip(t.plumTint, t.plum), display: 'inline-flex', alignItems: 'center', gap: 5 }}><GraduationCap size={14} /> {listing.nearbyUni}</span></div>
               )}
 
               {listing.availableFrom && (
@@ -100,8 +103,8 @@ export default function ListingCard({ listing, horizontal = false }) {
           <div style={{ fontSize: 13, color: t.inkSoft, marginBottom: 12 }}>{listing.suburb}, {listing.city}</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', gap: 14, fontSize: 13.5, color: t.ink, fontWeight: 600 }}>
-              <span>🛏 {listing.bedrooms}</span>
-              <span>🚿 {listing.bathrooms}</span>
+              <span style={ico}><Bed size={16} /> {listing.bedrooms}</span>
+              <span style={ico}><Bath size={16} /> {listing.bathrooms}</span>
             </div>
             <div>
               <span style={{ fontSize: 20, fontWeight: 800, color: t.ink }}>${listing.rent}</span>

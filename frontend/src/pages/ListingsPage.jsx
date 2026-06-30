@@ -184,7 +184,7 @@ export default function ListingsPage() {
             </>
           ) : (
             <div style={{ textAlign: 'center', padding: '80px 20px', background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}` }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16, color: t.inkFaint }}><Search size={44} /></div>
               <h3 className="font-display" style={{ fontSize: 21, fontWeight: 700, color: t.ink, marginBottom: 8 }}>No listings found</h3>
               <p style={{ color: t.inkSoft, fontSize: 14.5, marginBottom: 18 }}>Try a different search or clear your filters</p>
               <button onClick={clearAll} className="btn btn-coral" style={{ padding: '11px 26px', fontSize: 14.5 }}>Clear all</button>
