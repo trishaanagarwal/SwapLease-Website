@@ -18,16 +18,6 @@ export default function SocialAuth({ label = 'Continue' }) {
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
 
-  // Errors that mean the popup couldn't run (blocked by the browser) — retry via redirect.
-  const POPUP_FALLBACK = new Set([
-    'auth/popup-blocked',
-    'auth/cancelled-popup-request',
-    'auth/popup-closed-by-user',
-    'auth/web-storage-unsupported',
-    'auth/operation-not-supported-in-this-environment',
-    'auth/internal-error',
-  ]);
-
   const handle = async (provider) => {
     setError('');
     setBusy(provider);
@@ -36,19 +26,18 @@ export default function SocialAuth({ label = 'Continue' }) {
       navigate('/');
     } catch (err) {
       if (err.code === 'auth/account-exists-with-different-credential') {
-        setError('An account already exists with this email. Try signing in with email and password instead.');
+        setError('An account already exists with this email. Sign in with email and password instead.');
       } else if (err.code === 'auth/unauthorized-domain') {
-        setError('This site is not authorised for Google sign-in yet. Please contact support.');
-      } else if (POPUP_FALLBACK.has(err.code)) {
-        // Popup was blocked (common in Brave/Safari) — switch to full-page redirect.
+        setError('This site is not authorised for Google sign-in yet.');
+      } else {
+        // Any other failure (commonly a popup blocked by Brave/Safari) —
+        // fall back to a full-page redirect, which browsers don't block.
         try {
           await socialLoginRedirect(provider);
-          return; // page will navigate away to Google
-        } catch {
-          setError('Your browser blocked the sign-in window. Please allow popups or try another browser.');
+          return; // page navigates away to Google
+        } catch (e2) {
+          setError(`Could not start Google sign-in (${e2.code || err.code || 'blocked'}). Try Chrome, or allow popups for this site.`);
         }
-      } else {
-        setError(`Could not sign in (${err.code || 'unknown error'}). Please try again.`);
       }
     } finally {
       setBusy('');
