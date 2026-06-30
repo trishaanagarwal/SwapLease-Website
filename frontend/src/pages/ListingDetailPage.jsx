@@ -66,7 +66,7 @@ export default function ListingDetailPage() {
         convId = ref.id;
       }
       navigate(`/messages?conv=${convId}`);
-    } catch (err) {
+    } catch {
       alert('Could not open conversation. Please try again.');
     } finally {
       setContacting(false);
@@ -281,7 +281,7 @@ export default function ListingDetailPage() {
               {!isOwner && (
                 <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: 14, marginTop: 18, textAlign: 'center' }}>
                   {reported ? (
-                    <span style={{ fontSize: 13, color: '#1C4D3E', fontWeight: 600 }}>✓ Reported — thank you</span>
+                    <span style={{ fontSize: 13, color: '#1C4D3E', fontWeight: 600 }}>✓ Reported, thank you</span>
                   ) : (
                     <button onClick={handleReport}
                       style={{ background: 'none', border: 'none', color: '#9ca3af', fontSize: 13, cursor: 'pointer', fontWeight: 600, textDecoration: 'underline' }}>

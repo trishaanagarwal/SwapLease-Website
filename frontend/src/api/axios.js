@@ -1,5 +1,5 @@
 /**
- * Axios API Client — with CSRF token management
+ * Axios API Client, with CSRF token management
  *
  * On startup the client fetches a CSRF token from /api/csrf-token.
  * Every state-changing request (POST/PUT/DELETE) automatically includes:
@@ -7,7 +7,7 @@
  *   X-Session-Id: <sessionId>
  *
  * After each successful mutating request the server returns a rotated token
- * in the X-New-CSRF-Token response header — we update our stored token so
+ * in the X-New-CSRF-Token response header, we update our stored token so
  * the next request uses the fresh one-time value.
  *
  * Why: Even though our JWT-in-Authorization-header approach is already CSRF-immune,
@@ -23,7 +23,7 @@ import axios from 'axios';
 
 const MUTATING_METHODS = new Set(['post', 'put', 'patch', 'delete']);
 
-// In-memory CSRF state — survives page navigation but not a hard reload
+// In-memory CSRF state, survives page navigation but not a hard reload
 // (which triggers a fresh token fetch on the next mutating request)
 let csrfToken = null;
 let sessionId = null;

@@ -171,8 +171,24 @@ img { display: block; max-width: 100%; }
 }
 .fade-up { animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Skeleton shimmer for loading cards */
+@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+.skeleton {
+  background: linear-gradient(90deg, #F1ECE3 25%, #E7E3DA 37%, #F1ECE3 63%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
 /* Hero stacks on smaller screens; the 3D card hides on mobile to keep it clean */
 @media (max-width: 880px) {
   .hero-grid { grid-template-columns: 1fr !important; gap: 36px !important; }
   .hero-grid > div:last-child { display: none; }
+}
+
+/* Listings: stack the filter sidebar above results on small screens */
+@media (max-width: 760px) {
+  .listings-wrap { flex-direction: column !important; }
+  .listings-aside { width: 100% !important; }
 }

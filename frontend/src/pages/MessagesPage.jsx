@@ -85,7 +85,7 @@ export default function MessagesPage() {
     : null;
 
   return (
-    <div style={{ display: 'flex', height: 'calc(100vh - 60px)', background: '#F8F6F1', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', height: 'calc(100vh - 70px)', background: '#F8F6F1', overflow: 'hidden' }}>
 
       <div style={{ width: 300, flexShrink: 0, background: '#fff', borderRight: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '20px 20px 14px', borderBottom: '1px solid #f3f4f6' }}>
@@ -142,7 +142,7 @@ export default function MessagesPage() {
               {messages.length === 0 ? (
                 <div style={{ textAlign: 'center', color: '#9ca3af', fontSize: 14, margin: 'auto' }}>
                   <div style={{ fontSize: 36, marginBottom: 12 }}>👋</div>
-                  <p>No messages yet — say hello!</p>
+                  <p>No messages yet, say hello!</p>
                 </div>
               ) : (
                 messages.map(msg => {

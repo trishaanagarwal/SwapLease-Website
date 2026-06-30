@@ -38,7 +38,7 @@ export default function LegalPage({ title, updated, intro, sections }) {
           ))}
 
           <div style={{ marginTop: 32, paddingTop: 22, borderTop: `1px solid ${t.border}`, fontSize: 13.5, color: t.inkFaint, lineHeight: 1.6 }}>
-            Questions about this document? Contact us at <strong style={{ color: t.inkSoft }}>support@swaplease.com.au</strong>.
+            Questions about this document? Contact us at <strong style={{ color: t.inkSoft }}>help@swaplease.homes</strong>.
           </div>
         </div>
       </div>

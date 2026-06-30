@@ -5,9 +5,9 @@ import { t } from '../theme';
 const TIPS = [
   'Never pay a bond, deposit or rent before signing a proper lease/transfer agreement and confirming the property is real.',
   'Always inspect the property in person (or via a live video call) before paying anything.',
-  'Keep conversations and records inside SwapLease where possible — be cautious if someone rushes you off-platform.',
+  'Keep conversations and records inside SwapLease where possible, be cautious if someone rushes you off-platform.',
   'Never share passwords, bank logins, or one-time codes. SwapLease will never ask for them.',
-  'Make sure any lease transfer is approved by the landlord or agent — verbal agreements aren’t protection.',
+  'Make sure any lease transfer is approved by the landlord or agent, verbal agreements aren’t protection.',
 ];
 
 export default function SafetyTips({ compact = false }) {

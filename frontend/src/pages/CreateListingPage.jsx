@@ -8,7 +8,7 @@ import { UNIVERSITIES } from '../constants';
 const CLOUDINARY_CLOUD = 'deewvfzpl';
 const CLOUDINARY_PRESET = 'slease';
 
-// ── Address Autocomplete using Photon (Komoot) — free, CORS-friendly, no API key ──
+// ── Address Autocomplete using Photon (Komoot), free, CORS-friendly, no API key ──
 function AddressAutocomplete({ value, onChange, onSelect }) {
   const [suggestions, setSuggestions] = useState([]);
   const [open, setOpen] = useState(false);
@@ -145,7 +145,7 @@ export default function CreateListingPage() {
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
-  const bathPerTenant = form.tenants > 0 ? (form.bathrooms / form.tenants).toFixed(2).replace(/\.?0+$/, '') : '—';
+  const bathPerTenant = form.tenants > 0 ? (form.bathrooms / form.tenants).toFixed(2).replace(/\.?0+$/, '') : 'n/a';
   const ratioLabel = form.tenants === 1
     ? `${form.bathrooms} bathroom${form.bathrooms > 1 ? 's' : ''} for 1 person`
     : `${form.bathrooms} bathroom${form.bathrooms > 1 ? 's' : ''} for ${form.tenants} people (${bathPerTenant} per person)`;
@@ -223,7 +223,7 @@ export default function CreateListingPage() {
         });
         navigate(`/listings/${ref_.id}`);
       }
-    } catch (err) {
+    } catch {
       setError(`Failed to ${isEdit ? 'update' : 'create'} listing. Please try again.`);
       setLoading(false);
     }
@@ -265,7 +265,7 @@ export default function CreateListingPage() {
               <label style={labelStyle}>Search address</label>
               <AddressAutocomplete value={form.address} onChange={(val) => set('address', val)}
                 onSelect={({ address, suburb, city, state }) => setForm(f => ({ ...f, address, suburb, city: city || f.city, state: state || f.state }))} />
-              <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 5 }}>Start typing — Australian addresses will appear as suggestions</div>
+              <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 5 }}>Start typing, Australian addresses will appear as suggestions</div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
               <div>

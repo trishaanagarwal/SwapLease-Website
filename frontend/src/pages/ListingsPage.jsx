@@ -25,8 +25,11 @@ export default function ListingsPage() {
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
   const [type, setType] = useState('');
   const [maxRent, setMaxRent] = useState(2000);
+  const [minBeds, setMinBeds] = useState(0);
   const [furnished, setFurnished] = useState(false);
   const [sort, setSort] = useState('newest');
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 8;
 
   useEffect(() => {
     setLoading(true);
@@ -36,10 +39,14 @@ export default function ListingsPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Reset to first page whenever the result set changes.
+  useEffect(() => { setPage(1); }, [type, maxRent, minBeds, furnished, sort, search]);
+
   const listings = allListings
     .filter(l => {
       if (type && l.type !== type) return false;
       if (maxRent < 2000 && l.rent > maxRent) return false;
+      if (minBeds > 0 && (l.bedrooms || 0) < minBeds) return false;
       if (furnished && !l.furnished) return false;
       if (search) {
         const s = search.toLowerCase();
@@ -51,13 +58,17 @@ export default function ListingsPage() {
     .sort((a, b) => {
       if (sort === 'cheapest') return (a.rent || 0) - (b.rent || 0);
       if (sort === 'expensive') return (b.rent || 0) - (a.rent || 0);
+      if (sort === 'beds') return (b.bedrooms || 0) - (a.bedrooms || 0);
       return 0;
     });
+
+  const visible = listings.slice(0, page * PAGE_SIZE);
+  const hasMore = visible.length < listings.length;
 
   const inputStyle = { border: `1.5px solid ${t.borderStrong}`, borderRadius: 12, padding: '9px 13px', fontSize: 14, color: t.ink, background: '#fff', outline: 'none', width: '100%', fontFamily: 'inherit' };
   const labelStyle = { display: 'block', fontSize: 12.5, fontWeight: 700, color: t.ink, marginBottom: 8 };
 
-  const clearAll = () => { setType(''); setFurnished(false); setMaxRent(2000); setSearch(''); setSearchInput(''); };
+  const clearAll = () => { setType(''); setFurnished(false); setMaxRent(2000); setMinBeds(0); setSearch(''); setSearchInput(''); };
 
   return (
     <div style={{ minHeight: '100vh', background: t.cream }}>
@@ -67,7 +78,7 @@ export default function ListingsPage() {
         <div className="blob" style={{ width: 320, height: 320, background: t.green, top: -120, right: -80, opacity: 0.5 }} />
         <div style={{ maxWidth: 1200, margin: '0 auto', position: 'relative' }}>
           <h1 className="font-display" style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 800, color: '#fff', margin: '0 0 6px' }}>Browse student leases</h1>
-          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 15, margin: '0 0 22px' }}>Find your next home across Melbourne — direct from students.</p>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 15, margin: '0 0 22px' }}>Find your next home across Melbourne, direct from students.</p>
           <form onSubmit={e => { e.preventDefault(); setSearch(searchInput); }} style={{ display: 'flex', gap: 8, maxWidth: 600, background: '#fff', borderRadius: t.pill, padding: 6, boxShadow: t.shadow }}>
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, paddingLeft: 14 }}>
               <Search size={18} color={t.inkFaint} />
@@ -80,9 +91,9 @@ export default function ListingsPage() {
         </div>
       </div>
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '26px 22px', display: 'flex', gap: 26, alignItems: 'flex-start' }}>
+      <div className="listings-wrap" style={{ maxWidth: 1200, margin: '0 auto', padding: '26px 22px', display: 'flex', gap: 26, alignItems: 'flex-start' }}>
 
-        <aside style={{ width: 230, flexShrink: 0, background: '#fff', borderRadius: t.radius, border: `1px solid ${t.border}`, padding: 22, boxShadow: t.shadowSm }}>
+        <aside className="listings-aside" style={{ width: 230, flexShrink: 0, background: '#fff', borderRadius: t.radius, border: `1px solid ${t.border}`, padding: 22, boxShadow: t.shadowSm }}>
           <h3 className="font-display" style={{ fontSize: 18, fontWeight: 700, color: t.ink, margin: '0 0 20px' }}>Filters</h3>
 
           <div style={{ marginBottom: 20 }}>
@@ -104,6 +115,18 @@ export default function ListingsPage() {
           </div>
 
           <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 20, marginBottom: 20 }}>
+            <label style={labelStyle}>Bedrooms</label>
+            <div style={{ display: 'flex', gap: 6 }}>
+              {[0, 1, 2, 3, 4].map(n => (
+                <button key={n} onClick={() => setMinBeds(n)}
+                  style={{ flex: 1, background: minBeds === n ? t.coral : '#fff', color: minBeds === n ? '#fff' : t.inkSoft, border: `1.5px solid ${minBeds === n ? t.coral : t.border}`, borderRadius: 10, padding: '7px 0', fontSize: 13, cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}>
+                  {n === 0 ? 'Any' : `${n}+`}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 20, marginBottom: 20 }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 14, color: t.inkSoft, fontWeight: 600 }}>
               <input type="checkbox" checked={furnished} onChange={e => setFurnished(e.target.checked)} style={{ accentColor: t.coral, width: 16, height: 16 }} />
               Furnished only
@@ -116,10 +139,11 @@ export default function ListingsPage() {
               <option value="newest">Newest first</option>
               <option value="cheapest">Cheapest first</option>
               <option value="expensive">Most expensive</option>
+              <option value="beds">Most bedrooms</option>
             </select>
           </div>
 
-          {(type || furnished || maxRent < 2000 || search) && (
+          {(type || furnished || maxRent < 2000 || minBeds > 0 || search) && (
             <button onClick={clearAll}
               style={{ marginTop: 16, background: 'none', border: `1.5px solid ${t.borderStrong}`, borderRadius: t.pill, padding: '8px 14px', fontSize: 13, color: t.inkSoft, cursor: 'pointer', width: '100%', fontWeight: 600, fontFamily: 'inherit' }}>
               Clear filters
@@ -144,11 +168,20 @@ export default function ListingsPage() {
           {loading ? (
             <div>
               {[...Array(4)].map((_, i) => (
-                <div key={i} style={{ background: '#fff', borderRadius: t.radius, height: 200, marginBottom: 16, border: `1px solid ${t.border}` }} />
+                <div key={i} className="skeleton" style={{ borderRadius: t.radius, height: 200, marginBottom: 16 }} />
               ))}
             </div>
           ) : listings.length > 0 ? (
-            <div>{listings.map(l => <ListingCard key={l.id} listing={l} horizontal />)}</div>
+            <>
+              <div>{visible.map(l => <ListingCard key={l.id} listing={l} horizontal />)}</div>
+              {hasMore && (
+                <div style={{ textAlign: 'center', marginTop: 12 }}>
+                  <button onClick={() => setPage(p => p + 1)} className="btn btn-soft" style={{ padding: '12px 30px', fontSize: 14.5 }}>
+                    Load more ({listings.length - visible.length} more)
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <div style={{ textAlign: 'center', padding: '80px 20px', background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}` }}>
               <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>

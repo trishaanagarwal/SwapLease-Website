@@ -7,6 +7,9 @@ import {
   verifyBeforeUpdateEmail,
   reauthenticateWithCredential,
   EmailAuthProvider,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  signInWithPopup,
   signOut,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp, arrayUnion, arrayRemove } from 'firebase/firestore';
@@ -79,6 +82,28 @@ export function AuthProvider({ children }) {
     setPendingVerification({ email: email.toLowerCase(), password });
   };
 
+  // Sign in / sign up with Google or Facebook. Social accounts are
+  // provider-verified, so they skip the email-verification step.
+  const socialLogin = async (providerName) => {
+    const provider = providerName === 'facebook' ? new FacebookAuthProvider() : new GoogleAuthProvider();
+    const cred = await signInWithPopup(auth, provider);
+    const fbUser = cred.user;
+    const ref = doc(db, 'users', fbUser.uid);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      const newData = {
+        name: fbUser.displayName || (fbUser.email ? fbUser.email.split('@')[0] : 'New user'),
+        email: (fbUser.email || '').toLowerCase(),
+        university: '', bio: '', phone: '', bookmarks: [], createdAt: serverTimestamp(),
+      };
+      await setDoc(ref, newData);
+      setUser({ id: fbUser.uid, emailVerified: true, ...newData });
+    } else {
+      const data = await syncEmail(fbUser, snap.data());
+      setUser({ id: fbUser.uid, emailVerified: true, ...data });
+    }
+  };
+
   const resendVerification = async () => {
     if (!pendingVerification) return;
     const cred = await signInWithEmailAndPassword(auth, pendingVerification.email, pendingVerification.password);
@@ -122,7 +147,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser, resendVerification, pendingVerification, toggleBookmark, changeEmail }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser, resendVerification, pendingVerification, toggleBookmark, changeEmail, socialLogin }}>
       {children}
     </AuthContext.Provider>
   );

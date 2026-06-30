@@ -4,6 +4,7 @@ import DOMPurify from 'dompurify';
 import { sendEmailVerification, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 import { useAuth } from '../context/AuthContext';
+import SocialAuth from '../components/SocialAuth';
 import logoMark from '../assets/logo-mark.png';
 import { t } from '../theme';
 
@@ -85,7 +86,7 @@ export default function LoginPage() {
               {needsVerification && (
                 <div style={{ marginTop: 10 }}>
                   {resendStatus === 'sent' ? (
-                    <span style={{ color: t.sage, fontWeight: 700 }}>✓ Verification email resent — check your inbox</span>
+                    <span style={{ color: t.sage, fontWeight: 700 }}>✓ Verification email resent, check your inbox</span>
                   ) : (
                     <button onClick={resendVerification} disabled={resendStatus === 'sending'}
                       style={{ background: 'none', border: 'none', color: t.coralDeep, fontWeight: 700, textDecoration: 'underline', cursor: 'pointer', padding: 0, fontSize: 14 }}>
@@ -114,6 +115,8 @@ export default function LoginPage() {
               {loading ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
+
+          <SocialAuth label="Sign in" />
 
           <div style={{ textAlign: 'center', marginTop: 24, paddingTop: 20, borderTop: `1px solid ${t.border}` }}>
             <span style={{ fontSize: 14, color: t.inkSoft }}>Don't have an account? </span>

@@ -40,7 +40,7 @@ const sections = [
         'detect and prevent fraud, abuse, and breaches of our Terms; and',
         'comply with our legal obligations.',
       ] },
-      'Some information you provide is, by the nature of the service, visible to other users — for example, your name, university, and the details and photos in your Listings, and your name within conversations. Your email and phone number are not displayed publicly unless you choose to share them with another user.',
+      'Some information you provide is, by the nature of the service, visible to other users, for example, your name, university, and the details and photos in your Listings, and your name within conversations. Your email and phone number are not displayed publicly unless you choose to share them with another user.',
     ],
   },
   {
@@ -48,9 +48,9 @@ const sections = [
     body: [
       'We do not sell your personal information. We disclose it only as needed to operate the platform, including to:',
       { list: [
-        'Google Firebase (Google LLC) — for authentication, database, and hosting of account and platform data;',
-        'Cloudinary — for hosting and delivering the images you upload;',
-        'other users — to the limited extent described above so the platform can work; and',
+        'Google Firebase (Google LLC), for authentication, database, and hosting of account and platform data;',
+        'Cloudinary, for hosting and delivering the images you upload;',
+        'other users, to the limited extent described above so the platform can work; and',
         'authorities or third parties where required or authorised by law, or to protect the rights, safety, or property of SwapLease or others.',
       ] },
     ],
@@ -64,7 +64,7 @@ const sections = [
   {
     heading: 'Security',
     body: [
-      'We take reasonable steps to protect your personal information from misuse, interference, loss, and unauthorised access, modification, or disclosure — including using reputable cloud providers, encrypted authentication, and database access rules. However, no method of transmission or storage is completely secure, and we cannot guarantee absolute security. You are responsible for keeping your password confidential.',
+      'We take reasonable steps to protect your personal information from misuse, interference, loss, and unauthorised access, modification, or disclosure, including using reputable cloud providers, encrypted authentication, and database access rules. However, no method of transmission or storage is completely secure, and we cannot guarantee absolute security. You are responsible for keeping your password confidential.',
     ],
   },
   {
@@ -116,7 +116,7 @@ export default function PrivacyPage() {
     <LegalPage
       title="Privacy Policy"
       updated="30 June 2026"
-      intro="Your privacy matters to us. This Policy explains what personal information SwapLease collects, why we collect it, how we use and protect it, and the choices you have — in line with the Australian Privacy Principles."
+      intro="Your privacy matters to us. This Policy explains what personal information SwapLease collects, why we collect it, how we use and protect it, and the choices you have, in line with the Australian Privacy Principles."
       sections={sections}
     />
   );

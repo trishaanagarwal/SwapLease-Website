@@ -51,7 +51,7 @@ export default function HomePage() {
             </h1>
 
             <p style={{ fontSize: 19, color: t.inkSoft, margin: '0 0 34px', lineHeight: 1.6, maxWidth: 500, fontWeight: 500 }}>
-              Melbourne's trusted marketplace for student lease transfers. List in minutes, browse verified homes, and swap directly — no agents, no fees.
+              Melbourne's trusted marketplace for student lease transfers. List in minutes, browse verified homes, and swap directly, no agents, no fees.
             </p>
 
             <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, maxWidth: 520, marginBottom: 22, background: '#fff', borderRadius: t.pill, padding: 7, boxShadow: t.shadow, border: `1px solid ${t.border}` }}>
@@ -132,7 +132,7 @@ export default function HomePage() {
         {loading ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 22 }}>
             {[...Array(3)].map((_, i) => (
-              <div key={i} style={{ background: '#fff', borderRadius: t.radius, height: 320, border: `1px solid ${t.border}` }} />
+              <div key={i} className="skeleton" style={{ borderRadius: t.radius, height: 320 }} />
             ))}
           </div>
         ) : listings.length > 0 ? (
@@ -142,7 +142,7 @@ export default function HomePage() {
         ) : (
           <div style={{ textAlign: 'center', padding: '64px 20px', background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}`, boxShadow: t.shadowSm }}>
             <div style={{ fontSize: 46, marginBottom: 14 }}>🏠</div>
-            <p style={{ fontSize: 17, color: t.inkSoft, marginBottom: 8, fontWeight: 600 }}>No listings yet — be the first to post!</p>
+            <p style={{ fontSize: 17, color: t.inkSoft, marginBottom: 8, fontWeight: 600 }}>No listings yet, be the first to post!</p>
             <Link to="/create-listing" style={{ color: t.navy, textDecoration: 'none', fontWeight: 700 }}>List your lease →</Link>
           </div>
         )}
@@ -159,7 +159,7 @@ export default function HomePage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 24 }}>
             {[
-              { n: '01', icon: '📝', title: 'List your lease', desc: 'Post your place in minutes — photos, rent, dates and your nearby uni.', tint: t.navy },
+              { n: '01', icon: '📝', title: 'List your lease', desc: 'Post your place in minutes, photos, rent, dates and your nearby uni.', tint: t.navy },
               { n: '02', icon: '🔍', title: 'Browse & filter', desc: 'Search by suburb, price or property type to find your perfect home.', tint: t.green },
               { n: '03', icon: '💬', title: 'Message & swap', desc: 'Chat directly, arrange an inspection and transfer the lease.', tint: t.gold },
             ].map((step) => (
@@ -174,7 +174,7 @@ export default function HomePage() {
             ))}
           </div>
           <div style={{ textAlign: 'center', marginTop: 48 }}>
-            <Link to="/signup" className="btn btn-gold" style={{ padding: '15px 38px', fontSize: 16 }}>Get started — it's free <ArrowRight size={18} /></Link>
+            <Link to="/signup" className="btn btn-gold" style={{ padding: '15px 38px', fontSize: 16 }}>Get started, it's free <ArrowRight size={18} /></Link>
           </div>
         </div>
       </section>

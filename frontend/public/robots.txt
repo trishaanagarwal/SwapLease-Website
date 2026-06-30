@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /profile
+Disallow: /messages
+Disallow: /saved
+
+Sitemap: https://swaplease.homes/sitemap.xml

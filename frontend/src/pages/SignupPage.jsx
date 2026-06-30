@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import { useAuth } from '../context/AuthContext';
 import { UNIVERSITIES } from '../constants';
+import SocialAuth from '../components/SocialAuth';
 import logoMark from '../assets/logo-mark.png';
 import { t } from '../theme';
 
@@ -12,7 +13,7 @@ function validate(form) {
   const errors = {};
   const name = purify(form.name.trim());
   if (name.length < 2) errors.name = 'Name must be at least 2 characters';
-  if (!/^[\p{L}\s'\-\.]+$/u.test(name)) errors.name = 'Name may only contain letters and spaces';
+  if (!/^[\p{L}\s'.-]+$/u.test(name)) errors.name = 'Name may only contain letters and spaces';
   if (!form.email.includes('@')) errors.email = 'Enter a valid email address';
   if (form.email.toLowerCase() !== form.confirmEmail.toLowerCase()) errors.confirmEmail = 'Email addresses do not match';
   if (form.password.length < 8) errors.password = 'Password must be at least 8 characters';
@@ -181,6 +182,14 @@ export default function SignupPage() {
               {loading ? 'Creating account…' : 'Create account'}
             </button>
           </form>
+
+          <SocialAuth label="Sign up" />
+          <p style={{ fontSize: 11.5, color: t.inkFaint, textAlign: 'center', margin: '4px 0 0', lineHeight: 1.5 }}>
+            By continuing with Google you agree to our{' '}
+            <Link to="/terms" target="_blank" style={{ color: t.coralDeep, fontWeight: 700, textDecoration: 'none' }}>Terms</Link>
+            {' '}and{' '}
+            <Link to="/privacy" target="_blank" style={{ color: t.coralDeep, fontWeight: 700, textDecoration: 'none' }}>Privacy Policy</Link>.
+          </p>
 
           <div style={{ textAlign: 'center', marginTop: 24, paddingTop: 20, borderTop: `1px solid ${t.border}` }}>
             <span style={{ fontSize: 14, color: t.inkSoft }}>Already have an account? </span>

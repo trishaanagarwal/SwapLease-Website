@@ -38,7 +38,7 @@ export default function VerifyEmailPage() {
 
         <div style={{ marginTop: 8 }}>
           {status === 'sent' ? (
-            <p style={{ color: t.sage, fontSize: 14, fontWeight: 700 }}>✓ Email resent — check your inbox</p>
+            <p style={{ color: t.sage, fontSize: 14, fontWeight: 700 }}>✓ Email resent, check your inbox</p>
           ) : status === 'error' ? (
             <p style={{ color: t.coralDeep, fontSize: 14, fontWeight: 600 }}>Failed to resend. Try again.</p>
           ) : (

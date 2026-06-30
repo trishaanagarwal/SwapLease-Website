@@ -54,7 +54,7 @@ const sections = [
   {
     heading: 'Release and waiver',
     body: [
-      'To the maximum extent permitted by law, you RELEASE and forever discharge SwapLease, its owners, operators, employees, and agents from any and all claims, demands, losses, damages, costs, liabilities, and causes of action of every kind — whether known or unknown, anticipated or unanticipated — arising out of or in any way connected with: (a) your dealings with any other User; (b) any Listing, property, agreement, transfer, sublease, or assignment; or (c) the conduct of any User on or off the platform.',
+      'To the maximum extent permitted by law, you RELEASE and forever discharge SwapLease, its owners, operators, employees, and agents from any and all claims, demands, losses, damages, costs, liabilities, and causes of action of every kind, whether known or unknown, anticipated or unanticipated, arising out of or in any way connected with: (a) your dealings with any other User; (b) any Listing, property, agreement, transfer, sublease, or assignment; or (c) the conduct of any User on or off the platform.',
       'If you have a dispute with one or more Users, you pursue it directly against those Users and not against SwapLease.',
     ],
   },
@@ -92,7 +92,7 @@ const sections = [
   {
     heading: 'Limitation of liability',
     body: [
-      'To the maximum extent permitted by law, SwapLease and its owners, operators, employees, and agents will not be liable for any indirect, incidental, special, consequential, or punitive loss or damage, or for any loss of profits, revenue, data, goodwill, bond, deposit, or money, arising out of or in connection with your use of the platform or any dealing with another User — even if we have been advised of the possibility of such loss.',
+      'To the maximum extent permitted by law, SwapLease and its owners, operators, employees, and agents will not be liable for any indirect, incidental, special, consequential, or punitive loss or damage, or for any loss of profits, revenue, data, goodwill, bond, deposit, or money, arising out of or in connection with your use of the platform or any dealing with another User, even if we have been advised of the possibility of such loss.',
       'To the maximum extent permitted by law, our total aggregate liability to you for all claims arising out of or relating to the platform is limited to the greater of (a) the total amount you paid us to use the platform in the 12 months before the claim (which, for a free service, is nil), or (b) AUD $100.',
     ],
   },
@@ -133,7 +133,7 @@ export default function TermsPage() {
     <LegalPage
       title="Terms & Conditions"
       updated="30 June 2026"
-      intro="Please read these Terms & Conditions carefully. They govern your use of SwapLease. By creating an account or using the platform, you agree to be bound by them. The most important thing to understand is that SwapLease is only a platform that connects students — we are not a party to any lease, transfer, or agreement you make with another user, and all such dealings are entirely between you and that user."
+      intro="Please read these Terms & Conditions carefully. They govern your use of SwapLease. By creating an account or using the platform, you agree to be bound by them. The most important thing to understand is that SwapLease is only a platform that connects students, we are not a party to any lease, transfer, or agreement you make with another user, and all such dealings are entirely between you and that user."
       sections={sections}
     />
   );

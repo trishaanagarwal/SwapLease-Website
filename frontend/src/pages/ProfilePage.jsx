@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Edit2, Save, X, PlusCircle, User, Mail } from 'lucide-react';
-import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { Edit2, Save, X, PlusCircle, User, Mail, Trash2, Pencil } from 'lucide-react';
+import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import { UNIVERSITIES } from '../constants';
@@ -47,7 +47,7 @@ export default function ProfilePage() {
     setEmailBusy(true);
     try {
       await changeEmail(next, emailForm.password);
-      setEmailMsg({ type: 'ok', text: `Verification link sent to ${next}. Click it to confirm — then sign in with your new email. Your old email stays active until you confirm.` });
+      setEmailMsg({ type: 'ok', text: `Verification link sent to ${next}. Click it to confirm, then sign in with your new email. Your old email stays active until you confirm.` });
       setEmailForm({ newEmail: '', password: '' });
     } catch (err) {
       if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') setEmailMsg({ type: 'err', text: 'Incorrect password.' });
@@ -70,6 +70,26 @@ export default function ProfilePage() {
       setError('Failed to save. Please try again.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const removeListing = async (id) => {
+    if (!confirm('Remove this listing permanently? This cannot be undone.')) return;
+    try {
+      await deleteDoc(doc(db, 'listings', id));
+      setListings(ls => ls.filter(l => l.id !== id));
+    } catch {
+      alert('Could not remove the listing. Please try again.');
+    }
+  };
+
+  const toggleListingStatus = async (id, current) => {
+    const next = current === 'taken' ? 'active' : 'taken';
+    try {
+      await updateDoc(doc(db, 'listings', id), { status: next });
+      setListings(ls => ls.map(l => l.id === id ? { ...l, status: next } : l));
+    } catch {
+      alert('Could not update the listing. Please try again.');
     }
   };
 
@@ -165,7 +185,7 @@ export default function ProfilePage() {
             <h2 className="font-display" style={{ fontSize: 20, fontWeight: 800, color: t.ink, margin: 0 }}>Login email</h2>
           </div>
           <p style={{ color: t.inkSoft, fontSize: 14, margin: '0 0 18px' }}>
-            Current email: <strong style={{ color: t.ink }}>{user?.email}</strong>. Changing it sends a verification link to the new address — your old email keeps working until you confirm.
+            Current email: <strong style={{ color: t.ink }}>{user?.email}</strong>. Changing it sends a verification link to the new address, your old email keeps working until you confirm.
           </p>
 
           {emailMsg.text && (
@@ -219,7 +239,25 @@ export default function ProfilePage() {
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 22 }}>
-              {listings.map(l => <ListingCard key={l.id} listing={l} />)}
+              {listings.map(l => (
+                <div key={l.id} style={{ display: 'flex', flexDirection: 'column' }}>
+                  <ListingCard listing={l} />
+                  <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                    <Link to={`/listings/${l.id}/edit`}
+                      style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, textDecoration: 'none', background: '#fff', border: `1.5px solid ${t.borderStrong}`, color: t.ink, borderRadius: t.pill, padding: '8px 10px', fontSize: 13, fontWeight: 700 }}>
+                      <Pencil size={14} /> Edit
+                    </Link>
+                    <button onClick={() => toggleListingStatus(l.id, l.status)}
+                      style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, background: l.status === 'taken' ? t.sageTint : t.honeyTint, border: 'none', color: l.status === 'taken' ? t.sage : '#A87C33', borderRadius: t.pill, padding: '8px 10px', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                      {l.status === 'taken' ? 'Available' : 'Mark taken'}
+                    </button>
+                    <button onClick={() => removeListing(l.id)} aria-label="Remove listing"
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', border: '1.5px solid #fecaca', color: '#dc2626', borderRadius: t.pill, padding: '8px 12px', cursor: 'pointer' }}>
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>

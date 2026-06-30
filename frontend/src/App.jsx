@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
+import NotFoundPage from './pages/NotFoundPage';
 import HomePage from './pages/HomePage';
 import ListingsPage from './pages/ListingsPage';
 import ListingDetailPage from './pages/ListingDetailPage';
@@ -27,6 +29,7 @@ function Layout({ children }) {
 export default function App() {
   return (
     <BrowserRouter>
+      <ErrorBoundary>
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -62,8 +65,10 @@ export default function App() {
               <ProtectedRoute><SavedPage /></ProtectedRoute>
             </Layout>
           } />
+          <Route path="*" element={<Layout><NotFoundPage /></Layout>} />
         </Routes>
       </AuthProvider>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }
