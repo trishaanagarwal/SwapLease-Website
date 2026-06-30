@@ -34,9 +34,10 @@ export default function MessagesPage() {
       where('participants', 'array-contains', user.id),
       orderBy('lastMessageAt', 'desc')
     );
-    const unsub = onSnapshot(q, snap => {
-      setConversations(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    });
+    const unsub = onSnapshot(q,
+      snap => setConversations(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+      err => console.error('Conversations listener error:', err)
+    );
     return unsub;
   }, [user]);
 
@@ -47,9 +48,10 @@ export default function MessagesPage() {
       collection(db, 'conversations', activeConvId, 'messages'),
       orderBy('createdAt', 'asc')
     );
-    const unsub = onSnapshot(q, snap => {
-      setMessages(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    });
+    const unsub = onSnapshot(q,
+      snap => setMessages(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+      err => console.error('Messages listener error:', err)
+    );
     return unsub;
   }, [activeConvId]);
 
