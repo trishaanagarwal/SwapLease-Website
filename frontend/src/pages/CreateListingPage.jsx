@@ -1,12 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { collection, addDoc, updateDoc, getDoc, doc, serverTimestamp } from 'firebase/firestore';
+import DOMPurify from 'dompurify';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import { UNIVERSITIES } from '../constants';
 
 const CLOUDINARY_CLOUD = 'deewvfzpl';
 const CLOUDINARY_PRESET = 'slease';
+
+// Strip any HTML/script from user text (defense in depth; React also escapes on render).
+const clean = (str) => DOMPurify.sanitize((str || '').trim(), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
 
 function Counter({ value, onChange, min = 1, max = 20 }) {
   return (
@@ -112,11 +116,11 @@ export default function CreateListingPage() {
     if (!form.rent) { setError('Rent is required'); return; }
     setLoading(true);
     const fields = {
-      title: form.title.trim(),
-      description: form.description.trim(),
-      address: form.address.trim(),
-      suburb: form.suburb.trim(),
-      city: form.city.trim(),
+      title: clean(form.title),
+      description: clean(form.description),
+      address: clean(form.address),
+      suburb: clean(form.suburb),
+      city: clean(form.city),
       rent: Number(form.rent),
       bond: form.bond ? Number(form.bond) : null,
       availableFrom: form.availableFrom || null,

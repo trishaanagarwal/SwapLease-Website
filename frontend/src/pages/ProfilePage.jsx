@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Edit2, Save, X, PlusCircle, User, Mail, Trash2, Pencil } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Edit2, Save, X, PlusCircle, User, Mail, Trash2, Pencil, AlertTriangle } from 'lucide-react';
 import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
@@ -9,7 +9,8 @@ import ListingCard from '../components/ListingCard';
 import { t } from '../theme';
 
 export default function ProfilePage() {
-  const { user, updateUser, changeEmail } = useAuth();
+  const { user, updateUser, changeEmail, deleteAccount, isPasswordUser } = useAuth();
+  const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,6 +22,31 @@ export default function ProfilePage() {
   const [emailForm, setEmailForm] = useState({ newEmail: '', password: '' });
   const [emailBusy, setEmailBusy] = useState(false);
   const [emailMsg, setEmailMsg] = useState({ type: '', text: '' });
+
+  // Account deletion flow
+  const [showDelete, setShowDelete] = useState(false);
+  const [delConfirm, setDelConfirm] = useState('');
+  const [delPassword, setDelPassword] = useState('');
+  const [delBusy, setDelBusy] = useState(false);
+  const [delError, setDelError] = useState('');
+  const passwordUser = isPasswordUser();
+
+  const handleDeleteAccount = async () => {
+    setDelError('');
+    if (delConfirm !== 'DELETE') { setDelError('Please type DELETE to confirm.'); return; }
+    if (passwordUser && !delPassword) { setDelError('Enter your password to confirm.'); return; }
+    setDelBusy(true);
+    try {
+      await deleteAccount(delPassword);
+      navigate('/');
+    } catch (err) {
+      if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') setDelError('Incorrect password.');
+      else if (err.code === 'auth/popup-closed-by-user') setDelError('Verification was cancelled. Please try again.');
+      else if (err.code === 'auth/requires-recent-login') setDelError('Please sign out and back in, then try again.');
+      else setDelError('Could not delete account. Please try again.');
+      setDelBusy(false);
+    }
+  };
 
   useEffect(() => {
     if (user) setForm({ name: user.name || '', bio: user.bio || '', university: user.university || '', phone: user.phone || '' });
@@ -258,6 +284,50 @@ export default function ProfilePage() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+
+        {/* ---- Danger zone: delete account ---- */}
+        <div style={{ ...card, padding: 28, border: '1px solid #f3c9c9', background: '#fffafa' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+            <AlertTriangle size={19} color="#dc2626" />
+            <h2 className="font-display" style={{ fontSize: 20, fontWeight: 800, color: '#b91c1c', margin: 0 }}>Delete account</h2>
+          </div>
+          <p style={{ color: t.inkSoft, fontSize: 14, margin: '0 0 16px', lineHeight: 1.6 }}>
+            Permanently delete your SwapLease account, your profile and all of your listings. This cannot be undone.
+          </p>
+
+          {!showDelete ? (
+            <button onClick={() => setShowDelete(true)}
+              style={{ background: '#fff', border: '1.5px solid #dc2626', color: '#dc2626', borderRadius: t.pill, padding: '10px 20px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+              Delete my account
+            </button>
+          ) : (
+            <div style={{ background: '#fff', border: '1px solid #f3c9c9', borderRadius: 14, padding: 20 }}>
+              <p style={{ fontSize: 13.5, color: t.ink, margin: '0 0 14px', fontWeight: 600 }}>
+                To confirm, {passwordUser ? 'enter your password and ' : ''}type <strong>DELETE</strong> below.
+                {!passwordUser && ' You\'ll be asked to re-verify with Google.'}
+              </p>
+              {delError && (
+                <div style={{ background: t.coralTint, border: `1px solid ${t.coral}`, color: t.coralDeep, padding: '10px 14px', borderRadius: 10, fontSize: 13.5, marginBottom: 12, fontWeight: 600 }}>{delError}</div>
+              )}
+              {passwordUser && (
+                <input type="password" value={delPassword} onChange={e => setDelPassword(e.target.value)} placeholder="Your password"
+                  style={{ ...field, marginBottom: 10 }} />
+              )}
+              <input value={delConfirm} onChange={e => setDelConfirm(e.target.value)} placeholder="Type DELETE to confirm"
+                style={{ ...field, marginBottom: 14 }} />
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button onClick={handleDeleteAccount} disabled={delBusy}
+                  style={{ background: '#dc2626', border: 'none', color: '#fff', borderRadius: t.pill, padding: '10px 20px', fontSize: 14, fontWeight: 700, cursor: delBusy ? 'not-allowed' : 'pointer', opacity: delBusy ? 0.6 : 1, fontFamily: 'inherit' }}>
+                  {delBusy ? 'Deleting…' : 'Permanently delete'}
+                </button>
+                <button onClick={() => { setShowDelete(false); setDelError(''); setDelConfirm(''); setDelPassword(''); }} disabled={delBusy}
+                  style={{ background: '#fff', border: `1.5px solid ${t.borderStrong}`, color: t.inkSoft, borderRadius: t.pill, padding: '10px 20px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                  Cancel
+                </button>
+              </div>
             </div>
           )}
         </div>

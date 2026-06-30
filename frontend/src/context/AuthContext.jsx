@@ -4,8 +4,11 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendEmailVerification,
+  sendPasswordResetEmail,
   verifyBeforeUpdateEmail,
   reauthenticateWithCredential,
+  reauthenticateWithPopup,
+  deleteUser,
   EmailAuthProvider,
   GoogleAuthProvider,
   FacebookAuthProvider,
@@ -14,7 +17,7 @@ import {
   getRedirectResult,
   signOut,
 } from 'firebase/auth';
-import { doc, setDoc, getDoc, updateDoc, serverTimestamp, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, deleteDoc, collection, query, where, getDocs, serverTimestamp, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 
 const AuthContext = createContext(null);
@@ -165,8 +168,37 @@ export function AuthProvider({ children }) {
     await verifyBeforeUpdateEmail(auth.currentUser, newEmail.trim().toLowerCase());
   };
 
+  // Send a password-reset email (for users who forgot their password).
+  const resetPassword = (email) => sendPasswordResetEmail(auth, email.trim().toLowerCase());
+
+  // True if the signed-in account uses email/password (vs Google).
+  const isPasswordUser = () =>
+    !!auth.currentUser?.providerData?.some(p => p.providerId === 'password');
+
+  // Permanently delete the account: re-authenticate, remove the user's listings
+  // and profile, then delete the Auth account. Requires a recent login.
+  const deleteAccount = async (password) => {
+    const u = auth.currentUser;
+    if (!u) throw new Error('Not signed in.');
+    const providerId = u.providerData[0]?.providerId || 'password';
+    // Step 1 — verify identity (re-authenticate).
+    if (providerId === 'password') {
+      const cred = EmailAuthProvider.credential(u.email, password);
+      await reauthenticateWithCredential(u, cred);
+    } else {
+      await reauthenticateWithPopup(u, makeProvider(providerId.includes('facebook') ? 'facebook' : 'google'));
+    }
+    // Step 2 — delete the user's own listings.
+    const snap = await getDocs(query(collection(db, 'listings'), where('userId', '==', u.uid)));
+    await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
+    // Step 3 — delete the profile doc, then the Auth account.
+    await deleteDoc(doc(db, 'users', u.uid));
+    await deleteUser(u);
+    setUser(null);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser, resendVerification, pendingVerification, toggleBookmark, changeEmail, socialLogin, socialLoginRedirect }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser, resendVerification, pendingVerification, toggleBookmark, changeEmail, socialLogin, socialLoginRedirect, resetPassword, deleteAccount, isPasswordUser }}>
       {children}
     </AuthContext.Provider>
   );

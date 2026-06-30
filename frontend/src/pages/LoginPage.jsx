@@ -17,8 +17,22 @@ export default function LoginPage() {
   const [needsVerification, setNeedsVerification] = useState(false);
   const [resendStatus, setResendStatus] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const [resetMsg, setResetMsg] = useState('');
+  const { login, resetPassword } = useAuth();
   const navigate = useNavigate();
+
+  const handleForgotPassword = async () => {
+    setError(''); setResetMsg('');
+    const addr = email.trim().toLowerCase();
+    if (!addr.includes('@')) { setError('Enter your email address above first, then click "Forgot password".'); return; }
+    try {
+      await resetPassword(addr);
+      setResetMsg(`If an account exists for ${addr}, a password-reset link has been sent. Check your inbox (and spam).`);
+    } catch {
+      // Don't reveal whether the email exists — show the same neutral message.
+      setResetMsg(`If an account exists for ${addr}, a password-reset link has been sent. Check your inbox (and spam).`);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -104,11 +118,24 @@ export default function LoginPage() {
               <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                 placeholder="you@example.com" required style={inputStyle} />
             </div>
-            <div style={{ marginBottom: 24 }}>
+            <div style={{ marginBottom: 10 }}>
               <label style={lbl}>Password</label>
               <input type="password" value={password} onChange={e => setPassword(e.target.value)}
                 placeholder="Your password" required style={inputStyle} />
             </div>
+
+            <div style={{ textAlign: 'right', marginBottom: 20 }}>
+              <button type="button" onClick={handleForgotPassword}
+                style={{ background: 'none', border: 'none', color: t.coralDeep, fontSize: 13, fontWeight: 700, cursor: 'pointer', padding: 0 }}>
+                Forgot password?
+              </button>
+            </div>
+
+            {resetMsg && (
+              <div style={{ background: t.sageTint, border: `1px solid ${t.sage}`, color: t.sage, borderRadius: 12, padding: '11px 14px', fontSize: 13.5, marginBottom: 18, fontWeight: 600, lineHeight: 1.5 }}>
+                {resetMsg}
+              </div>
+            )}
 
             <button type="submit" disabled={loading} className="btn btn-coral"
               style={{ width: '100%', padding: 14, fontSize: 16, opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}>

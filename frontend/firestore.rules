@@ -36,7 +36,8 @@ service cloud.firestore {
         && (!('bookmarks' in request.resource.data)
             || (request.resource.data.bookmarks is list && request.resource.data.bookmarks.size() <= 1000));
 
-      allow delete: if false;
+      // The owner may delete their own profile (account deletion).
+      allow delete: if isOwner(userId);
     }
 
     // ---------- listings ----------
@@ -55,11 +56,20 @@ service cloud.firestore {
         && request.resource.data.images.size() <= 12
         && (!('description' in request.resource.data) || request.resource.data.description.size() <= 5000);
 
-      // Owner-only edits; ownership and creation time are immutable.
+      // Owner-only edits; ownership and creation time are immutable, and the
+      // same field constraints as create are re-validated to prevent tampering.
       allow update: if signedIn()
         && resource.data.userId == request.auth.uid
         && request.resource.data.userId == resource.data.userId
-        && request.resource.data.createdAt == resource.data.createdAt;
+        && request.resource.data.createdAt == resource.data.createdAt
+        && strLen(request.resource.data.title, 1, 200)
+        && request.resource.data.rent is number
+        && request.resource.data.rent > 0
+        && request.resource.data.rent < 100000
+        && request.resource.data.status in ['active', 'taken']
+        && request.resource.data.images is list
+        && request.resource.data.images.size() <= 12
+        && (!('description' in request.resource.data) || request.resource.data.description.size() <= 5000);
 
       allow delete: if signedIn() && resource.data.userId == request.auth.uid;
     }
