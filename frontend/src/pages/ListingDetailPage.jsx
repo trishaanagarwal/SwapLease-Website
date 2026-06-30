@@ -24,6 +24,7 @@ export default function ListingDetailPage() {
   const [imgIdx, setImgIdx] = useState(0);
   const [deleting, setDeleting] = useState(false);
   const [contacting, setContacting] = useState(false);
+  const [lister, setLister] = useState(null); // { name, photoURL } or { deleted: true }
 
   useEffect(() => {
     getDoc(doc(db, 'listings', id))
@@ -34,6 +35,16 @@ export default function ListingDetailPage() {
       .catch(() => navigate('/listings'))
       .finally(() => setLoading(false));
   }, [id]);
+
+  // Fetch the lister's current public profile (photo/name, or deleted state).
+  useEffect(() => {
+    if (!listing?.userId) return;
+    getDoc(doc(db, 'users', listing.userId))
+      .then(s => setLister(s.exists()
+        ? { name: s.data().name, photoURL: s.data().photoURL || '' }
+        : { deleted: true }))
+      .catch(() => {});
+  }, [listing?.userId]);
 
   const handleContact = async () => {
     if (!user) return navigate('/login');
@@ -269,12 +280,18 @@ export default function ListingDetailPage() {
               <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: 20 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 }}>Listed by</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#1B3A6B', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 18, flexShrink: 0 }}>
-                    {listing.userName?.[0]?.toUpperCase()}
-                  </div>
+                  {lister?.photoURL && !lister?.deleted ? (
+                    <img src={lister.photoURL} alt="" style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                  ) : (
+                    <div style={{ width: 44, height: 44, borderRadius: '50%', background: lister?.deleted ? '#9ca3af' : '#1B3A6B', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 18, flexShrink: 0 }}>
+                      {lister?.deleted ? '?' : (listing.userName?.[0]?.toUpperCase())}
+                    </div>
+                  )}
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{listing.userName}</div>
-                    {listing.userUniversity && <div style={{ fontSize: 13, color: '#6b7280', marginTop: 2 }}>{listing.userUniversity}</div>}
+                    <div style={{ fontWeight: 700, fontSize: 15, color: lister?.deleted ? '#9ca3af' : '#111', fontStyle: lister?.deleted ? 'italic' : 'normal' }}>
+                      {lister?.deleted ? 'Deleted profile' : (lister?.name || listing.userName)}
+                    </div>
+                    {!lister?.deleted && listing.userUniversity && <div style={{ fontSize: 13, color: '#6b7280', marginTop: 2 }}>{listing.userUniversity}</div>}
                   </div>
                 </div>
                 {listing.userBio && <p style={{ fontSize: 13, color: '#6b7280', marginTop: 12, lineHeight: 1.5 }}>{listing.userBio}</p>}

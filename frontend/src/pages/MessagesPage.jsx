@@ -2,11 +2,23 @@ import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   collection, query, where, orderBy, onSnapshot,
-  addDoc, doc, updateDoc, serverTimestamp,
+  addDoc, doc, getDoc, updateDoc, serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { MessageSquare } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+
+// Avatar showing a profile photo, an initial, or a deleted-profile placeholder.
+function Avatar({ name, photoURL, deleted, size = 40 }) {
+  if (photoURL && !deleted) {
+    return <img src={photoURL} alt="" style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />;
+  }
+  return (
+    <div style={{ width: size, height: size, borderRadius: '50%', background: deleted ? '#9ca3af' : '#1B3A6B', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: size * 0.4, flexShrink: 0 }}>
+      {deleted ? '?' : (name?.[0]?.toUpperCase() || '?')}
+    </div>
+  );
+}
 
 function fmtTime(ts) {
   try {
@@ -25,7 +37,32 @@ export default function MessagesPage() {
   const [messages, setMessages] = useState([]);
   const [newMsg, setNewMsg] = useState('');
   const [sending, setSending] = useState(false);
+  const [profiles, setProfiles] = useState({}); // uid -> { name, photoURL, deleted }
   const messagesEndRef = useRef(null);
+
+  const otherIdOf = (conv) => (conv.user1Id === user?.id ? conv.user2Id : conv.user1Id);
+
+  // Fetch the live profile (photo + name, or deleted state) of each chat partner.
+  useEffect(() => {
+    if (!user) return;
+    const ids = [...new Set(conversations.map(otherIdOf))].filter(Boolean);
+    ids.forEach(async (id) => {
+      if (profiles[id]) return;
+      try {
+        const snap = await getDoc(doc(db, 'users', id));
+        setProfiles(p => ({ ...p, [id]: snap.exists()
+          ? { name: snap.data().name, photoURL: snap.data().photoURL || '', deleted: false }
+          : { name: 'Deleted profile', photoURL: '', deleted: true } }));
+      } catch { /* ignore */ }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversations, user]);
+
+  const profileOf = (conv) => {
+    const id = otherIdOf(conv);
+    const denormName = conv.user1Id === user?.id ? conv.user2Name : conv.user1Name;
+    return profiles[id] || { name: denormName, photoURL: '', deleted: false };
+  };
 
   // Real-time conversations listener
   useEffect(() => {
@@ -83,9 +120,7 @@ export default function MessagesPage() {
   };
 
   const activeConv = conversations.find(c => c.id === activeConvId);
-  const otherUser = activeConv
-    ? (activeConv.user1Id === user?.id ? { name: activeConv.user2Name } : { name: activeConv.user1Name })
-    : null;
+  const otherUser = activeConv ? profileOf(activeConv) : null;
 
   return (
     <div style={{ display: 'flex', height: 'calc(100vh - 70px)', background: '#F8F6F1', overflow: 'hidden' }}>
@@ -103,15 +138,13 @@ export default function MessagesPage() {
             </div>
           ) : (
             conversations.map(conv => {
-              const other = conv.user1Id === user?.id ? { name: conv.user2Name } : { name: conv.user1Name };
+              const other = profileOf(conv);
               const isActive = conv.id === activeConvId;
               return (
                 <button key={conv.id} onClick={() => setActiveConvId(conv.id)}
                   style={{ width: '100%', textAlign: 'left', padding: '14px 20px', background: isActive ? '#E8EDF6' : 'transparent', borderLeft: isActive ? '3px solid #1B3A6B' : '3px solid transparent', border: 'none', cursor: 'pointer', borderBottom: '1px solid #f9fafb', display: 'block' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#1B3A6B', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 16, flexShrink: 0 }}>
-                      {other.name?.[0]?.toUpperCase()}
-                    </div>
+                    <Avatar name={other.name} photoURL={other.photoURL} deleted={other.deleted} size={40} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontWeight: 700, fontSize: 14, color: '#111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{other.name}</span>
@@ -132,11 +165,9 @@ export default function MessagesPage() {
         {activeConvId && otherUser ? (
           <>
             <div style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#1B3A6B', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 15 }}>
-                {otherUser.name?.[0]?.toUpperCase()}
-              </div>
+              <Avatar name={otherUser.name} photoURL={otherUser.photoURL} deleted={otherUser.deleted} size={36} />
               <div>
-                <div style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>{otherUser.name}</div>
+                <div style={{ fontWeight: 700, fontSize: 15, color: otherUser.deleted ? '#9ca3af' : '#111', fontStyle: otherUser.deleted ? 'italic' : 'normal' }}>{otherUser.name}</div>
                 {activeConv?.listingTitle && <div style={{ fontSize: 12, color: '#6b7280' }}>Re: {activeConv.listingTitle}</div>}
               </div>
             </div>
