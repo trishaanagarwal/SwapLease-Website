@@ -10,12 +10,30 @@ import {
   GoogleAuthProvider,
   FacebookAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 
 const AuthContext = createContext(null);
+
+const makeProvider = (name) => (name === 'facebook' ? new FacebookAuthProvider() : new GoogleAuthProvider());
+
+// Ensure a Firestore profile exists for a federated (Google/Facebook) user.
+async function ensureUserDoc(firebaseUser) {
+  const ref = doc(db, 'users', firebaseUser.uid);
+  const snap = await getDoc(ref);
+  if (snap.exists()) return snap.data();
+  const newData = {
+    name: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : 'New user'),
+    email: (firebaseUser.email || '').toLowerCase(),
+    university: '', bio: '', phone: '', bookmarks: [], createdAt: serverTimestamp(),
+  };
+  await setDoc(ref, newData);
+  return newData;
+}
 
 // If the verified Auth email differs from the stored profile email
 // (e.g. after a confirmed email change), keep the Firestore doc in sync.
@@ -36,9 +54,20 @@ export function AuthProvider({ children }) {
   const [pendingVerification, setPendingVerification] = useState(null); // { email, password }
 
   useEffect(() => {
+    // Complete any pending redirect-based social sign-in (popup fallback).
+    getRedirectResult(auth).catch(() => {});
+
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        const snap = await getDoc(doc(db, 'users', firebaseUser.uid));
+        let snap = await getDoc(doc(db, 'users', firebaseUser.uid));
+        // Auto-create a profile for federated sign-ins (Google) on first login.
+        if (!snap.exists()) {
+          const isFederated = firebaseUser.providerData.some(p => p.providerId !== 'password');
+          if (isFederated) {
+            await ensureUserDoc(firebaseUser);
+            snap = await getDoc(doc(db, 'users', firebaseUser.uid));
+          }
+        }
         if (snap.exists()) {
           const data = await syncEmail(firebaseUser, snap.data());
           setUser({ id: firebaseUser.uid, emailVerified: firebaseUser.emailVerified, ...data });
@@ -82,27 +111,17 @@ export function AuthProvider({ children }) {
     setPendingVerification({ email: email.toLowerCase(), password });
   };
 
-  // Sign in / sign up with Google or Facebook. Social accounts are
+  // Sign in / sign up with Google (or Facebook). Social accounts are
   // provider-verified, so they skip the email-verification step.
   const socialLogin = async (providerName) => {
-    const provider = providerName === 'facebook' ? new FacebookAuthProvider() : new GoogleAuthProvider();
-    const cred = await signInWithPopup(auth, provider);
-    const fbUser = cred.user;
-    const ref = doc(db, 'users', fbUser.uid);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) {
-      const newData = {
-        name: fbUser.displayName || (fbUser.email ? fbUser.email.split('@')[0] : 'New user'),
-        email: (fbUser.email || '').toLowerCase(),
-        university: '', bio: '', phone: '', bookmarks: [], createdAt: serverTimestamp(),
-      };
-      await setDoc(ref, newData);
-      setUser({ id: fbUser.uid, emailVerified: true, ...newData });
-    } else {
-      const data = await syncEmail(fbUser, snap.data());
-      setUser({ id: fbUser.uid, emailVerified: true, ...data });
-    }
+    const cred = await signInWithPopup(auth, makeProvider(providerName));
+    const data = await ensureUserDoc(cred.user);
+    const synced = await syncEmail(cred.user, data);
+    setUser({ id: cred.user.uid, emailVerified: true, ...synced });
   };
+
+  // Fallback for browsers that block popups (e.g. Brave/Safari with strict shields).
+  const socialLoginRedirect = (providerName) => signInWithRedirect(auth, makeProvider(providerName));
 
   const resendVerification = async () => {
     if (!pendingVerification) return;
@@ -147,7 +166,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser, resendVerification, pendingVerification, toggleBookmark, changeEmail, socialLogin }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser, resendVerification, pendingVerification, toggleBookmark, changeEmail, socialLogin, socialLoginRedirect }}>
       {children}
     </AuthContext.Provider>
   );

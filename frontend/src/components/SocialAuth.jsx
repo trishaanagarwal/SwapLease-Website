@@ -13,10 +13,20 @@ const GoogleIcon = () => (
 );
 
 export default function SocialAuth({ label = 'Continue' }) {
-  const { socialLogin } = useAuth();
+  const { socialLogin, socialLoginRedirect } = useAuth();
   const navigate = useNavigate();
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
+
+  // Errors that mean the popup couldn't run (blocked by the browser) — retry via redirect.
+  const POPUP_FALLBACK = new Set([
+    'auth/popup-blocked',
+    'auth/cancelled-popup-request',
+    'auth/popup-closed-by-user',
+    'auth/web-storage-unsupported',
+    'auth/operation-not-supported-in-this-environment',
+    'auth/internal-error',
+  ]);
 
   const handle = async (provider) => {
     setError('');
@@ -25,12 +35,20 @@ export default function SocialAuth({ label = 'Continue' }) {
       await socialLogin(provider);
       navigate('/');
     } catch (err) {
-      if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
-        // user dismissed the popup; no error needed
-      } else if (err.code === 'auth/account-exists-with-different-credential') {
-        setError('An account already exists with this email. Try signing in with the other method.');
+      if (err.code === 'auth/account-exists-with-different-credential') {
+        setError('An account already exists with this email. Try signing in with email and password instead.');
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setError('This site is not authorised for Google sign-in yet. Please contact support.');
+      } else if (POPUP_FALLBACK.has(err.code)) {
+        // Popup was blocked (common in Brave/Safari) — switch to full-page redirect.
+        try {
+          await socialLoginRedirect(provider);
+          return; // page will navigate away to Google
+        } catch {
+          setError('Your browser blocked the sign-in window. Please allow popups or try another browser.');
+        }
       } else {
-        setError('Could not sign in. Please try again.');
+        setError(`Could not sign in (${err.code || 'unknown error'}). Please try again.`);
       }
     } finally {
       setBusy('');
