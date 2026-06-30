@@ -80,10 +80,9 @@ export default function CreateListingPage() {
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
-    const MAX_MB = 5;
-    const ALLOWED = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const MAX_MB = 10;
     for (const f of files) {
-      if (!ALLOWED.includes(f.type)) { setError(`"${f.name}" is not an allowed image type (JPG, PNG, WEBP, GIF only)`); return; }
+      if (!f.type.startsWith('image/')) { setError(`"${f.name}" is not an image file`); return; }
       if (f.size > MAX_MB * 1024 * 1024) { setError(`"${f.name}" exceeds the ${MAX_MB}MB size limit`); return; }
     }
     setUploading(true);
@@ -281,7 +280,7 @@ export default function CreateListingPage() {
           </Section>
 
           <Section title="Photos">
-            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple style={{ display: 'none' }} onChange={handleFileChange} />
+            <input ref={fileInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleFileChange} />
             <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading}
               style={{ width: '100%', border: '2px dashed #d1d5db', borderRadius: 10, padding: '28px 20px', textAlign: 'center', cursor: uploading ? 'not-allowed' : 'pointer', background: uploading ? '#f9fafb' : '#fafafa', marginBottom: form.images.length > 0 ? 16 : 0 }}
               onMouseEnter={e => !uploading && (e.currentTarget.style.borderColor = '#1B3A6B')}

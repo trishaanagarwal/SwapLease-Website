@@ -155,7 +155,7 @@ export default function ListingDetailPage() {
                 <img src={images[imgIdx]} alt={listing.title}
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
               ) : (
-                <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'linear-gradient(135deg, #F1ECE3, #E8EDF6)', color: '#9AA0B0' }}>
+                <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, background: '#F1ECE3', color: '#9AA0B0' }}>
                   <ImageOff size={42} />
                   <span style={{ fontSize: 14, fontWeight: 700 }}>No photos provided</span>
                 </div>

@@ -123,9 +123,9 @@ export default function MessagesPage() {
   const otherUser = activeConv ? profileOf(activeConv) : null;
 
   return (
-    <div style={{ display: 'flex', height: 'calc(100vh - 70px)', background: '#F8F6F1', overflow: 'hidden' }}>
+    <div className="msg-pane" data-active={activeConvId ? 'chat' : 'list'} style={{ display: 'flex', height: 'calc(100vh - 70px)', background: '#F8F6F1', overflow: 'hidden' }}>
 
-      <div style={{ width: 300, flexShrink: 0, background: '#fff', borderRight: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column' }}>
+      <div className="msg-list" style={{ width: 320, flexShrink: 0, background: '#fff', borderRight: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '20px 20px 14px', borderBottom: '1px solid #f3f4f6' }}>
           <h1 style={{ fontSize: 20, fontWeight: 800, color: '#111', margin: 0 }}>Messages</h1>
         </div>
@@ -161,10 +161,12 @@ export default function MessagesPage() {
         </div>
       </div>
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div className="msg-chat" style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         {activeConvId && otherUser ? (
           <>
-            <div style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 10 }}>
+              <button className="msg-back" onClick={() => setActiveConvId(null)} aria-label="Back"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1B3A6B', fontSize: 22, lineHeight: 1, padding: '0 4px 0 0' }}>‹</button>
               <Avatar name={otherUser.name} photoURL={otherUser.photoURL} deleted={otherUser.deleted} size={36} />
               <div>
                 <div style={{ fontWeight: 700, fontSize: 15, color: otherUser.deleted ? '#9ca3af' : '#111', fontStyle: otherUser.deleted ? 'italic' : 'normal' }}>{otherUser.name}</div>

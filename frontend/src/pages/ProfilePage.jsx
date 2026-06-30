@@ -1,15 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Edit2, Save, X, PlusCircle, User, Mail, Trash2, Pencil, AlertTriangle, Camera } from 'lucide-react';
-
-const CLOUDINARY_CLOUD = 'deewvfzpl';
-const CLOUDINARY_PRESET = 'slease';
 import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import { UNIVERSITIES } from '../constants';
 import ListingCard from '../components/ListingCard';
 import { t } from '../theme';
+
+const CLOUDINARY_CLOUD = 'deewvfzpl';
+const CLOUDINARY_PRESET = 'slease';
 
 export default function ProfilePage() {
   const { user, updateUser, changeEmail, deleteAccount, isPasswordUser } = useAuth();
@@ -117,8 +117,8 @@ export default function ProfilePage() {
   const handleAvatarChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { alert('Please use a JPG, PNG or WEBP image.'); return; }
-    if (file.size > 5 * 1024 * 1024) { alert('Image must be under 5MB.'); return; }
+    if (!file.type.startsWith('image/')) { alert('Please choose an image file.'); return; }
+    if (file.size > 10 * 1024 * 1024) { alert('Image must be under 10MB.'); return; }
     setAvatarUploading(true);
     try {
       const fd = new FormData();
@@ -149,7 +149,7 @@ export default function ProfilePage() {
   const card = { background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}`, boxShadow: t.shadowSm };
   const lbl = { display: 'block', fontSize: 13, fontWeight: 700, color: t.ink, marginBottom: 7 };
   const field = { width: '100%', fontFamily: 'inherit', fontSize: 14.5, color: t.ink, background: '#fff', border: `1.5px solid ${t.borderStrong}`, borderRadius: 12, padding: '10px 14px', outline: 'none', boxSizing: 'border-box' };
-  const smallBtn = { display: 'flex', alignItems: 'center', gap: 6, fontSize: 13.5, fontWeight: 700, padding: '9px 16px', borderRadius: t.pill, cursor: 'pointer', fontFamily: 'inherit' };
+  const smallBtn = { display: 'flex', alignItems: 'center', gap: 6, fontSize: 13.5, fontWeight: 700, padding: '9px 16px', borderRadius: t.radius, cursor: 'pointer', fontFamily: 'inherit' };
   const infoBox = { padding: '14px 16px', background: t.cream, borderRadius: 14 };
 
   return (
@@ -163,11 +163,11 @@ export default function ProfilePage() {
                 {user?.photoURL ? (
                   <img src={user.photoURL} alt="" style={{ width: 68, height: 68, borderRadius: 22, objectFit: 'cover' }} />
                 ) : (
-                  <div style={{ width: 68, height: 68, borderRadius: 22, background: `linear-gradient(135deg, ${t.coral}, ${t.honey})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 28 }}>
+                  <div style={{ width: 68, height: 68, borderRadius: 22, background: t.navy, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 28 }}>
                     {user?.name?.[0]?.toUpperCase()}
                   </div>
                 )}
-                <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }} onChange={handleAvatarChange} />
+                <input ref={avatarInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
                 <button onClick={() => avatarInputRef.current?.click()} disabled={avatarUploading} aria-label="Change photo"
                   style={{ position: 'absolute', bottom: -4, right: -4, width: 28, height: 28, borderRadius: '50%', background: t.navy, border: '2px solid #fff', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: avatarUploading ? 'wait' : 'pointer' }}>
                   <Camera size={14} />
@@ -308,15 +308,15 @@ export default function ProfilePage() {
                   <ListingCard listing={l} />
                   <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                     <Link to={`/listings/${l.id}/edit`}
-                      style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, textDecoration: 'none', background: '#fff', border: `1.5px solid ${t.borderStrong}`, color: t.ink, borderRadius: t.pill, padding: '8px 10px', fontSize: 13, fontWeight: 700 }}>
+                      style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, textDecoration: 'none', background: '#fff', border: `1.5px solid ${t.borderStrong}`, color: t.ink, borderRadius: t.radius, padding: '8px 10px', fontSize: 13, fontWeight: 700 }}>
                       <Pencil size={14} /> Edit
                     </Link>
                     <button onClick={() => toggleListingStatus(l.id, l.status)}
-                      style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, background: l.status === 'taken' ? t.sageTint : t.honeyTint, border: 'none', color: l.status === 'taken' ? t.sage : '#A87C33', borderRadius: t.pill, padding: '8px 10px', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                      style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, background: l.status === 'taken' ? t.sageTint : t.honeyTint, border: 'none', color: l.status === 'taken' ? t.sage : '#A87C33', borderRadius: t.radius, padding: '8px 10px', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
                       {l.status === 'taken' ? 'Available' : 'Mark taken'}
                     </button>
                     <button onClick={() => removeListing(l.id)} aria-label="Remove listing"
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', border: '1.5px solid #fecaca', color: '#dc2626', borderRadius: t.pill, padding: '8px 12px', cursor: 'pointer' }}>
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', border: '1.5px solid #fecaca', color: '#dc2626', borderRadius: t.radius, padding: '8px 12px', cursor: 'pointer' }}>
                       <Trash2 size={15} />
                     </button>
                   </div>
@@ -338,7 +338,7 @@ export default function ProfilePage() {
 
           {!showDelete ? (
             <button onClick={() => setShowDelete(true)}
-              style={{ background: '#fff', border: '1.5px solid #dc2626', color: '#dc2626', borderRadius: t.pill, padding: '10px 20px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+              style={{ background: '#fff', border: '1.5px solid #dc2626', color: '#dc2626', borderRadius: t.radius, padding: '10px 20px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
               Delete my account
             </button>
           ) : (
@@ -358,11 +358,11 @@ export default function ProfilePage() {
                 style={{ ...field, marginBottom: 14 }} />
               <div style={{ display: 'flex', gap: 10 }}>
                 <button onClick={handleDeleteAccount} disabled={delBusy}
-                  style={{ background: '#dc2626', border: 'none', color: '#fff', borderRadius: t.pill, padding: '10px 20px', fontSize: 14, fontWeight: 700, cursor: delBusy ? 'not-allowed' : 'pointer', opacity: delBusy ? 0.6 : 1, fontFamily: 'inherit' }}>
+                  style={{ background: '#dc2626', border: 'none', color: '#fff', borderRadius: t.radius, padding: '10px 20px', fontSize: 14, fontWeight: 700, cursor: delBusy ? 'not-allowed' : 'pointer', opacity: delBusy ? 0.6 : 1, fontFamily: 'inherit' }}>
                   {delBusy ? 'Deleting…' : 'Permanently delete'}
                 </button>
                 <button onClick={() => { setShowDelete(false); setDelError(''); setDelConfirm(''); setDelPassword(''); }} disabled={delBusy}
-                  style={{ background: '#fff', border: `1.5px solid ${t.borderStrong}`, color: t.inkSoft, borderRadius: t.pill, padding: '10px 20px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                  style={{ background: '#fff', border: `1.5px solid ${t.borderStrong}`, color: t.inkSoft, borderRadius: t.radius, padding: '10px 20px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
                   Cancel
                 </button>
               </div>

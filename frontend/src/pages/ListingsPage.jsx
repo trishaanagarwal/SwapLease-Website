@@ -73,20 +73,18 @@ export default function ListingsPage() {
   return (
     <div style={{ minHeight: '100vh', background: t.cream }}>
 
-      <div style={{ position: 'relative', overflow: 'hidden', background: t.ink, padding: '46px 22px 30px' }}>
-        <div className="blob" style={{ width: 360, height: 360, background: t.navy, top: -150, left: -60, opacity: 0.55 }} />
-        <div className="blob" style={{ width: 320, height: 320, background: t.green, top: -120, right: -80, opacity: 0.5 }} />
-        <div style={{ maxWidth: 1200, margin: '0 auto', position: 'relative' }}>
-          <h1 className="font-display" style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 800, color: '#fff', margin: '0 0 6px' }}>Browse student leases</h1>
-          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 15, margin: '0 0 22px' }}>Find your next home across Melbourne, direct from students.</p>
-          <form onSubmit={e => { e.preventDefault(); setSearch(searchInput); }} style={{ display: 'flex', gap: 8, maxWidth: 600, background: '#fff', borderRadius: t.pill, padding: 6, boxShadow: t.shadow }}>
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, paddingLeft: 14 }}>
+      <div style={{ background: '#fff', borderBottom: `1px solid ${t.border}`, padding: '34px 22px 26px' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <h1 className="font-display" style={{ fontSize: 'clamp(26px, 4vw, 36px)', fontWeight: 600, color: t.ink, margin: '0 0 6px' }}>Browse student leases</h1>
+          <p style={{ color: t.inkSoft, fontSize: 15, margin: '0 0 20px' }}>Find your next home across Melbourne, direct from students.</p>
+          <form onSubmit={e => { e.preventDefault(); setSearch(searchInput); }} style={{ display: 'flex', gap: 8, maxWidth: 600 }}>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, paddingLeft: 14, background: '#fff', border: `1.5px solid ${t.borderStrong}`, borderRadius: t.radius }}>
               <Search size={18} color={t.inkFaint} />
               <input type="text" placeholder="Search suburb, street or university…"
                 value={searchInput} onChange={e => setSearchInput(e.target.value)}
-                style={{ flex: 1, border: 'none', outline: 'none', padding: '9px 4px', fontSize: 14.5, background: 'transparent', color: t.ink, fontFamily: 'inherit' }} />
+                style={{ flex: 1, border: 'none', outline: 'none', padding: '10px 4px', fontSize: 14.5, background: 'transparent', color: t.ink, fontFamily: 'inherit' }} />
             </div>
-            <button type="submit" className="btn btn-coral" style={{ padding: '9px 24px', fontSize: 14.5 }}>Search</button>
+            <button type="submit" className="btn btn-coral" style={{ padding: '10px 24px', fontSize: 14.5 }}>Search</button>
           </form>
         </div>
       </div>
@@ -145,7 +143,7 @@ export default function ListingsPage() {
 
           {(type || furnished || maxRent < 2000 || minBeds > 0 || search) && (
             <button onClick={clearAll}
-              style={{ marginTop: 16, background: 'none', border: `1.5px solid ${t.borderStrong}`, borderRadius: t.pill, padding: '8px 14px', fontSize: 13, color: t.inkSoft, cursor: 'pointer', width: '100%', fontWeight: 600, fontFamily: 'inherit' }}>
+              style={{ marginTop: 16, background: 'none', border: `1.5px solid ${t.borderStrong}`, borderRadius: t.radius, padding: '8px 14px', fontSize: 13, color: t.inkSoft, cursor: 'pointer', width: '100%', fontWeight: 600, fontFamily: 'inherit' }}>
               Clear filters
             </button>
           )}
@@ -155,7 +153,7 @@ export default function ListingsPage() {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 18 }}>
             {SUBURBS.map(s => (
               <button key={s} onClick={() => { setSearch(s); setSearchInput(s); }}
-                style={{ background: search === s ? t.coral : '#fff', color: search === s ? '#fff' : t.inkSoft, border: `1.5px solid ${search === s ? t.coral : t.border}`, borderRadius: t.pill, padding: '6px 15px', fontSize: 13, cursor: 'pointer', fontWeight: search === s ? 700 : 600, fontFamily: 'inherit' }}>
+                style={{ background: search === s ? t.coral : '#fff', color: search === s ? '#fff' : t.inkSoft, border: `1.5px solid ${search === s ? t.coral : t.border}`, borderRadius: t.radius, padding: '6px 15px', fontSize: 13, cursor: 'pointer', fontWeight: search === s ? 700 : 600, fontFamily: 'inherit' }}>
                 {s}
               </button>
             ))}

@@ -30,14 +30,12 @@ export default function SavedPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: t.cream }}>
-      <div style={{ position: 'relative', overflow: 'hidden', background: t.ink, padding: '46px 22px 34px' }}>
-        <div className="blob" style={{ width: 340, height: 340, background: t.navy, top: -150, left: -60, opacity: 0.55 }} />
-        <div className="blob" style={{ width: 300, height: 300, background: t.green, top: -120, right: -80, opacity: 0.5 }} />
-        <div style={{ maxWidth: 1200, margin: '0 auto', position: 'relative', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Bookmark size={26} color={t.gold} fill={t.gold} />
+      <div style={{ background: '#fff', borderBottom: `1px solid ${t.border}`, padding: '34px 22px 26px' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Bookmark size={24} color={t.navy} />
           <div>
-            <h1 className="font-display" style={{ fontSize: 'clamp(26px, 4vw, 36px)', fontWeight: 800, color: '#fff', margin: 0 }}>Saved listings</h1>
-            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 15, margin: '4px 0 0' }}>Listings you've bookmarked for later</p>
+            <h1 className="font-display" style={{ fontSize: 'clamp(24px, 4vw, 32px)', fontWeight: 600, color: t.ink, margin: 0 }}>Saved listings</h1>
+            <p style={{ color: t.inkSoft, fontSize: 15, margin: '4px 0 0' }}>Listings you've bookmarked for later</p>
           </div>
         </div>
       </div>

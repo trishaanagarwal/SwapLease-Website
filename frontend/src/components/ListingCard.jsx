@@ -5,11 +5,11 @@ import BookmarkButton from './BookmarkButton';
 
 const ico = { display: 'inline-flex', alignItems: 'center', gap: 5 };
 
-const chip = (bg, color) => ({ fontSize: 11.5, fontWeight: 700, color, background: bg, borderRadius: t.pill, padding: '3px 11px', display: 'inline-block' });
+const chip = (bg, color) => ({ fontSize: 11.5, fontWeight: 700, color, background: bg, borderRadius: t.radiusSm, padding: '3px 9px', display: 'inline-block' });
 
 function NoPhoto() {
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, background: `linear-gradient(135deg, ${t.creamDeep}, #E8EDF6)`, color: t.inkFaint }}>
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, background: t.creamDeep, color: t.inkFaint }}>
       <ImageOff size={28} />
       <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.02em' }}>No photo yet</span>
     </div>
@@ -19,7 +19,7 @@ function NoPhoto() {
 function TakenTag() {
   return (
     <div style={{ position: 'absolute', inset: 0, background: 'rgba(22,34,59,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <span style={{ background: '#fff', color: t.ink, fontWeight: 800, fontSize: 13, padding: '7px 16px', borderRadius: t.pill, letterSpacing: '0.02em' }}>Taken</span>
+      <span style={{ background: '#fff', color: t.ink, fontWeight: 800, fontSize: 13, padding: '7px 16px', borderRadius: t.radiusSm, letterSpacing: '0.02em' }}>Taken</span>
     </div>
   );
 }
@@ -90,11 +90,11 @@ export default function ListingCard({ listing, horizontal = false }) {
             <img src={image} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : <NoPhoto />}
           {taken && <TakenTag />}
-          <div style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(4px)', borderRadius: t.pill, padding: '4px 12px', fontSize: 11.5, fontWeight: 700, color: t.ink }}>
+          <div style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(4px)', borderRadius: t.radiusSm, padding: '4px 10px', fontSize: 11.5, fontWeight: 700, color: t.ink }}>
             {typeLabels[listing.type] || listing.type}
           </div>
           {listing.furnished && (
-            <div style={{ position: 'absolute', bottom: 12, left: 12, background: t.sage, borderRadius: t.pill, padding: '4px 12px', fontSize: 11.5, fontWeight: 700, color: '#fff' }}>Furnished</div>
+            <div style={{ position: 'absolute', bottom: 12, left: 12, background: t.sage, borderRadius: t.radiusSm, padding: '4px 10px', fontSize: 11.5, fontWeight: 700, color: '#fff' }}>Furnished</div>
           )}
           <div style={{ position: 'absolute', top: 12, right: 12 }}><BookmarkButton listingId={listing.id} /></div>
         </div>

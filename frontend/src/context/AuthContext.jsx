@@ -54,7 +54,7 @@ async function syncEmail(firebaseUser, data) {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [pendingVerification, setPendingVerification] = useState(null); // { email, password }
+  const [pendingVerification] = useState(null); // retained for VerifyEmailPage compatibility
 
   useEffect(() => {
     // Complete any pending redirect-based social sign-in (popup fallback).
