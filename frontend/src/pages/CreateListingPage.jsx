@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { collection, addDoc, updateDoc, getDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -7,84 +7,6 @@ import { UNIVERSITIES } from '../constants';
 
 const CLOUDINARY_CLOUD = 'deewvfzpl';
 const CLOUDINARY_PRESET = 'slease';
-
-// ── Address Autocomplete using Photon (Komoot), free, CORS-friendly, no API key ──
-function AddressAutocomplete({ value, onChange, onSelect }) {
-  const [suggestions, setSuggestions] = useState([]);
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const debounceRef = useRef(null);
-  const wrapperRef = useRef(null);
-
-  useEffect(() => {
-    const handler = (e) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
-
-  const fetchSuggestions = useCallback((q) => {
-    if (q.trim().length < 3) { setSuggestions([]); setOpen(false); return; }
-    clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(async () => {
-      setLoading(true);
-      try {
-        // Bias results around Melbourne CBD; filter to Australian Victoria results.
-        const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lat=-37.8136&lon=144.9631&limit=8&lang=en`;
-        const res = await fetch(url);
-        const data = await res.json();
-        const feats = (data.features || []).filter(f => {
-          const p = f.properties || {};
-          return p.countrycode === 'AU' && (p.state === 'Victoria' || /victoria/i.test(p.state || ''));
-        });
-        setSuggestions(feats);
-        setOpen(feats.length > 0);
-      } catch { setSuggestions([]); setOpen(false); }
-      finally { setLoading(false); }
-    }, 300);
-  }, []);
-
-  const handleSelect = (item) => {
-    const p = item.properties || {};
-    const streetAddr = [p.housenumber, p.street || p.name].filter(Boolean).join(' ') || p.name || '';
-    const suburb = p.district || p.suburb || p.locality || p.city || '';
-    const city = p.city || p.county || '';
-    onSelect({ address: streetAddr, suburb, city, state: p.state || '' });
-    setOpen(false); setSuggestions([]);
-  };
-
-  const formatLabel = (item) => {
-    const p = item.properties || {};
-    return [[p.housenumber, p.street || p.name].filter(Boolean).join(' '), p.district || p.suburb || '', p.city || '', p.postcode || '']
-      .filter(Boolean).join(', ');
-  };
-
-  return (
-    <div ref={wrapperRef} style={{ position: 'relative' }}>
-      <input type="text" value={value} onChange={e => { onChange(e.target.value); fetchSuggestions(e.target.value); }}
-        onFocus={() => suggestions.length > 0 && setOpen(true)}
-        placeholder="Start typing an address, e.g. 45 Swanston St..."
-        style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 8, padding: '10px 14px', fontSize: 14, color: '#111', outline: 'none', boxSizing: 'border-box' }}
-        autoComplete="off" />
-      {loading && <div style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 11, color: '#9ca3af' }}>Searching…</div>}
-      {open && suggestions.length > 0 && (
-        <ul style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, boxShadow: '0 4px 20px rgba(0,0,0,0.12)', zIndex: 100, margin: 0, padding: 0, listStyle: 'none', maxHeight: 280, overflowY: 'auto' }}>
-          {suggestions.map((item, i) => (
-            <li key={item.place_id || i} onMouseDown={() => handleSelect(item)}
-              style={{ padding: '10px 14px', cursor: 'pointer', fontSize: 13, color: '#111', borderBottom: i < suggestions.length - 1 ? '1px solid #f3f4f6' : 'none', display: 'flex', alignItems: 'flex-start', gap: 8 }}
-              onMouseEnter={e => e.currentTarget.style.background = '#E8EDF6'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-              <span style={{ flexShrink: 0 }}>📍</span>
-              <span style={{ lineHeight: 1.4 }}>{formatLabel(item)}</span>
-            </li>
-          ))}
-          <li style={{ padding: '6px 14px', fontSize: 11, color: '#9ca3af', borderTop: '1px solid #f3f4f6' }}>Powered by OpenStreetMap</li>
-        </ul>
-      )}
-    </div>
-  );
-}
 
 function Counter({ value, onChange, min = 1, max = 20 }) {
   return (
@@ -262,10 +184,10 @@ export default function CreateListingPage() {
 
           <Section title="Location">
             <div style={{ marginBottom: 16 }}>
-              <label style={labelStyle}>Search address</label>
-              <AddressAutocomplete value={form.address} onChange={(val) => set('address', val)}
-                onSelect={({ address, suburb, city, state }) => setForm(f => ({ ...f, address, suburb, city: city || f.city, state: state || f.state }))} />
-              <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 5 }}>Start typing, Australian addresses will appear as suggestions</div>
+              <label style={labelStyle}>Street address</label>
+              <input value={form.address} onChange={e => set('address', e.target.value)}
+                placeholder="e.g. 581 Swanston Street" style={inputStyle}
+                onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#d1d5db'} />
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
               <div>
