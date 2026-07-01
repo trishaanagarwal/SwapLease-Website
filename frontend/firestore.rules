@@ -79,6 +79,17 @@ service cloud.firestore {
       allow delete: if signedIn() && resource.data.userId == request.auth.uid;
     }
 
+    // ---------- seekers (roommate posts, one per user, doc id = uid) ----------
+    match /seekers/{userId} {
+      allow read: if true;
+      allow write: if verified() && request.auth.uid == userId
+        && request.resource.data.userId == userId
+        && strLen(request.resource.data.about, 1, 2000)
+        && request.resource.data.images is list
+        && request.resource.data.images.size() <= 4;
+      allow delete: if isOwner(userId);
+    }
+
     // ---------- reports ----------
     // Signed-in users can file a report; only admins read them (via console).
     match /reports/{reportId} {

@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, User, LogOut, ChevronDown, Plus, Bookmark } from 'lucide-react';
+import { MessageCircle, User, LogOut, ChevronDown, Plus, Bookmark, Users } from 'lucide-react';
 import logoMark from '../assets/logo-mark.png';
 import { t } from '../theme';
 
@@ -42,14 +42,12 @@ export default function Navbar() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <Link to="/listings" className="nav-hide-sm" style={navLink}>Browse leases</Link>
+          <Link to="/roommates" className="nav-hide-sm" style={navLink}>Roommates</Link>
 
           {user ? (
             <>
               <Link to="/create-listing" className="btn btn-coral" style={{ fontSize: 14, padding: '9px 16px', marginLeft: 4 }}>
                 <Plus size={16} strokeWidth={2.4} /> <span className="nav-hide-xs">List your lease</span>
-              </Link>
-              <Link to="/saved" className="nav-hide-sm" style={{ ...navLink, display: 'flex', alignItems: 'center', gap: 5 }}>
-                <Bookmark size={17} /> Saved
               </Link>
               <Link to="/messages" className="nav-hide-sm" style={{ ...navLink, display: 'flex', alignItems: 'center', gap: 5 }}>
                 <MessageCircle size={17} /> Messages
@@ -69,22 +67,45 @@ export default function Navbar() {
                   <ChevronDown size={15} color={t.inkSoft} />
                 </button>
                 {dropdownOpen && (
-                  <div style={{ position: 'absolute', right: 0, top: 'calc(100% + 10px)', background: '#fff', border: `1px solid ${t.border}`, borderRadius: 18, boxShadow: t.shadowLg, minWidth: 210, zIndex: 100, overflow: 'hidden' }}>
-                    <div style={{ padding: '15px 18px', background: t.cream, borderBottom: `1px solid ${t.border}` }}>
-                      <div style={{ fontWeight: 800, fontSize: 14.5, color: t.ink }}>{user.name}</div>
-                      <div style={{ fontSize: 12.5, color: t.inkSoft, marginTop: 2 }}>{user.email}</div>
+                  <div style={{ position: 'absolute', right: 0, top: 'calc(100% + 10px)', background: '#fff', border: `1px solid ${t.border}`, borderRadius: t.radiusLg, boxShadow: t.shadowLg, minWidth: 250, zIndex: 100, overflow: 'hidden', padding: 6 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '12px 12px 14px' }}>
+                      {user.photoURL ? (
+                        <img src={user.photoURL} alt="" style={{ width: 42, height: 42, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                      ) : (
+                        <div style={{ width: 42, height: 42, borderRadius: '50%', background: t.navy, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 17, flexShrink: 0 }}>
+                          {user.name?.[0]?.toUpperCase()}
+                        </div>
+                      )}
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontWeight: 700, fontSize: 14.5, color: t.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.name}</div>
+                        <div style={{ fontSize: 12.5, color: t.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+                      </div>
                     </div>
-                    <Link to="/profile" onClick={() => setDropdownOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 18px', textDecoration: 'none', color: t.ink, fontSize: 14.5, fontWeight: 600 }}>
-                      <User size={16} /> My Profile
-                    </Link>
-                    <Link to="/saved" onClick={() => setDropdownOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 18px', textDecoration: 'none', color: t.ink, fontSize: 14.5, fontWeight: 600 }}>
-                      <Bookmark size={16} /> Saved listings
-                    </Link>
-                    <Link to="/messages" onClick={() => setDropdownOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 18px', textDecoration: 'none', color: t.ink, fontSize: 14.5, fontWeight: 600 }}>
-                      <MessageCircle size={16} /> Messages
-                    </Link>
-                    <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 18px', width: '100%', background: 'none', border: 'none', cursor: 'pointer', color: t.coralDeep, fontSize: 14.5, fontWeight: 700, borderTop: `1px solid ${t.border}` }}>
-                      <LogOut size={16} /> Sign out
+                    {!user.emailVerified && (
+                      <div style={{ margin: '0 6px 6px', padding: '8px 10px', background: t.honeyTint, borderRadius: t.radius, fontSize: 12, color: '#8a6a1f', fontWeight: 600 }}>
+                        Verify your email to list or message.
+                      </div>
+                    )}
+                    <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 6 }}>
+                      {[
+                        { to: '/profile', icon: User, label: 'My profile' },
+                        { to: '/roommates/edit', icon: Users, label: 'My roommate post' },
+                        { to: '/saved', icon: Bookmark, label: 'Saved listings' },
+                        { to: '/messages', icon: MessageCircle, label: 'Messages' },
+                      ].map(item => (
+                        <Link key={item.to} to={item.to} onClick={() => setDropdownOpen(false)}
+                          onMouseEnter={e => e.currentTarget.style.background = t.cream}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                          style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '10px 12px', textDecoration: 'none', color: t.ink, fontSize: 14, fontWeight: 600, borderRadius: t.radius }}>
+                          <item.icon size={17} color={t.inkSoft} /> {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                    <button onClick={handleLogout}
+                      onMouseEnter={e => e.currentTarget.style.background = t.coralTint}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '10px 12px', width: '100%', background: 'none', border: 'none', cursor: 'pointer', color: t.coralDeep, fontSize: 14, fontWeight: 700, borderRadius: t.radius, marginTop: 4, borderTop: `1px solid ${t.border}` }}>
+                      <LogOut size={17} /> Sign out
                     </button>
                   </div>
                 )}

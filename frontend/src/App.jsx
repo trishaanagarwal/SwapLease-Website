@@ -1,11 +1,14 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import RequireVerified from './components/RequireVerified';
 import NotFoundPage from './pages/NotFoundPage';
 import HomePage from './pages/HomePage';
+import LandingPage from './pages/LandingPage';
+import SeekersPage from './pages/SeekersPage';
+import EditSeekerPage from './pages/EditSeekerPage';
 import ListingsPage from './pages/ListingsPage';
 import ListingDetailPage from './pages/ListingDetailPage';
 import CreateListingPage from './pages/CreateListingPage';
@@ -27,6 +30,13 @@ function Layout({ children }) {
   );
 }
 
+// Logged-out visitors get the marketing landing page; members get their home.
+function HomeRoute() {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  return user ? <HomePage /> : <LandingPage />;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -38,7 +48,13 @@ export default function App() {
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/terms" element={<Layout><TermsPage /></Layout>} />
           <Route path="/privacy" element={<Layout><PrivacyPage /></Layout>} />
-          <Route path="/" element={<Layout><HomePage /></Layout>} />
+          <Route path="/" element={<Layout><HomeRoute /></Layout>} />
+          <Route path="/roommates" element={<Layout><SeekersPage /></Layout>} />
+          <Route path="/roommates/edit" element={
+            <Layout>
+              <ProtectedRoute><RequireVerified action="post a roommate profile"><EditSeekerPage /></RequireVerified></ProtectedRoute>
+            </Layout>
+          } />
           <Route path="/listings" element={<Layout><ListingsPage /></Layout>} />
           <Route path="/listings/:id" element={<Layout><ListingDetailPage /></Layout>} />
           <Route path="/create-listing" element={
