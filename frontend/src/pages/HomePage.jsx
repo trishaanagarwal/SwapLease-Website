@@ -43,7 +43,7 @@ export default function HomePage() {
           </h1>
 
           <p style={{ fontSize: 'clamp(16px, 2.4vw, 18.5px)', color: t.inkSoft, margin: '0 0 30px', lineHeight: 1.65, maxWidth: 560, fontWeight: 500 }}>
-            Melbourne's marketplace for student lease transfers. List in minutes, browse verified homes, and swap directly — no agents, no fees.
+            The easiest way for Melbourne students to take over or pass on a lease. List your place in minutes, message other students directly, and skip the agents and fees.
           </p>
 
           <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, maxWidth: 540, marginBottom: 18 }}>
@@ -113,9 +113,9 @@ export default function HomePage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
             {[
-              { n: '01', icon: FileText, title: 'List your lease', desc: 'Post your place in minutes — photos, rent, dates and your nearby uni.' },
-              { n: '02', icon: Search, title: 'Browse & filter', desc: 'Search by suburb, price or property type to find your perfect home.' },
-              { n: '03', icon: MessageCircle, title: 'Message & swap', desc: 'Chat directly, arrange an inspection and transfer the lease.' },
+              { n: '01', icon: FileText, title: 'List your lease', desc: 'Add your photos, rent, dates and nearby uni. It only takes a few minutes.' },
+              { n: '02', icon: Search, title: 'Browse & filter', desc: 'Search by suburb, price or property type until you find a place that fits.' },
+              { n: '03', icon: MessageCircle, title: 'Message & swap', desc: 'Chat directly, sort out an inspection, and take over the lease.' },
             ].map((step) => (
               <div key={step.n} style={{ background: '#fff', borderRadius: t.radiusLg, padding: '26px 24px', border: `1px solid ${t.border}` }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -128,7 +128,7 @@ export default function HomePage() {
             ))}
           </div>
           <div style={{ marginTop: 36 }}>
-            <Link to="/signup" className="btn btn-coral" style={{ padding: '13px 30px', fontSize: 15 }}>Get started — it's free <ArrowRight size={17} /></Link>
+            <Link to="/signup" className="btn btn-coral" style={{ padding: '13px 30px', fontSize: 15 }}>Get started for free <ArrowRight size={17} /></Link>
           </div>
         </div>
       </section>

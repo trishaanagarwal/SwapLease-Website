@@ -30,7 +30,7 @@ export default function SocialAuth({ label = 'Continue' }) {
       } else if (err.code === 'auth/unauthorized-domain') {
         setError('This site is not authorised for Google sign-in yet.');
       } else {
-        // Any other failure (commonly a popup blocked by Brave/Safari) —
+        // Any other failure (commonly a popup blocked by Brave/Safari):
         // fall back to a full-page redirect, which browsers don't block.
         try {
           await socialLoginRedirect(provider);

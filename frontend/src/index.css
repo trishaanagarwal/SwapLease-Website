@@ -33,7 +33,7 @@
   --shadow: 0 4px 16px rgba(16, 28, 56, 0.07);
   --shadow-lg: 0 10px 30px rgba(16, 28, 56, 0.10);
 
-  /* Restrained radii — corners are softened, not pill-rounded */
+  /* Restrained radii, corners are softened, not pill-rounded */
   --radius-sm: 6px;
   --radius: 8px;
   --radius-lg: 12px;
@@ -69,7 +69,7 @@ img { display: block; max-width: 100%; }
 .grad-text { color: var(--navy); }
 .gold-text { color: var(--gold); }
 
-/* Buttons — flat fills, gently softened corners */
+/* Buttons, flat fills, gently softened corners */
 .btn {
   font-family: inherit;
   font-weight: 700;
@@ -136,7 +136,7 @@ img { display: block; max-width: 100%; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Loading skeleton — soft solid pulse (no gradient) */
+/* Loading skeleton, soft solid pulse (no gradient) */
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
 .skeleton { background: #ECE8DF; animation: pulse 1.3s ease-in-out infinite; }
 

@@ -37,9 +37,9 @@ export default function RequireVerified({ children, action = 'do this' }) {
           Can’t find it? Please check your spam or junk folder.
         </p>
 
-        {status === 'sent' && <div style={{ color: t.sage, fontWeight: 700, fontSize: 14, marginBottom: 16 }}>✓ Verification email sent — check your inbox and spam.</div>}
-        {status === 'error' && <div style={{ color: t.coralDeep, fontWeight: 700, fontSize: 14, marginBottom: 16 }}>Couldn’t send right now. Try again in a moment.</div>}
-        {status === 'still' && <div style={{ color: t.coralDeep, fontWeight: 700, fontSize: 14, marginBottom: 16 }}>Not verified yet — click the link in your email, then try again.</div>}
+        {status === 'sent' && <div style={{ color: t.sage, fontWeight: 700, fontSize: 14, marginBottom: 16 }}>Sent! Check your inbox, and your spam folder too.</div>}
+        {status === 'error' && <div style={{ color: t.coralDeep, fontWeight: 700, fontSize: 14, marginBottom: 16 }}>Couldn’t send that right now. Give it a moment and try again.</div>}
+        {status === 'still' && <div style={{ color: t.coralDeep, fontWeight: 700, fontSize: 14, marginBottom: 16 }}>Still not verified. Click the link in your email, then try again.</div>}
 
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
           <button onClick={recheck} disabled={checking} className="btn btn-coral" style={{ padding: '12px 24px', fontSize: 15 }}>

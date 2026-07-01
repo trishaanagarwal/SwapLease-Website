@@ -192,17 +192,17 @@ export function AuthProvider({ children }) {
     const u = auth.currentUser;
     if (!u) throw new Error('Not signed in.');
     const providerId = u.providerData[0]?.providerId || 'password';
-    // Step 1 — verify identity (re-authenticate).
+    // Step 1, verify identity (re-authenticate).
     if (providerId === 'password') {
       const cred = EmailAuthProvider.credential(u.email, password);
       await reauthenticateWithCredential(u, cred);
     } else {
       await reauthenticateWithPopup(u, makeProvider(providerId.includes('facebook') ? 'facebook' : 'google'));
     }
-    // Step 2 — delete the user's own listings.
+    // Step 2, delete the user's own listings.
     const snap = await getDocs(query(collection(db, 'listings'), where('userId', '==', u.uid)));
     await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
-    // Step 3 — delete the profile doc, then the Auth account.
+    // Step 3, delete the profile doc, then the Auth account.
     await deleteDoc(doc(db, 'users', u.uid));
     await deleteUser(u);
     setUser(null);

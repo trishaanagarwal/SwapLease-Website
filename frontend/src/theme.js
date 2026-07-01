@@ -1,4 +1,4 @@
-// Shared design tokens (flat, restrained — no gradients, gently softened corners).
+// Shared design tokens (flat, restrained, no gradients, gently softened corners).
 // Token NAMES are kept stable so existing pages recolor automatically.
 export const t = {
   cream: '#F8F6F1',

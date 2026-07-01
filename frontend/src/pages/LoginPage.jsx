@@ -29,7 +29,7 @@ export default function LoginPage() {
       await resetPassword(addr);
       setResetMsg(`If an account exists for ${addr}, a password-reset link has been sent. Check your inbox (and spam).`);
     } catch {
-      // Don't reveal whether the email exists — show the same neutral message.
+      // Don't reveal whether the email exists, show the same neutral message.
       setResetMsg(`If an account exists for ${addr}, a password-reset link has been sent. Check your inbox (and spam).`);
     }
   };
