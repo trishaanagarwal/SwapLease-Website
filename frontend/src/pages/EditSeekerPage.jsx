@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { doc, getDoc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import DOMPurify from 'dompurify';
 import { X } from 'lucide-react';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import { t } from '../theme';
 
@@ -15,7 +15,7 @@ export default function EditSeekerPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const fileRef = useRef(null);
-  const [form, setForm] = useState({ about: '', budget: '', areas: '', moveIn: '', images: [] });
+  const [form, setForm] = useState({ about: '', budget: '', areas: '', moveInFrom: '', moveInTo: '', images: [] });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -28,7 +28,7 @@ export default function EditSeekerPage() {
     getDoc(doc(db, 'seekers', user.id)).then(s => {
       if (s.exists()) {
         const d = s.data();
-        setForm({ about: d.about || '', budget: d.budget ?? '', areas: d.areas || '', moveIn: d.moveIn || '', images: d.images || [] });
+        setForm({ about: d.about || '', budget: d.budget ?? '', areas: d.areas || '', moveInFrom: d.moveInFrom || '', moveInTo: d.moveInTo || '', images: d.images || [] });
       }
     }).finally(() => setLoading(false));
   }, [user]);
@@ -57,25 +57,54 @@ export default function EditSeekerPage() {
     finally { setUploading(false); e.target.value = ''; }
   };
 
+  // Turn the two date fields into a friendly display string for the board.
+  const fmtDate = (iso) => iso ? new Date(iso + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+  const moveInDisplay = () => {
+    if (!form.moveInFrom) return '';
+    if (form.moveInTo) return `${fmtDate(form.moveInFrom)} – ${fmtDate(form.moveInTo)}`;
+    return `From ${fmtDate(form.moveInFrom)}`;
+  };
+
   const save = async () => {
     setError('');
     if (!clean(form.about)) { setError('Please write a short bit about yourself.'); return; }
+    if (form.moveInFrom && form.moveInTo && form.moveInTo < form.moveInFrom) {
+      setError('The "until" date can\'t be before the "from" date.'); return;
+    }
     setSaving(true);
+    const payload = {
+      userId: user.id,
+      userName: user.name,
+      userPhotoURL: user.photoURL || '',
+      about: clean(form.about),
+      budget: form.budget ? Number(form.budget) : null,
+      areas: clean(form.areas),
+      moveIn: moveInDisplay(),
+      moveInFrom: form.moveInFrom || '',
+      moveInTo: form.moveInTo || '',
+      images: form.images.slice(0, 4),
+      updatedAt: serverTimestamp(),
+    };
+    const write = () => setDoc(doc(db, 'seekers', user.id), payload);
     try {
-      await setDoc(doc(db, 'seekers', user.id), {
-        userId: user.id,
-        userName: user.name,
-        userPhotoURL: user.photoURL || '',
-        about: clean(form.about),
-        budget: form.budget ? Number(form.budget) : null,
-        areas: clean(form.areas),
-        moveIn: clean(form.moveIn),
-        images: form.images.slice(0, 4),
-        updatedAt: serverTimestamp(),
-      });
+      await write();
       navigate('/roommates');
-    } catch {
-      setError('Could not save. Please try again.');
+    } catch (e) {
+      // A just-verified account can still carry a stale token that says
+      // "unverified", which the security rules reject. Force a fresh token
+      // and try once more before giving up.
+      if (e?.code === 'permission-denied' && auth.currentUser) {
+        try {
+          await auth.currentUser.getIdToken(true);
+          await write();
+          return navigate('/roommates');
+        } catch (e2) {
+          setError(`Could not save (${e2?.code || 'error'}). If you just verified your email, please sign out and back in, then try again.`);
+          setSaving(false);
+          return;
+        }
+      }
+      setError(`Could not save (${e?.code || 'error'}). Please try again.`);
       setSaving(false);
     }
   };
@@ -116,9 +145,15 @@ export default function EditSeekerPage() {
               <input value={form.areas} onChange={e => set('areas', e.target.value)} placeholder="e.g. Carlton, Parkville" style={input} />
             </div>
           </div>
-          <div style={{ marginBottom: 20 }}>
-            <label style={label}>Move-in timing</label>
-            <input value={form.moveIn} onChange={e => set('moveIn', e.target.value)} placeholder="e.g. From July, flexible" style={input} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
+            <div>
+              <label style={label}>Available from</label>
+              <input type="date" value={form.moveInFrom} onChange={e => set('moveInFrom', e.target.value)} style={input} />
+            </div>
+            <div>
+              <label style={label}>Until (optional)</label>
+              <input type="date" value={form.moveInTo} min={form.moveInFrom || undefined} onChange={e => set('moveInTo', e.target.value)} style={input} />
+            </div>
           </div>
 
           <label style={label}>Photos ({form.images.length}/4)</label>
