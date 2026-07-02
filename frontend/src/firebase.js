@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 // Trim every value so a stray space in an env var can't corrupt the config
@@ -18,5 +18,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+// Auto-detect when the default streaming transport is blocked (common on
+// mobile networks, VPNs and some ad-blockers) and fall back to long-polling,
+// so reads/writes don't hang forever on phones. Safe on desktop too.
+export const db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
 export const storage = getStorage(app);
