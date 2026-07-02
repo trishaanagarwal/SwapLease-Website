@@ -43,7 +43,7 @@ export default function LandingPage() {
           </h1>
 
           <p style={{ fontSize: 'clamp(16px, 2.4vw, 18.5px)', color: t.inkSoft, margin: '0 0 30px', lineHeight: 1.65, maxWidth: 560, fontWeight: 500 }}>
-            The easiest way for Melbourne students to take over or pass on a lease, and to find a roommate. List your place in minutes, message other students directly, and skip the agents and fees.
+            The easiest way for Melbourne students to take over or pass on a lease. List your place in minutes, post what you're looking for, and message other students directly, no agents, no fees.
           </p>
 
           <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, maxWidth: 540, marginBottom: 18 }}>
@@ -59,7 +59,7 @@ export default function LandingPage() {
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 32 }}>
             <Link to="/create-listing" className="btn btn-coral" style={{ padding: '12px 24px', fontSize: 15 }}>List your lease <ArrowRight size={16} /></Link>
             <Link to="/listings" className="btn btn-soft" style={{ padding: '12px 24px', fontSize: 15 }}>Browse leases</Link>
-            <Link to="/roommates" className="btn btn-soft" style={{ padding: '12px 24px', fontSize: 15 }}>Find a roommate</Link>
+            <Link to="/roommates" className="btn btn-soft" style={{ padding: '12px 24px', fontSize: 15 }}>Browse requests</Link>
           </div>
 
           <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
@@ -80,7 +80,7 @@ export default function LandingPage() {
       <section style={{ maxWidth: 1200, margin: '0 auto', padding: '14px 22px 56px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 28 }}>
           <div>
-            <h2 className="font-display" style={{ fontSize: 'clamp(26px, 4vw, 32px)', fontWeight: 600, color: t.ink, margin: 0 }}>Freshly listed</h2>
+            <h2 className="font-display" style={{ fontSize: 'clamp(26px, 4vw, 32px)', fontWeight: 600, color: t.ink, margin: 0 }}>Recently added</h2>
             <p style={{ color: t.inkSoft, margin: '6px 0 0', fontSize: 15 }}>New leases from students around Melbourne</p>
           </div>
           <Link to="/listings" style={{ color: t.navy, textDecoration: 'none', fontSize: 15, fontWeight: 700, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 5 }}>Explore all <ArrowRight size={16} /></Link>
@@ -111,13 +111,13 @@ export default function LandingPage() {
           <div style={{ maxWidth: 560 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
               <Users size={20} color={t.navy} />
-              <h2 className="font-display" style={{ fontSize: 'clamp(22px, 4vw, 28px)', fontWeight: 600, color: t.ink, margin: 0 }}>Looking for a roommate?</h2>
+              <h2 className="font-display" style={{ fontSize: 'clamp(22px, 4vw, 28px)', fontWeight: 600, color: t.ink, margin: 0 }}>Looking for a place or a roommate?</h2>
             </div>
             <p style={{ color: t.inkSoft, fontSize: 15, lineHeight: 1.6, margin: 0 }}>
-              Post a short profile with a few photos so people can see who you are, then message each other directly. Great for finding someone to share a place with, or someone to take over your lease.
+              Post a short request with a few photos so people can see what you're after, then message each other directly. Great for finding a room, someone to share a place with, or someone to take over your lease.
             </p>
           </div>
-          <Link to="/roommates" className="btn btn-coral" style={{ padding: '13px 26px', fontSize: 15 }}>Find a roommate <ArrowRight size={16} /></Link>
+          <Link to="/roommates" className="btn btn-coral" style={{ padding: '13px 26px', fontSize: 15 }}>Browse requests <ArrowRight size={16} /></Link>
         </div>
       </section>
 
@@ -175,7 +175,7 @@ export default function LandingPage() {
             </div>
             <div>
               <div style={{ color: '#fff', fontWeight: 700, fontSize: 13.5, marginBottom: 14 }}>Platform</div>
-              {[['Browse leases', '/listings'], ['Find a roommate', '/roommates'], ['List a lease', '/create-listing'], ['Sign up', '/signup'], ['Terms & Conditions', '/terms'], ['Privacy Policy', '/privacy']].map(([label, path]) => (
+              {[['Browse leases', '/listings'], ['Requests', '/roommates'], ['List a lease', '/create-listing'], ['Sign up', '/signup'], ['Terms & Conditions', '/terms'], ['Privacy Policy', '/privacy']].map(([label, path]) => (
                 <div key={path}><Link to={path} style={{ color: 'rgba(255,255,255,0.62)', textDecoration: 'none', fontSize: 13.5, lineHeight: 2.1 }}>{label}</Link></div>
               ))}
             </div>

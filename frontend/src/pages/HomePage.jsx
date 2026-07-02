@@ -22,7 +22,7 @@ export default function HomePage() {
   const actions = [
     { to: '/create-listing', icon: PlusCircle, title: 'List your lease', desc: 'Post your place for someone to take over.' },
     { to: '/listings', icon: Search, title: 'Browse leases', desc: 'Find a place around Melbourne.' },
-    { to: '/roommates', icon: Users, title: 'Find a roommate', desc: 'See who else is looking, and connect.' },
+    { to: '/roommates', icon: Users, title: 'Post a request', desc: "Say what you're after, a place, room or roommate." },
     { to: '/messages', icon: MessageCircle, title: 'Messages', desc: 'Continue your conversations.' },
   ];
 
@@ -50,8 +50,8 @@ export default function HomePage() {
 
         {/* Freshly listed */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20 }}>
-          <h2 className="font-display" style={{ fontSize: 'clamp(22px, 4vw, 28px)', fontWeight: 600, color: t.ink, margin: 0 }}>Freshly listed</h2>
-          <Link to="/listings" style={{ color: t.navy, textDecoration: 'none', fontSize: 15, fontWeight: 700, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 5 }}>Explore all <ArrowRight size={16} /></Link>
+          <h2 className="font-display" style={{ fontSize: 'clamp(22px, 4vw, 28px)', fontWeight: 600, color: t.ink, margin: 0 }}>Recently added</h2>
+          <Link to="/listings" style={{ color: t.navy, textDecoration: 'none', fontSize: 15, fontWeight: 700, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 5 }}>Explore more <ArrowRight size={16} /></Link>
         </div>
 
         {loading ? (

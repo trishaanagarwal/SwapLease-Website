@@ -52,7 +52,7 @@ export default function App() {
           <Route path="/roommates" element={<Layout><SeekersPage /></Layout>} />
           <Route path="/roommates/edit" element={
             <Layout>
-              <ProtectedRoute><RequireVerified action="post a roommate profile"><EditSeekerPage /></RequireVerified></ProtectedRoute>
+              <ProtectedRoute><RequireVerified action="post a request"><EditSeekerPage /></RequireVerified></ProtectedRoute>
             </Layout>
           } />
           <Route path="/listings" element={<Layout><ListingsPage /></Layout>} />

@@ -45,7 +45,7 @@ export default function SeekersPage() {
       else {
         const ref = await addDoc(collection(db, 'conversations'), {
           listingId: key,
-          listingTitle: `${seeker.userName} · roommate search`,
+          listingTitle: `${seeker.userName} · request`,
           participants: [user.id, seeker.userId],
           user1Id: user.id, user2Id: seeker.userId,
           user1Name: user.name, user2Name: seeker.userName,
@@ -79,9 +79,9 @@ export default function SeekersPage() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <Users size={24} color={t.navy} />
-              <h1 className="font-display" style={{ fontSize: 'clamp(24px, 4vw, 32px)', fontWeight: 600, color: t.ink, margin: 0 }}>Find a roommate</h1>
+              <h1 className="font-display" style={{ fontSize: 'clamp(24px, 4vw, 32px)', fontWeight: 600, color: t.ink, margin: 0 }}>Requests</h1>
             </div>
-            <p style={{ color: t.inkSoft, fontSize: 15, margin: '6px 0 0' }}>Students looking to share a place or take over a lease. Message anyone directly.</p>
+            <p style={{ color: t.inkSoft, fontSize: 15, margin: '6px 0 0' }}>Students posting what they're after, a place, a room, or a roommate. Message anyone directly.</p>
           </div>
           <Link to="/roommates/edit" className="btn btn-coral" style={{ padding: '11px 20px', fontSize: 14.5 }}>
             <PlusCircle size={16} /> {myPost ? 'Edit your post' : 'Post yours'}
@@ -106,7 +106,7 @@ export default function SeekersPage() {
           </select>
         </div>
         <div style={{ fontSize: 14, color: t.inkSoft, fontWeight: 600, marginBottom: 18 }}>
-          {loading ? 'Loading…' : `${filtered.length} ${filtered.length === 1 ? 'person' : 'people'} looking`}
+          {loading ? 'Loading…' : `${filtered.length} ${filtered.length === 1 ? 'request' : 'requests'}`}
         </div>
 
         {loading ? (
@@ -147,7 +147,7 @@ export default function SeekersPage() {
           <div style={{ textAlign: 'center', padding: '64px 20px', background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}` }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14, color: t.inkFaint }}><Users size={40} /></div>
             <p style={{ fontSize: 16, color: t.inkSoft, marginBottom: 12, fontWeight: 600 }}>
-              {seekers.length > 0 ? 'No one matches those filters. Try widening your search.' : 'No roommate posts yet. Be the first!'}
+              {seekers.length > 0 ? 'No one matches those filters. Try widening your search.' : 'No requests yet. Be the first!'}
             </p>
             {seekers.length === 0 && <Link to="/roommates/edit" className="btn btn-coral" style={{ padding: '11px 24px', fontSize: 14.5 }}>Post yours</Link>}
           </div>

@@ -81,7 +81,7 @@ export default function EditSeekerPage() {
   };
 
   const removePost = async () => {
-    if (!confirm('Remove your roommate post?')) return;
+    if (!confirm('Remove your request?')) return;
     try { await deleteDoc(doc(db, 'seekers', user.id)); navigate('/roommates'); }
     catch { setError('Could not remove the post.'); }
   };
@@ -94,8 +94,8 @@ export default function EditSeekerPage() {
   return (
     <div style={{ minHeight: '100vh', background: t.cream, padding: '32px 20px' }}>
       <div style={{ maxWidth: 640, margin: '0 auto' }}>
-        <h1 className="font-display" style={{ fontSize: 28, fontWeight: 600, color: t.ink, margin: '0 0 6px' }}>Your roommate post</h1>
-        <p style={{ color: t.inkSoft, fontSize: 15, margin: '0 0 24px' }}>Tell people a bit about yourself and add up to 4 photos. Others can message you directly.</p>
+        <h1 className="font-display" style={{ fontSize: 28, fontWeight: 600, color: t.ink, margin: '0 0 6px' }}>Your request</h1>
+        <p style={{ color: t.inkSoft, fontSize: 15, margin: '0 0 24px' }}>Say what you're looking for, a place, a room, or a roommate, and add up to 4 photos. Others can message you directly.</p>
 
         {error && <div style={{ background: t.coralTint, border: `1px solid ${t.coral}`, color: t.coralDeep, borderRadius: t.radius, padding: '11px 15px', fontSize: 14, marginBottom: 16, fontWeight: 600 }}>{error}</div>}
 

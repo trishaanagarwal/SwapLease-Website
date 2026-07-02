@@ -42,7 +42,7 @@ export default function Navbar() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <Link to="/listings" className="nav-hide-sm" style={navLink}>Browse leases</Link>
-          <Link to="/roommates" className="nav-hide-sm" style={navLink}>Roommates</Link>
+          <Link to="/roommates" className="nav-hide-sm" style={navLink}>Requests</Link>
 
           {user ? (
             <>
@@ -89,7 +89,7 @@ export default function Navbar() {
                     <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 6 }}>
                       {[
                         { to: '/profile', icon: User, label: 'My profile' },
-                        { to: '/roommates/edit', icon: Users, label: 'My roommate post' },
+                        { to: '/roommates/edit', icon: Users, label: 'My request' },
                         { to: '/saved', icon: Bookmark, label: 'Saved listings' },
                         { to: '/messages', icon: MessageCircle, label: 'Messages' },
                       ].map(item => (
