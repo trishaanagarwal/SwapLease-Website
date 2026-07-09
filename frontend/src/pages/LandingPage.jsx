@@ -130,13 +130,15 @@ export default function LandingPage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
             {[
-              { n: '01', icon: FileText, title: 'List your lease', desc: 'Add your photos, rent, dates and nearby uni. It only takes a few minutes.' },
-              { n: '02', icon: Search, title: 'Browse & filter', desc: 'Search by suburb, price or property type until you find a place that fits.' },
-              { n: '03', icon: MessageCircle, title: 'Message & swap', desc: 'Chat directly, sort out an inspection, and take over the lease.' },
+              { n: '01', icon: FileText, title: 'List your lease', desc: 'Add your photos, rent, dates and nearby uni. It only takes a few minutes.', color: t.navy, tint: t.coralTint },
+              { n: '02', icon: Search, title: 'Browse & filter', desc: 'Search by suburb, price or property type until you find a place that fits.', color: t.green, tint: t.sageTint },
+              { n: '03', icon: MessageCircle, title: 'Message & swap', desc: 'Chat directly, sort out an inspection, and take over the lease.', color: t.plum, tint: t.plumTint },
             ].map((step) => (
               <div key={step.n} style={{ background: '#fff', borderRadius: t.radiusLg, padding: '26px 24px', border: `1px solid ${t.border}` }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                  <step.icon size={22} color={t.navy} strokeWidth={1.6} />
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: step.tint, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <step.icon size={22} color={step.color} strokeWidth={2} />
+                  </div>
                   <span style={{ fontSize: 13, fontWeight: 700, color: t.inkFaint, letterSpacing: '0.05em' }}>{step.n}</span>
                 </div>
                 <h3 className="font-display" style={{ fontSize: 19, fontWeight: 600, color: t.ink, marginBottom: 8 }}>{step.title}</h3>

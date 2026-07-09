@@ -36,6 +36,7 @@ export default function HomePage() {
       .finally(() => setSeekersLoading(false));
   }, []);
 
+  // Same find-or-create flow as SeekersPage so conversations share one schema.
   const messageSeeker = async (seeker) => {
     if (!user) return navigate('/login');
     if (!user.emailVerified) return navigate('/messages');
@@ -43,27 +44,32 @@ export default function HomePage() {
     setBusy(seeker.userId);
     try {
       const key = `roommate:${seeker.userId}`;
-      const existing = await getDocs(query(collection(db, 'conversations'), where('participants', 'array-contains', user.id)));
-      const found = existing.docs.find(d => d.data().participants.includes(seeker.userId) && d.data().type === 'roommate');
-      if (found) return navigate(`/messages?c=${found.id}`);
-      const ref = await addDoc(collection(db, 'conversations'), {
-        participants: [user.id, seeker.userId],
-        type: 'roommate',
-        key,
-        lastMessageAt: serverTimestamp(),
-        createdAt: serverTimestamp(),
-      });
-      navigate(`/messages?c=${ref.id}`);
+      const snap = await getDocs(query(collection(db, 'conversations'),
+        where('listingId', '==', key), where('participants', 'array-contains', user.id)));
+      let convId;
+      if (!snap.empty) convId = snap.docs[0].id;
+      else {
+        const ref = await addDoc(collection(db, 'conversations'), {
+          listingId: key,
+          listingTitle: `${seeker.userName} · request`,
+          participants: [user.id, seeker.userId],
+          user1Id: user.id, user2Id: seeker.userId,
+          user1Name: user.name, user2Name: seeker.userName,
+          lastMessage: '', lastMessageAt: serverTimestamp(), createdAt: serverTimestamp(),
+        });
+        convId = ref.id;
+      }
+      navigate(`/messages?conv=${convId}`);
     } catch {
       setBusy('');
     }
   };
 
   const actions = [
-    { to: '/create-listing', icon: PlusCircle, title: 'List your lease', desc: 'Post your place for someone to take over.' },
-    { to: '/listings', icon: Search, title: 'Browse leases', desc: 'Find a place around Melbourne.' },
-    { to: '/roommates', icon: Users, title: 'Post a request', desc: "Say what you're after, a place, room or roommate." },
-    { to: '/messages', icon: MessageCircle, title: 'Messages', desc: 'Continue your conversations.' },
+    { to: '/create-listing', icon: PlusCircle, title: 'List your lease', desc: 'Post your place for someone to take over.', color: t.navy, tint: t.coralTint },
+    { to: '/listings', icon: Search, title: 'Browse leases', desc: 'Find a place around Melbourne.', color: t.green, tint: t.sageTint },
+    { to: '/roommates', icon: Users, title: 'Post a request', desc: "Say what you're after, a place, room or roommate.", color: t.plum, tint: t.plumTint },
+    { to: '/messages', icon: MessageCircle, title: 'Messages', desc: 'Continue your conversations.', color: t.gold, tint: t.honeyTint },
   ];
 
   const firstName = user?.name?.split(' ')[0] || 'there';
@@ -81,7 +87,9 @@ export default function HomePage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, marginBottom: 48 }}>
           {actions.map(a => (
             <Link key={a.to} to={a.to} className="lift" style={{ textDecoration: 'none', background: '#fff', border: `1px solid ${t.border}`, borderRadius: t.radiusLg, padding: '22px 22px' }}>
-              <a.icon size={22} color={t.navy} strokeWidth={1.7} />
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: a.tint, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <a.icon size={22} color={a.color} strokeWidth={2} />
+              </div>
               <div className="font-display" style={{ fontSize: 18, fontWeight: 600, color: t.ink, margin: '14px 0 6px' }}>{a.title}</div>
               <div style={{ fontSize: 13.5, color: t.inkSoft, lineHeight: 1.5 }}>{a.desc}</div>
             </Link>

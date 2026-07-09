@@ -19,9 +19,10 @@ service cloud.firestore {
     }
 
     // ---------- users ----------
-    // Public read (names shown on listings); only the owner may write their own doc.
+    // Readable by signed-in users only (docs contain email/phone, so they must
+    // not be publicly scrapeable); only the owner may write their own doc.
     match /users/{userId} {
-      allow read: if true;
+      allow read: if signedIn();
 
       allow create: if isOwner(userId)
         && strLen(request.resource.data.name, 1, 100)
@@ -86,7 +87,11 @@ service cloud.firestore {
         && request.resource.data.userId == userId
         && strLen(request.resource.data.about, 1, 2000)
         && request.resource.data.images is list
-        && request.resource.data.images.size() <= 4;
+        && request.resource.data.images.size() <= 4
+        && (!('budget' in request.resource.data)
+            || (request.resource.data.budget is number
+                && request.resource.data.budget >= 0
+                && request.resource.data.budget < 100000));
       allow delete: if isOwner(userId);
     }
 
@@ -103,8 +108,14 @@ service cloud.firestore {
     // ---------- conversations ----------
     // Only the two participants can see or touch a conversation.
     match /conversations/{convId} {
-      allow read, update: if signedIn()
+      allow read: if signedIn()
         && request.auth.uid in resource.data.participants;
+
+      // Participants and creation time are immutable after creation.
+      allow update: if signedIn()
+        && request.auth.uid in resource.data.participants
+        && request.resource.data.participants == resource.data.participants
+        && request.resource.data.createdAt == resource.data.createdAt;
 
       allow create: if verified()
         && request.auth.uid in request.resource.data.participants

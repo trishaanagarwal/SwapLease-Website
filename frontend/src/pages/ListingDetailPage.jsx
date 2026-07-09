@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { doc, getDoc, deleteDoc, updateDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
-import { MapPin, GraduationCap, MessageCircle, Flag, ImageOff } from 'lucide-react';
+import { MapPin, GraduationCap, MessageCircle, Flag, ImageOff, Share2, Check } from 'lucide-react';
 import BookmarkButton from '../components/BookmarkButton';
 import SafetyTips from '../components/SafetyTips';
 
@@ -84,6 +84,21 @@ export default function ListingDetailPage() {
     } finally {
       setContacting(false);
     }
+  };
+
+  // Share: native share sheet on mobile, copy-link fallback on desktop.
+  const [copied, setCopied] = useState(false);
+  const handleShare = async () => {
+    const url = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: listing.title, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch { /* user cancelled share sheet */ }
   };
 
   const [reported, setReported] = useState(false);
@@ -196,6 +211,10 @@ export default function ListingDetailPage() {
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <button onClick={handleShare}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff', border: '1.5px solid #D9D3C6', color: copied ? '#1C4D3E' : '#16223B', borderRadius: 8, padding: '7px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                    {copied ? <><Check size={14} /> Link copied</> : <><Share2 size={14} /> Share</>}
+                  </button>
                   {!isOwner && <BookmarkButton listingId={listing.id} variant="button" />}
                   {isOwner && (
                     <>

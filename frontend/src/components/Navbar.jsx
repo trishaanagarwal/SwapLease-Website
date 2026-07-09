@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, User, LogOut, ChevronDown, Plus, Bookmark, Users } from 'lucide-react';
+import { MessageCircle, User, LogOut, ChevronDown, Plus, Bookmark, Users, Menu, X, Search } from 'lucide-react';
 import logoMark from '../assets/logo-mark.png';
 import { t } from '../theme';
 
@@ -9,6 +9,7 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -117,8 +118,30 @@ export default function Navbar() {
               <Link to="/signup" className="btn btn-coral" style={{ fontSize: 14, padding: '10px 20px' }}>Sign up</Link>
             </>
           )}
+
+          {/* Mobile hamburger (visible < 640px only) */}
+          <button className="nav-show-sm" onClick={() => setMenuOpen(o => !o)} aria-label="Menu"
+            style={{ display: 'none', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, background: '#fff', border: `1.5px solid ${t.border}`, borderRadius: t.radius, cursor: 'pointer', color: t.ink, marginLeft: 2 }}>
+            {menuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile menu panel */}
+      {menuOpen && (
+        <div className="nav-show-sm" style={{ display: 'none', flexDirection: 'column', gap: 2, padding: '8px 14px 14px', borderTop: `1px solid ${t.border}`, background: t.cream }}>
+          {[
+            { to: '/listings', icon: Search, label: 'Browse leases' },
+            { to: '/roommates', icon: Users, label: 'Requests' },
+            ...(user ? [{ to: '/messages', icon: MessageCircle, label: 'Messages' }] : []),
+          ].map(item => (
+            <Link key={item.to} to={item.to} onClick={() => setMenuOpen(false)}
+              style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '12px 10px', textDecoration: 'none', color: t.ink, fontSize: 15, fontWeight: 600, borderRadius: t.radius }}>
+              <item.icon size={18} color={t.inkSoft} /> {item.label}
+            </Link>
+          ))}
+        </div>
+      )}
     </nav>
   );
 }

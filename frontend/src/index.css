@@ -153,6 +153,7 @@ img { display: block; max-width: 100%; }
 
 @media (max-width: 640px) {
   .nav-hide-sm { display: none !important; }
+  .nav-show-sm { display: flex !important; }
   .nav-wordmark { font-size: 19px !important; }
 }
 @media (max-width: 480px) {
