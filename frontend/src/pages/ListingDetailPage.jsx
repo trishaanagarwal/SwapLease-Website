@@ -144,7 +144,7 @@ export default function ListingDetailPage() {
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-      <div style={{ width: 40, height: 40, border: '3px solid #e5e7eb', borderTopColor: '#1B3A6B', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ width: 40, height: 40, border: '3px solid #E5E1D8', borderTopColor: '#1B3A6B', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
     </div>
   );
 
@@ -158,14 +158,14 @@ export default function ListingDetailPage() {
     <div style={{ minHeight: '100vh', background: '#F8F6F1' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 20px' }}>
 
-        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, marginBottom: 20, padding: 0 }}>
+        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#586079', fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, marginBottom: 20, padding: 0 }}>
           ← Back to listings
         </button>
 
         <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
-          <div style={{ flex: 1, minWidth: 320 }}>
-            <div style={{ borderRadius: 12, overflow: 'hidden', position: 'relative', background: '#e5e7eb', marginBottom: 20, height: 380 }}>
+          <div style={{ flex: '1 1 480px', minWidth: 0 }}>
+            <div style={{ borderRadius: 12, overflow: 'hidden', position: 'relative', background: '#E5E1D8', marginBottom: 20, height: 380 }}>
               {hasImages ? (
                 <img src={images[imgIdx]} alt={listing.title}
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
@@ -191,7 +191,7 @@ export default function ListingDetailPage() {
               )}
             </div>
 
-            <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #e5e7eb', padding: '24px 28px', marginBottom: 16 }}>
+            <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E1D8', padding: '24px 28px', marginBottom: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
@@ -202,11 +202,11 @@ export default function ListingDetailPage() {
                       <span style={{ fontSize: 12, fontWeight: 700, color: '#fff', background: '#A87C33', borderRadius: 20, padding: '3px 12px' }}>Taken</span>
                     )}
                     {listing.furnished && (
-                      <span style={{ fontSize: 12, fontWeight: 600, color: '#059669', background: '#d1fae5', borderRadius: 20, padding: '3px 12px' }}>Furnished</span>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: '#1C4D3E', background: '#E6EDE8', borderRadius: 20, padding: '3px 12px' }}>Furnished</span>
                     )}
                   </div>
-                  <h1 style={{ fontSize: 26, fontWeight: 800, color: '#111', margin: '0 0 8px', lineHeight: 1.2 }}>{listing.title}</h1>
-                  <p style={{ fontSize: 15, color: '#6b7280', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <h1 className="font-display" style={{ fontSize: 26, fontWeight: 600, color: '#16223B', margin: '0 0 8px', lineHeight: 1.2 }}>{listing.title}</h1>
+                  <p style={{ fontSize: 15, color: '#586079', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
                     <MapPin size={15} /> {[listing.address, listing.suburb, listing.city].filter(Boolean).join(', ')}
                   </p>
                 </div>
@@ -236,8 +236,8 @@ export default function ListingDetailPage() {
               </div>
             </div>
 
-            <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #e5e7eb', padding: '24px 28px', marginBottom: 16 }}>
-              <h2 style={{ fontSize: 17, fontWeight: 700, color: '#111', margin: '0 0 20px' }}>Property details</h2>
+            <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E1D8', padding: '24px 28px', marginBottom: 16 }}>
+              <h2 style={{ fontSize: 17, fontWeight: 700, color: '#16223B', margin: '0 0 20px' }}>Property details</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 16 }}>
                 {[
                   { label: 'Weekly rent', value: `$${listing.rent?.toLocaleString()}/wk` },
@@ -248,9 +248,9 @@ export default function ListingDetailPage() {
                   listing.availableFrom && { label: 'Available from', value: fmtDate(listing.availableFrom) },
                   listing.availableTo && { label: 'Lease ends', value: fmtDate(listing.availableTo) },
                 ].filter(Boolean).map((item, i) => (
-                  <div key={i} style={{ background: '#f9fafb', borderRadius: 10, padding: '14px 16px' }}>
-                    <div style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>{item.label}</div>
-                    <div style={{ fontSize: 16, fontWeight: 700, color: '#111' }}>{item.value}</div>
+                  <div key={i} style={{ background: '#F8F6F1', borderRadius: 10, padding: '14px 16px' }}>
+                    <div style={{ fontSize: 11, color: '#9AA0B0', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>{item.label}</div>
+                    <div style={{ fontSize: 16, fontWeight: 700, color: '#16223B' }}>{item.value}</div>
                   </div>
                 ))}
               </div>
@@ -263,19 +263,19 @@ export default function ListingDetailPage() {
             </div>
 
             {listing.description && (
-              <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #e5e7eb', padding: '24px 28px' }}>
-                <h2 style={{ fontSize: 17, fontWeight: 700, color: '#111', margin: '0 0 14px' }}>About this place</h2>
-                <p style={{ fontSize: 15, color: '#374151', lineHeight: 1.7, margin: 0, whiteSpace: 'pre-wrap' }}>{listing.description}</p>
+              <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E1D8', padding: '24px 28px' }}>
+                <h2 style={{ fontSize: 17, fontWeight: 700, color: '#16223B', margin: '0 0 14px' }}>About this place</h2>
+                <p style={{ fontSize: 15, color: '#3E4763', lineHeight: 1.7, margin: 0, whiteSpace: 'pre-wrap' }}>{listing.description}</p>
               </div>
             )}
           </div>
 
-          <div style={{ width: 300, flexShrink: 0 }}>
-            <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #e5e7eb', padding: 24, position: 'sticky', top: 80 }}>
+          <div style={{ flex: '1 1 300px', maxWidth: 420, minWidth: 0 }}>
+            <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E1D8', padding: 24, position: 'sticky', top: 80 }}>
               <div style={{ marginBottom: 20 }}>
-                <span style={{ fontSize: 32, fontWeight: 900, color: '#111' }}>${listing.rent?.toLocaleString()}</span>
-                <span style={{ fontSize: 16, color: '#6b7280' }}> /week</span>
-                {listing.bond && <div style={{ fontSize: 13, color: '#9ca3af', marginTop: 4 }}>Bond: ${listing.bond?.toLocaleString()}</div>}
+                <span style={{ fontSize: 32, fontWeight: 900, color: '#16223B' }}>${listing.rent?.toLocaleString()}</span>
+                <span style={{ fontSize: 16, color: '#586079' }}> /week</span>
+                {listing.bond && <div style={{ fontSize: 13, color: '#9AA0B0', marginTop: 4 }}>Bond: ${listing.bond?.toLocaleString()}</div>}
               </div>
 
               {!isOwner ? (
@@ -284,7 +284,7 @@ export default function ListingDetailPage() {
                   <MessageCircle size={18} /> {contacting ? 'Opening chat...' : `Message ${listing.userName?.split(' ')[0]}`}
                 </button>
               ) : (
-                <div style={{ background: '#f0fdf4', borderRadius: 10, padding: '12px 16px', marginBottom: 20, fontSize: 14, color: '#059669', fontWeight: 600, textAlign: 'center' }}>
+                <div style={{ background: '#E6EDE8', borderRadius: 10, padding: '12px 16px', marginBottom: 20, fontSize: 14, color: '#1C4D3E', fontWeight: 600, textAlign: 'center' }}>
                   ✓ This is your listing
                 </div>
               )}
@@ -292,37 +292,37 @@ export default function ListingDetailPage() {
               {!user && (
                 <div style={{ textAlign: 'center', marginBottom: 20 }}>
                   <Link to="/login" style={{ color: '#1B3A6B', fontWeight: 700, textDecoration: 'none', fontSize: 14 }}>Sign in</Link>
-                  <span style={{ color: '#6b7280', fontSize: 14 }}> to message the lister</span>
+                  <span style={{ color: '#586079', fontSize: 14 }}> to message the lister</span>
                 </div>
               )}
 
-              <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: 20 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 }}>Listed by</div>
+              <div style={{ borderTop: '1px solid #EFEBE2', paddingTop: 20 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: '#9AA0B0', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 }}>Listed by</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   {lister?.photoURL && !lister?.deleted ? (
                     <img src={lister.photoURL} alt="" style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
                   ) : (
-                    <div style={{ width: 44, height: 44, borderRadius: '50%', background: lister?.deleted ? '#9ca3af' : '#1B3A6B', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 18, flexShrink: 0 }}>
+                    <div style={{ width: 44, height: 44, borderRadius: '50%', background: lister?.deleted ? '#9AA0B0' : '#1B3A6B', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 18, flexShrink: 0 }}>
                       {lister?.deleted ? '?' : (listing.userName?.[0]?.toUpperCase())}
                     </div>
                   )}
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: 15, color: lister?.deleted ? '#9ca3af' : '#111', fontStyle: lister?.deleted ? 'italic' : 'normal' }}>
+                    <div style={{ fontWeight: 700, fontSize: 15, color: lister?.deleted ? '#9AA0B0' : '#16223B', fontStyle: lister?.deleted ? 'italic' : 'normal' }}>
                       {lister?.deleted ? 'Deleted profile' : (lister?.name || listing.userName)}
                     </div>
-                    {!lister?.deleted && listing.userUniversity && <div style={{ fontSize: 13, color: '#6b7280', marginTop: 2 }}>{listing.userUniversity}</div>}
+                    {!lister?.deleted && listing.userUniversity && <div style={{ fontSize: 13, color: '#586079', marginTop: 2 }}>{listing.userUniversity}</div>}
                   </div>
                 </div>
-                {listing.userBio && <p style={{ fontSize: 13, color: '#6b7280', marginTop: 12, lineHeight: 1.5 }}>{listing.userBio}</p>}
+                {listing.userBio && <p style={{ fontSize: 13, color: '#586079', marginTop: 12, lineHeight: 1.5 }}>{listing.userBio}</p>}
               </div>
 
               {!isOwner && (
-                <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: 14, marginTop: 18, textAlign: 'center' }}>
+                <div style={{ borderTop: '1px solid #EFEBE2', paddingTop: 14, marginTop: 18, textAlign: 'center' }}>
                   {reported ? (
                     <span style={{ fontSize: 13, color: '#1C4D3E', fontWeight: 600 }}>✓ Reported, thank you</span>
                   ) : (
                     <button onClick={handleReport}
-                      style={{ background: 'none', border: 'none', color: '#9ca3af', fontSize: 13, cursor: 'pointer', fontWeight: 600, textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                      style={{ background: 'none', border: 'none', color: '#9AA0B0', fontSize: 13, cursor: 'pointer', fontWeight: 600, textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
                       <Flag size={13} /> Report this listing
                     </button>
                   )}

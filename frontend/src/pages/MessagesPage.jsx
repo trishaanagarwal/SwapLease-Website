@@ -14,7 +14,7 @@ function Avatar({ name, photoURL, deleted, size = 40 }) {
     return <img src={photoURL} alt="" style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />;
   }
   return (
-    <div style={{ width: size, height: size, borderRadius: '50%', background: deleted ? '#9ca3af' : '#1B3A6B', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: size * 0.4, flexShrink: 0 }}>
+    <div style={{ width: size, height: size, borderRadius: '50%', background: deleted ? '#9AA0B0' : '#1B3A6B', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: size * 0.4, flexShrink: 0 }}>
       {deleted ? '?' : (name?.[0]?.toUpperCase() || '?')}
     </div>
   );
@@ -125,16 +125,16 @@ export default function MessagesPage() {
   return (
     <div className="msg-pane" data-active={activeConvId ? 'chat' : 'list'} style={{ display: 'flex', height: 'calc(100vh - 70px)', background: '#F8F6F1', overflow: 'hidden' }}>
 
-      <div className="msg-list" style={{ width: 320, flexShrink: 0, background: '#fff', borderRight: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '20px 20px 14px', borderBottom: '1px solid #f3f4f6' }}>
-          <h1 style={{ fontSize: 20, fontWeight: 800, color: '#111', margin: 0 }}>Messages</h1>
+      <div className="msg-list" style={{ width: 320, flexShrink: 0, background: '#fff', borderRight: '1px solid #E5E1D8', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '20px 20px 14px', borderBottom: '1px solid #EFEBE2' }}>
+          <h1 className="font-display" style={{ fontSize: 20, fontWeight: 600, color: '#16223B', margin: 0 }}>Messages</h1>
         </div>
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {conversations.length === 0 ? (
             <div style={{ padding: '48px 24px', textAlign: 'center' }}>
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12, color: '#9ca3af' }}><MessageSquare size={34} /></div>
-              <p style={{ color: '#6b7280', fontSize: 14, margin: 0 }}>No conversations yet</p>
-              <p style={{ color: '#9ca3af', fontSize: 12, marginTop: 4 }}>Message a lister to get started</p>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12, color: '#9AA0B0' }}><MessageSquare size={34} /></div>
+              <p style={{ color: '#586079', fontSize: 14, margin: 0 }}>No conversations yet</p>
+              <p style={{ color: '#9AA0B0', fontSize: 12, marginTop: 4 }}>Message a lister to get started</p>
             </div>
           ) : (
             conversations.map(conv => {
@@ -142,16 +142,16 @@ export default function MessagesPage() {
               const isActive = conv.id === activeConvId;
               return (
                 <button key={conv.id} onClick={() => setActiveConvId(conv.id)}
-                  style={{ width: '100%', textAlign: 'left', padding: '14px 20px', background: isActive ? '#E8EDF6' : 'transparent', borderLeft: isActive ? '3px solid #1B3A6B' : '3px solid transparent', border: 'none', cursor: 'pointer', borderBottom: '1px solid #f9fafb', display: 'block' }}>
+                  style={{ width: '100%', textAlign: 'left', padding: '14px 20px', background: isActive ? '#E8EDF6' : 'transparent', borderLeft: isActive ? '3px solid #1B3A6B' : '3px solid transparent', border: 'none', cursor: 'pointer', borderBottom: '1px solid #F8F6F1', display: 'block' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <Avatar name={other.name} photoURL={other.photoURL} deleted={other.deleted} size={40} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontWeight: 700, fontSize: 14, color: '#111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{other.name}</span>
-                        {conv.lastMessageAt && <span style={{ fontSize: 11, color: '#9ca3af', flexShrink: 0, marginLeft: 4 }}>{fmtTime(conv.lastMessageAt)}</span>}
+                        <span style={{ fontWeight: 700, fontSize: 14, color: '#16223B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{other.name}</span>
+                        {conv.lastMessageAt && <span style={{ fontSize: 11, color: '#9AA0B0', flexShrink: 0, marginLeft: 4 }}>{fmtTime(conv.lastMessageAt)}</span>}
                       </div>
                       {conv.listingTitle && <div style={{ fontSize: 12, color: '#1B3A6B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 }}>{conv.listingTitle}</div>}
-                      {conv.lastMessage && <div style={{ fontSize: 12, color: '#9ca3af', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 }}>{conv.lastMessage}</div>}
+                      {conv.lastMessage && <div style={{ fontSize: 12, color: '#9AA0B0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 }}>{conv.lastMessage}</div>}
                     </div>
                   </div>
                 </button>
@@ -164,19 +164,19 @@ export default function MessagesPage() {
       <div className="msg-chat" style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         {activeConvId && otherUser ? (
           <>
-            <div style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ background: '#fff', borderBottom: '1px solid #E5E1D8', padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 10 }}>
               <button className="msg-back" onClick={() => setActiveConvId(null)} aria-label="Back"
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#1B3A6B', fontSize: 22, lineHeight: 1, padding: '0 4px 0 0' }}>‹</button>
               <Avatar name={otherUser.name} photoURL={otherUser.photoURL} deleted={otherUser.deleted} size={36} />
               <div>
-                <div style={{ fontWeight: 700, fontSize: 15, color: otherUser.deleted ? '#9ca3af' : '#111', fontStyle: otherUser.deleted ? 'italic' : 'normal' }}>{otherUser.name}</div>
-                {activeConv?.listingTitle && <div style={{ fontSize: 12, color: '#6b7280' }}>Re: {activeConv.listingTitle}</div>}
+                <div style={{ fontWeight: 700, fontSize: 15, color: otherUser.deleted ? '#9AA0B0' : '#16223B', fontStyle: otherUser.deleted ? 'italic' : 'normal' }}>{otherUser.name}</div>
+                {activeConv?.listingTitle && <div style={{ fontSize: 12, color: '#586079' }}>Re: {activeConv.listingTitle}</div>}
               </div>
             </div>
 
             <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: 12 }}>
               {messages.length === 0 ? (
-                <div style={{ textAlign: 'center', color: '#9ca3af', fontSize: 14, margin: 'auto' }}>
+                <div style={{ textAlign: 'center', color: '#9AA0B0', fontSize: 14, margin: 'auto' }}>
                   <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}><MessageSquare size={34} /></div>
                   <p>No messages yet, say hello!</p>
                 </div>
@@ -186,10 +186,10 @@ export default function MessagesPage() {
                   return (
                     <div key={msg.id} style={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
                       <div style={{ maxWidth: '65%' }}>
-                        <div style={{ padding: '10px 16px', borderRadius: 18, fontSize: 14, lineHeight: 1.5, background: isMe ? '#1B3A6B' : '#fff', color: isMe ? '#fff' : '#111', borderBottomRightRadius: isMe ? 4 : 18, borderBottomLeftRadius: isMe ? 18 : 4, boxShadow: isMe ? 'none' : '0 1px 4px rgba(0,0,0,0.08)', border: isMe ? 'none' : '1px solid #f3f4f6' }}>
+                        <div style={{ padding: '10px 16px', borderRadius: 18, fontSize: 14, lineHeight: 1.5, background: isMe ? '#1B3A6B' : '#fff', color: isMe ? '#fff' : '#16223B', borderBottomRightRadius: isMe ? 4 : 18, borderBottomLeftRadius: isMe ? 18 : 4, boxShadow: isMe ? 'none' : '0 1px 4px rgba(0,0,0,0.08)', border: isMe ? 'none' : '1px solid #EFEBE2' }}>
                           {msg.content}
                         </div>
-                        <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 4, textAlign: isMe ? 'right' : 'left' }}>
+                        <div style={{ fontSize: 11, color: '#9AA0B0', marginTop: 4, textAlign: isMe ? 'right' : 'left' }}>
                           {fmtTime(msg.createdAt)}
                         </div>
                       </div>
@@ -200,20 +200,20 @@ export default function MessagesPage() {
               <div ref={messagesEndRef} />
             </div>
 
-            <form onSubmit={sendMessage} style={{ background: '#fff', borderTop: '1px solid #e5e7eb', padding: '14px 20px', display: 'flex', gap: 10 }}>
+            <form onSubmit={sendMessage} style={{ background: '#fff', borderTop: '1px solid #E5E1D8', padding: '14px 20px', display: 'flex', gap: 10 }}>
               <input value={newMsg} onChange={e => setNewMsg(e.target.value)} placeholder="Type a message..."
-                style={{ flex: 1, border: '1px solid #e5e7eb', borderRadius: 24, padding: '10px 18px', fontSize: 14, outline: 'none', color: '#111' }} />
+                style={{ flex: 1, border: '1px solid #E5E1D8', borderRadius: 24, padding: '10px 18px', fontSize: 14, outline: 'none', color: '#16223B' }} />
               <button type="submit" disabled={!newMsg.trim() || sending}
-                style={{ background: newMsg.trim() && !sending ? '#1B3A6B' : '#d1d5db', color: '#fff', border: 'none', borderRadius: '50%', width: 42, height: 42, cursor: newMsg.trim() ? 'pointer' : 'not-allowed', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                style={{ background: newMsg.trim() && !sending ? '#1B3A6B' : '#D5CFC2', color: '#fff', border: 'none', borderRadius: '50%', width: 42, height: 42, cursor: newMsg.trim() ? 'pointer' : 'not-allowed', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 ↑
               </button>
             </form>
           </>
         ) : (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ textAlign: 'center', color: '#9ca3af' }}>
+            <div style={{ textAlign: 'center', color: '#9AA0B0' }}>
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}><MessageSquare size={46} /></div>
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: '#374151', margin: '0 0 8px' }}>Select a conversation</h3>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: '#3E4763', margin: '0 0 8px' }}>Select a conversation</h3>
               <p style={{ fontSize: 14, margin: 0 }}>Choose from the list on the left to start chatting</p>
             </div>
           </div>

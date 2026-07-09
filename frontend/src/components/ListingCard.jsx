@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Bed, Bath, Users, GraduationCap, ImageOff } from 'lucide-react';
+import { Bed, Bath, Users, GraduationCap, ImageOff, CalendarDays } from 'lucide-react';
 import { t, typeLabels } from '../theme';
 import BookmarkButton from './BookmarkButton';
 
@@ -100,7 +100,12 @@ export default function ListingCard({ listing, horizontal = false }) {
         </div>
         <div style={{ padding: '16px 18px 18px' }}>
           <h3 className="font-display" style={{ fontSize: 18, fontWeight: 700, color: t.ink, margin: '0 0 4px', lineHeight: 1.25 }}>{listing.title}</h3>
-          <div style={{ fontSize: 13, color: t.inkSoft, marginBottom: 12 }}>{listing.suburb}, {listing.city}</div>
+          <div style={{ fontSize: 13, color: t.inkSoft, marginBottom: 10 }}>{listing.suburb}, {listing.city}</div>
+          {listing.availableFrom && (
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700, color: t.green, background: t.sageTint, borderRadius: t.radiusSm, padding: '3px 9px', marginBottom: 12 }}>
+              <CalendarDays size={12} /> {listing.availableFrom}{listing.availableTo ? ` → ${listing.availableTo}` : ''}
+            </div>
+          )}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', gap: 14, fontSize: 13.5, color: t.ink, fontWeight: 600 }}>
               <span style={ico}><Bed size={16} /> {listing.bedrooms}</span>

@@ -56,6 +56,19 @@ export default function LandingPage() {
             <button type="submit" className="btn btn-coral" style={{ padding: '12px 26px', fontSize: 15.5 }}>Search</button>
           </form>
 
+          {/* One-tap suburb searches */}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 26 }}>
+            <span style={{ fontSize: 12.5, fontWeight: 700, color: t.inkFaint, letterSpacing: '0.04em', textTransform: 'uppercase', marginRight: 2 }}>Popular</span>
+            {SUBURBS.map(s => (
+              <button key={s} onClick={() => navigate(`/listings?search=${encodeURIComponent(s)}`)}
+                style={{ background: '#fff', border: `1px solid ${t.border}`, borderRadius: t.pill, padding: '6px 14px', fontSize: 13, fontWeight: 600, color: t.inkSoft, cursor: 'pointer', fontFamily: 'inherit', transition: 'border-color 0.15s ease, color 0.15s ease' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = t.navy; e.currentTarget.style.color = t.navy; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = t.border; e.currentTarget.style.color = t.inkSoft; }}>
+                {s}
+              </button>
+            ))}
+          </div>
+
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 32 }}>
             <Link to="/create-listing" className="btn btn-coral" style={{ padding: '12px 24px', fontSize: 15 }}>List your lease <ArrowRight size={16} /></Link>
             <Link to="/listings" className="btn btn-soft" style={{ padding: '12px 24px', fontSize: 15 }}>Browse leases</Link>

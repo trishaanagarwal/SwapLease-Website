@@ -54,8 +54,23 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-#root { min-height: 100vh; width: 100%; }
+/* clip (not hidden) so position: sticky keeps working; prevents any stray
+   wide element from making the whole page scroll sideways on phones */
+#root { min-height: 100vh; width: 100%; overflow-x: clip; }
 img { display: block; max-width: 100%; }
+
+/* Visible keyboard focus */
+:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; border-radius: 4px; }
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
+}
 
 ::selection { background: rgba(176, 132, 51, 0.20); }
 
@@ -102,8 +117,8 @@ img { display: block; max-width: 100%; }
 .glass { background: #fff; border: 1px solid var(--border); }
 
 /* Subtle card hover */
-.lift { transition: border-color 0.18s ease, box-shadow 0.2s ease; }
-.lift:hover { box-shadow: var(--shadow); }
+.lift { transition: border-color 0.18s ease, box-shadow 0.2s ease, transform 0.2s ease; }
+.lift:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
 
 /* Inputs */
 .field {
@@ -155,6 +170,8 @@ img { display: block; max-width: 100%; }
   .nav-hide-sm { display: none !important; }
   .nav-show-sm { display: flex !important; }
   .nav-wordmark { font-size: 19px !important; }
+  /* iOS Safari zooms the page when focusing inputs under 16px; keep fields at 16px on phones */
+  input, select, textarea { font-size: 16px !important; }
 }
 @media (max-width: 480px) {
   .nav-hide-xs { display: none; }
