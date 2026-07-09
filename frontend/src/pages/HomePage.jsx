@@ -1,23 +1,63 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
+import { Link, useNavigate } from 'react-router-dom';
+import { collection, query, where, orderBy, limit, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import ListingCard from '../components/ListingCard';
 import { t } from '../theme';
-import { PlusCircle, Search, Users, MessageCircle, ArrowRight, Home } from 'lucide-react';
+import { PlusCircle, Search, Users, MessageCircle, ArrowRight, Home, MapPin, BadgeCheck, CalendarDays, ImageOff } from 'lucide-react';
+
+function SeekerPhoto({ src }) {
+  if (src) return <img src={src} alt="" style={{ width: '100%', height: 160, objectFit: 'cover' }} />;
+  return (
+    <div style={{ width: '100%', height: 160, background: t.creamDeep, display: 'flex', alignItems: 'center', justifyContent: 'center', color: t.inkFaint }}>
+      <ImageOff size={24} />
+    </div>
+  );
+}
 
 export default function HomePage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [listings, setListings] = useState([]);
+  const [seekers, setSeekers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [seekersLoading, setSeekersLoading] = useState(true);
+  const [busy, setBusy] = useState('');
 
   useEffect(() => {
     getDocs(query(collection(db, 'listings'), where('status', '==', 'active'), orderBy('createdAt', 'desc'), limit(6)))
       .then(snap => setListings(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
       .catch(() => {})
       .finally(() => setLoading(false));
+    getDocs(query(collection(db, 'seekers'), orderBy('updatedAt', 'desc'), limit(3)))
+      .then(snap => setSeekers(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
+      .catch(() => {})
+      .finally(() => setSeekersLoading(false));
   }, []);
+
+  const messageSeeker = async (seeker) => {
+    if (!user) return navigate('/login');
+    if (!user.emailVerified) return navigate('/messages');
+    if (seeker.userId === user.id) return navigate('/roommates/edit');
+    setBusy(seeker.userId);
+    try {
+      const key = `roommate:${seeker.userId}`;
+      const existing = await getDocs(query(collection(db, 'conversations'), where('participants', 'array-contains', user.id)));
+      const found = existing.docs.find(d => d.data().participants.includes(seeker.userId) && d.data().type === 'roommate');
+      if (found) return navigate(`/messages?c=${found.id}`);
+      const ref = await addDoc(collection(db, 'conversations'), {
+        participants: [user.id, seeker.userId],
+        type: 'roommate',
+        key,
+        lastMessageAt: serverTimestamp(),
+        createdAt: serverTimestamp(),
+      });
+      navigate(`/messages?c=${ref.id}`);
+    } catch {
+      setBusy('');
+    }
+  };
 
   const actions = [
     { to: '/create-listing', icon: PlusCircle, title: 'List your lease', desc: 'Post your place for someone to take over.' },
@@ -67,6 +107,47 @@ export default function HomePage() {
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14, color: t.inkFaint }}><Home size={40} /></div>
             <p style={{ fontSize: 16, color: t.inkSoft, marginBottom: 8, fontWeight: 600 }}>No listings yet, be the first to post!</p>
             <Link to="/create-listing" style={{ color: t.navy, textDecoration: 'none', fontWeight: 700 }}>List your lease →</Link>
+          </div>
+        )}
+
+        {/* Recent requests */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', margin: '52px 0 20px' }}>
+          <h2 className="font-display" style={{ fontSize: 'clamp(22px, 4vw, 28px)', fontWeight: 600, color: t.ink, margin: 0 }}>Recent requests</h2>
+          <Link to="/roommates" style={{ color: t.navy, textDecoration: 'none', fontSize: 15, fontWeight: 700, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 5 }}>See all <ArrowRight size={16} /></Link>
+        </div>
+
+        {seekersLoading ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 22 }}>
+            {[...Array(3)].map((_, i) => <div key={i} className="skeleton" style={{ borderRadius: t.radius, height: 300 }} />)}
+          </div>
+        ) : seekers.length > 0 ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 22 }}>
+            {seekers.map(s => (
+              <div key={s.id} style={{ background: '#fff', border: `1px solid ${t.border}`, borderRadius: t.radiusLg, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <SeekerPhoto src={s.images?.[0]} />
+                <div style={{ padding: '14px 16px 16px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                    <span className="font-display" style={{ fontSize: 17, fontWeight: 600, color: t.ink }}>{s.userName}</span>
+                    <BadgeCheck size={15} color={t.green} />
+                  </div>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+                    {s.budget && <span style={{ fontSize: 12, fontWeight: 700, color: t.navy, background: t.coralTint, borderRadius: t.radiusSm, padding: '3px 9px' }}>${s.budget}/wk</span>}
+                    {s.areas && <span style={{ fontSize: 12, fontWeight: 700, color: t.inkSoft, background: t.cream, border: `1px solid ${t.border}`, borderRadius: t.radiusSm, padding: '3px 9px', display: 'inline-flex', alignItems: 'center', gap: 4 }}><MapPin size={11} /> {s.areas}</span>}
+                    {s.moveIn && <span style={{ fontSize: 12, fontWeight: 700, color: t.inkSoft, background: t.cream, border: `1px solid ${t.border}`, borderRadius: t.radiusSm, padding: '3px 9px', display: 'inline-flex', alignItems: 'center', gap: 4 }}><CalendarDays size={11} /> {s.moveIn}</span>}
+                  </div>
+                  <p style={{ fontSize: 13.5, color: t.inkSoft, lineHeight: 1.55, margin: '0 0 14px', flex: 1, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{s.about}</p>
+                  <button onClick={() => messageSeeker(s)} disabled={busy === s.userId} className="btn btn-coral" style={{ padding: '10px 16px', fontSize: 14 }}>
+                    <MessageCircle size={15} /> {s.userId === user?.id ? 'This is you' : (busy === s.userId ? 'Opening…' : `Message ${s.userName?.split(' ')[0]}`)}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '48px 20px', background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}` }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14, color: t.inkFaint }}><Users size={40} /></div>
+            <p style={{ fontSize: 16, color: t.inkSoft, marginBottom: 8, fontWeight: 600 }}>No requests yet.</p>
+            <Link to="/roommates/edit" style={{ color: t.navy, textDecoration: 'none', fontWeight: 700 }}>Post yours →</Link>
           </div>
         )}
       </div>

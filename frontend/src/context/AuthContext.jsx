@@ -15,6 +15,7 @@ import {
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
+  fetchSignInMethodsForEmail,
   signOut,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, collection, query, where, getDocs, serverTimestamp, arrayUnion, arrayRemove } from 'firebase/firestore';
@@ -174,9 +175,12 @@ export function AuthProvider({ children }) {
   // NEW address. The email only switches once the user clicks that link.
   const changeEmail = async (newEmail, currentPassword) => {
     if (!auth.currentUser) throw new Error('Not signed in.');
+    const trimmed = newEmail.trim().toLowerCase();
+    const methods = await fetchSignInMethodsForEmail(auth, trimmed);
+    if (methods.length > 0) throw new Error('That email is already associated with another account.');
     const cred = EmailAuthProvider.credential(auth.currentUser.email, currentPassword);
     await reauthenticateWithCredential(auth.currentUser, cred);
-    await verifyBeforeUpdateEmail(auth.currentUser, newEmail.trim().toLowerCase());
+    await verifyBeforeUpdateEmail(auth.currentUser, trimmed);
   };
 
   // Send a password-reset email (for users who forgot their password).
