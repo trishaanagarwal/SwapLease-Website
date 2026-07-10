@@ -1,25 +1,38 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import RequireVerified from './components/RequireVerified';
-import NotFoundPage from './pages/NotFoundPage';
-import HomePage from './pages/HomePage';
-import LandingPage from './pages/LandingPage';
-import SeekersPage from './pages/SeekersPage';
-import EditSeekerPage from './pages/EditSeekerPage';
-import ListingsPage from './pages/ListingsPage';
-import ListingDetailPage from './pages/ListingDetailPage';
-import CreateListingPage from './pages/CreateListingPage';
-import MessagesPage from './pages/MessagesPage';
-import ProfilePage from './pages/ProfilePage';
-import SavedPage from './pages/SavedPage';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import VerifyEmailPage from './pages/VerifyEmailPage';
-import TermsPage from './pages/TermsPage';
-import PrivacyPage from './pages/PrivacyPage';
+
+// Route-level code splitting: each page loads on demand, keeping the
+// initial bundle small (matters most on mobile data).
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const HomePage = lazy(() => import('./pages/HomePage'));
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const SeekersPage = lazy(() => import('./pages/SeekersPage'));
+const EditSeekerPage = lazy(() => import('./pages/EditSeekerPage'));
+const ListingsPage = lazy(() => import('./pages/ListingsPage'));
+const ListingDetailPage = lazy(() => import('./pages/ListingDetailPage'));
+const CreateListingPage = lazy(() => import('./pages/CreateListingPage'));
+const MessagesPage = lazy(() => import('./pages/MessagesPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const SavedPage = lazy(() => import('./pages/SavedPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const SignupPage = lazy(() => import('./pages/SignupPage'));
+const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
+const TermsPage = lazy(() => import('./pages/TermsPage'));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+
+// Centered spinner shown while a page chunk loads.
+function PageFallback() {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+      <div style={{ width: 36, height: 36, border: '3px solid #E5E1D8', borderTopColor: '#1B3A6B', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+    </div>
+  );
+}
 
 function Layout({ children }) {
   return (
@@ -42,6 +55,7 @@ export default function App() {
     <BrowserRouter>
       <ErrorBoundary>
       <AuthProvider>
+        <Suspense fallback={<PageFallback />}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
@@ -84,6 +98,7 @@ export default function App() {
           } />
           <Route path="*" element={<Layout><NotFoundPage /></Layout>} />
         </Routes>
+        </Suspense>
       </AuthProvider>
       </ErrorBoundary>
     </BrowserRouter>

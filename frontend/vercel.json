@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/listings/:id", "destination": "/api/listing-og?id=:id" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
