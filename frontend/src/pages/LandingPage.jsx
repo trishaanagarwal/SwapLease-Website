@@ -110,10 +110,36 @@ export default function LandingPage() {
             {listings.map(l => <ListingCard key={l.id} listing={l} />)}
           </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '64px 20px', background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}`, boxShadow: t.shadowSm }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14, color: t.inkFaint }}><Home size={42} /></div>
-            <p style={{ fontSize: 17, color: t.inkSoft, marginBottom: 8, fontWeight: 600 }}>No listings yet, be the first to post!</p>
-            <Link to="/create-listing" style={{ color: t.navy, textDecoration: 'none', fontWeight: 700 }}>List your lease →</Link>
+          /* Launch state: show what a listing looks like and make listing first an advantage */
+          <div style={{ background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}`, boxShadow: t.shadowSm, padding: 'clamp(24px, 4vw, 40px)', display: 'flex', flexWrap: 'wrap', gap: 36, alignItems: 'center' }}>
+            <div style={{ flex: '1 1 340px', minWidth: 0 }}>
+              <span style={{ color: t.gold, fontSize: 12.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Just launched</span>
+              <h3 className="font-display" style={{ fontSize: 'clamp(22px, 3.5vw, 28px)', fontWeight: 600, color: t.ink, margin: '10px 0 12px' }}>The first listings get seen by everyone</h3>
+              <p style={{ color: t.inkSoft, fontSize: 15, lineHeight: 1.65, margin: '0 0 8px' }}>
+                SwapLease is brand new, which means your listing won't be buried under a hundred others. Every student who joins this semester will see it.
+              </p>
+              <p style={{ color: t.inkSoft, fontSize: 15, lineHeight: 1.65, margin: '0 0 22px' }}>
+                Early listings carry a gold <strong style={{ color: t.gold }}>Founding lister</strong> badge, permanently.
+              </p>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <Link to="/create-listing" className="btn btn-coral" style={{ padding: '12px 24px', fontSize: 15 }}>List your lease <ArrowRight size={16} /></Link>
+                <a className="btn btn-soft" style={{ padding: '12px 24px', fontSize: 15 }}
+                  href={`https://wa.me/?text=${encodeURIComponent('Leaving your place early or hunting for one? SwapLease lets Melbourne students pass leases to each other directly — no agents, no fees. https://swaplease.homes')}`}
+                  target="_blank" rel="noopener noreferrer">Share to your group chat</a>
+              </div>
+            </div>
+            <div style={{ flex: '0 1 340px', minWidth: 280, position: 'relative' }}>
+              <div style={{ position: 'absolute', top: -12, left: 14, zIndex: 2, background: t.ink, color: '#fff', fontSize: 11.5, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', borderRadius: t.radiusSm, padding: '5px 11px' }}>
+                Preview · what your listing looks like
+              </div>
+              <div style={{ pointerEvents: 'none' }} aria-hidden="true">
+                <ListingCard listing={{
+                  id: 'preview', title: '2-bed apartment on Swanston St', suburb: 'Carlton', city: 'Melbourne',
+                  rent: 385, bedrooms: 2, bathrooms: 1, type: 'apartment', furnished: true,
+                  availableFrom: '2026-08-01', availableTo: '2027-02-01', images: [],
+                }} />
+              </div>
+            </div>
           </div>
         )}
       </section>

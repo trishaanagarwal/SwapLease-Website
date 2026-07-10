@@ -36,6 +36,12 @@ export default function ListingDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  // Reflect the listing in the tab title (and restore on leave).
+  useEffect(() => {
+    if (listing?.title) document.title = `${listing.title} · $${listing.rent}/wk · SwapLease`;
+    return () => { document.title = 'SwapLease: Student Lease Transfers in Melbourne'; };
+  }, [listing?.title, listing?.rent]);
+
   // Fetch the lister's current public profile (photo/name, or deleted state).
   useEffect(() => {
     if (!listing?.userId) return;
@@ -284,8 +290,28 @@ export default function ListingDetailPage() {
                   <MessageCircle size={18} /> {contacting ? 'Opening chat...' : `Message ${listing.userName?.split(' ')[0]}`}
                 </button>
               ) : (
-                <div style={{ background: '#E6EDE8', borderRadius: 10, padding: '12px 16px', marginBottom: 20, fontSize: 14, color: '#1C4D3E', fontWeight: 600, textAlign: 'center' }}>
-                  ✓ This is your listing
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ background: '#E6EDE8', borderRadius: 10, padding: '12px 16px', marginBottom: 12, fontSize: 14, color: '#1C4D3E', fontWeight: 600, textAlign: 'center' }}>
+                    ✓ This is your listing
+                  </div>
+                  {/* Owner share row: put the listing where students actually look */}
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#586079', marginBottom: 8 }}>Share it where students will see it:</div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <a href={`https://wa.me/?text=${encodeURIComponent(`Taking over my lease: ${listing.title}, ${listing.suburb} · $${listing.rent}/wk — ${window.location.href}`)}`}
+                      target="_blank" rel="noopener noreferrer"
+                      style={{ flex: 1, textAlign: 'center', textDecoration: 'none', background: '#1C4D3E', color: '#fff', borderRadius: 8, padding: '9px 0', fontSize: 13, fontWeight: 700 }}>
+                      WhatsApp
+                    </a>
+                    <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+                      target="_blank" rel="noopener noreferrer"
+                      style={{ flex: 1, textAlign: 'center', textDecoration: 'none', background: '#1B3A6B', color: '#fff', borderRadius: 8, padding: '9px 0', fontSize: 13, fontWeight: 700 }}>
+                      Facebook
+                    </a>
+                    <button onClick={handleShare}
+                      style={{ flex: 1, background: '#fff', border: '1.5px solid #D5CFC2', color: copied ? '#1C4D3E' : '#16223B', borderRadius: 8, padding: '9px 0', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                      {copied ? 'Copied ✓' : 'Copy link'}
+                    </button>
+                  </div>
                 </div>
               )}
 

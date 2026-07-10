@@ -5,6 +5,14 @@ import BookmarkButton from './BookmarkButton';
 
 const ico = { display: 'inline-flex', alignItems: 'center', gap: 5 };
 
+// Listings created during the launch window carry a permanent gold badge.
+const FOUNDING_CUTOFF = new Date('2026-10-01');
+const isFounding = (listing) => {
+  const ts = listing.createdAt;
+  const d = ts?.toDate ? ts.toDate() : ts ? new Date(ts) : null;
+  return d && d < FOUNDING_CUTOFF;
+};
+
 const chip = (bg, color) => ({ fontSize: 11.5, fontWeight: 700, color, background: bg, borderRadius: t.radiusSm, padding: '3px 9px', display: 'inline-block' });
 
 function NoPhoto() {
@@ -42,9 +50,10 @@ export default function ListingCard({ listing, horizontal = false }) {
 
           <div style={{ flex: 1, padding: '20px 24px', display: 'flex', justifyContent: 'space-between', gap: 16, minWidth: 0 }}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
                 <span style={chip(t.coralTint, t.coralDeep)}>{typeLabels[listing.type] || listing.type}</span>
                 {listing.furnished && <span style={chip(t.sageTint, t.sage)}>Furnished</span>}
+                {isFounding(listing) && <span style={chip(t.gold, '#fff')}>★ Founding lister</span>}
               </div>
 
               <h3 className="font-display" style={{ fontSize: 20, fontWeight: 700, color: t.ink, margin: '0 0 4px', lineHeight: 1.2 }}>{listing.title}</h3>
@@ -90,8 +99,15 @@ export default function ListingCard({ listing, horizontal = false }) {
             <img src={image} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : <NoPhoto />}
           {taken && <TakenTag />}
-          <div style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(4px)', borderRadius: t.radiusSm, padding: '4px 10px', fontSize: 11.5, fontWeight: 700, color: t.ink }}>
-            {typeLabels[listing.type] || listing.type}
+          <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
+            <div style={{ background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(4px)', borderRadius: t.radiusSm, padding: '4px 10px', fontSize: 11.5, fontWeight: 700, color: t.ink }}>
+              {typeLabels[listing.type] || listing.type}
+            </div>
+            {isFounding(listing) && (
+              <div style={{ background: t.gold, borderRadius: t.radiusSm, padding: '4px 10px', fontSize: 11, fontWeight: 800, color: '#fff', letterSpacing: '0.02em' }}>
+                ★ Founding lister
+              </div>
+            )}
           </div>
           {listing.furnished && (
             <div style={{ position: 'absolute', bottom: 12, left: 12, background: t.sage, borderRadius: t.radiusSm, padding: '4px 10px', fontSize: 11.5, fontWeight: 700, color: '#fff' }}>Furnished</div>

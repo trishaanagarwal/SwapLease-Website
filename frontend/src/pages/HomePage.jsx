@@ -113,8 +113,9 @@ export default function HomePage() {
         ) : (
           <div style={{ textAlign: 'center', padding: '56px 20px', background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}` }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14, color: t.inkFaint }}><Home size={40} /></div>
-            <p style={{ fontSize: 16, color: t.inkSoft, marginBottom: 8, fontWeight: 600 }}>No listings yet, be the first to post!</p>
-            <Link to="/create-listing" style={{ color: t.navy, textDecoration: 'none', fontWeight: 700 }}>List your lease →</Link>
+            <p style={{ fontSize: 16, color: t.ink, marginBottom: 6, fontWeight: 700 }}>Be the first to list, and get seen by everyone who joins</p>
+            <p style={{ fontSize: 14, color: t.inkSoft, marginBottom: 14 }}>Early listings carry a permanent gold Founding lister badge.</p>
+            <Link to="/create-listing" className="btn btn-coral" style={{ padding: '11px 22px', fontSize: 14.5 }}>List your lease →</Link>
           </div>
         )}
 
