@@ -49,7 +49,7 @@ export default function CreateListingPage() {
     title: '', description: '', address: '', suburb: '', city: '', state: '',
     rent: '', bond: '', availableFrom: '', availableTo: '',
     type: 'apartment', furnished: false, bedrooms: 1, bathrooms: 1, tenants: 1,
-    nearbyUni: '', images: [],
+    nearbyUni: '', images: [], onBehalfOf: '',
   });
 
   // Load existing listing when editing; only the owner may edit.
@@ -64,7 +64,7 @@ export default function CreateListingPage() {
         suburb: d.suburb || '', city: d.city || '', state: d.state || '',
         rent: d.rent ?? '', bond: d.bond ?? '', availableFrom: d.availableFrom || '', availableTo: d.availableTo || '',
         type: d.type || 'apartment', furnished: !!d.furnished, bedrooms: d.bedrooms || 1,
-        bathrooms: d.bathrooms || 1, tenants: d.tenants || 1, nearbyUni: d.nearbyUni || '', images: d.images || [],
+        bathrooms: d.bathrooms || 1, tenants: d.tenants || 1, nearbyUni: d.nearbyUni || '', images: d.images || [], onBehalfOf: d.onBehalfOf || '',
       });
     });
   }, [isEdit, editId, user, navigate]);
@@ -130,6 +130,7 @@ export default function CreateListingPage() {
       bathrooms: Number(form.bathrooms),
       tenants: Number(form.tenants),
       nearbyUni: form.nearbyUni || '',
+      onBehalfOf: clean(form.onBehalfOf) || null,
       images: form.images,
     };
     try {
@@ -176,12 +177,21 @@ export default function CreateListingPage() {
                 placeholder="e.g. Modern 2BR Apartment Near Melbourne Uni" required style={inputStyle}
                 onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
             </div>
-            <div>
+            <div style={{ marginBottom: 16 }}>
               <label style={labelStyle}>Description</label>
               <textarea value={form.description} onChange={e => set('description', e.target.value)}
                 rows={5} placeholder="Describe the property, its features, why you're transferring your lease..."
                 style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.5 }}
                 onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
+            </div>
+            <div>
+              <label style={labelStyle}>Posting for someone else? (optional)</label>
+              <input value={form.onBehalfOf} onChange={e => set('onBehalfOf', e.target.value)}
+                placeholder="Their first name, e.g. Sarah" maxLength={60} style={inputStyle}
+                onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
+              <div style={{ fontSize: 12.5, color: '#9AA0B0', marginTop: 6 }}>
+                Only with their permission. The listing will say you posted it on their behalf, and messages come to you so you can connect people with them.
+              </div>
             </div>
           </Section>
 

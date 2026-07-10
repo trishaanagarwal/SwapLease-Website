@@ -54,6 +54,7 @@ export default function ListingCard({ listing, horizontal = false }) {
                 <span style={chip(t.coralTint, t.coralDeep)}>{typeLabels[listing.type] || listing.type}</span>
                 {listing.furnished && <span style={chip(t.sageTint, t.sage)}>Furnished</span>}
                 {isFounding(listing) && <span style={chip(t.gold, '#fff')}>★ Founding lister</span>}
+                {listing.onBehalfOf && <span style={chip(t.honeyTint, '#8a6a1f')}>For {listing.onBehalfOf}</span>}
               </div>
 
               <h3 className="font-display" style={{ fontSize: 20, fontWeight: 700, color: t.ink, margin: '0 0 4px', lineHeight: 1.2 }}>{listing.title}</h3>
@@ -106,6 +107,11 @@ export default function ListingCard({ listing, horizontal = false }) {
             {isFounding(listing) && (
               <div style={{ background: t.gold, borderRadius: t.radiusSm, padding: '4px 10px', fontSize: 11, fontWeight: 800, color: '#fff', letterSpacing: '0.02em' }}>
                 ★ Founding lister
+              </div>
+            )}
+            {listing.onBehalfOf && (
+              <div style={{ background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(4px)', borderRadius: t.radiusSm, padding: '4px 10px', fontSize: 11, fontWeight: 700, color: '#8a6a1f' }}>
+                For {listing.onBehalfOf}
               </div>
             )}
           </div>

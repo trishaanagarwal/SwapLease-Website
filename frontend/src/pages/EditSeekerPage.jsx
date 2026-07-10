@@ -15,7 +15,7 @@ export default function EditSeekerPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const fileRef = useRef(null);
-  const [form, setForm] = useState({ about: '', budget: '', areas: '', moveInFrom: '', moveInTo: '', images: [] });
+  const [form, setForm] = useState({ about: '', budget: '', areas: '', moveInFrom: '', moveInTo: '', images: [], onBehalfOf: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -28,7 +28,7 @@ export default function EditSeekerPage() {
     getDoc(doc(db, 'seekers', user.id)).then(s => {
       if (s.exists()) {
         const d = s.data();
-        setForm({ about: d.about || '', budget: d.budget ?? '', areas: d.areas || '', moveInFrom: d.moveInFrom || '', moveInTo: d.moveInTo || '', images: d.images || [] });
+        setForm({ about: d.about || '', budget: d.budget ?? '', areas: d.areas || '', moveInFrom: d.moveInFrom || '', moveInTo: d.moveInTo || '', images: d.images || [], onBehalfOf: d.onBehalfOf || '' });
       }
     }).finally(() => setLoading(false));
   }, [user]);
@@ -83,6 +83,7 @@ export default function EditSeekerPage() {
       moveInFrom: form.moveInFrom || '',
       moveInTo: form.moveInTo || '',
       images: form.images.slice(0, 4),
+      onBehalfOf: clean(form.onBehalfOf) || null,
       updatedAt: serverTimestamp(),
     };
     const write = () => setDoc(doc(db, 'seekers', user.id), payload);
@@ -153,6 +154,14 @@ export default function EditSeekerPage() {
             <div>
               <label style={label}>Until (optional)</label>
               <input type="date" value={form.moveInTo} min={form.moveInFrom || undefined} onChange={e => set('moveInTo', e.target.value)} style={input} />
+            </div>
+          </div>
+
+          <div style={{ marginBottom: 20 }}>
+            <label style={label}>Posting for someone else? (optional)</label>
+            <input value={form.onBehalfOf} onChange={e => set('onBehalfOf', e.target.value)} placeholder="Their first name, e.g. Sarah" maxLength={60} style={input} />
+            <div style={{ fontSize: 12.5, color: t.inkFaint, marginTop: 6 }}>
+              Only with their permission. The post will say you're posting on their behalf, and messages come to you so you can connect people with them.
             </div>
           </div>
 

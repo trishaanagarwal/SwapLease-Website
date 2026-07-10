@@ -135,9 +135,14 @@ export default function HomePage() {
               <div key={s.id} style={{ background: '#fff', border: `1px solid ${t.border}`, borderRadius: t.radiusLg, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                 <SeekerPhoto src={s.images?.[0]} />
                 <div style={{ padding: '14px 16px 16px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-                    <span className="font-display" style={{ fontSize: 17, fontWeight: 600, color: t.ink }}>{s.userName}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
+                    <span className="font-display" style={{ fontSize: 17, fontWeight: 600, color: t.ink }}>{s.onBehalfOf || s.userName}</span>
                     <BadgeCheck size={15} color={t.green} />
+                    {s.onBehalfOf && (
+                      <span style={{ fontSize: 11.5, fontWeight: 700, color: '#8a6a1f', background: t.honeyTint, borderRadius: t.radiusSm, padding: '3px 9px' }}>
+                        via {s.userName?.split(' ')[0]}
+                      </span>
+                    )}
                   </div>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
                     {s.budget && <span style={{ fontSize: 12, fontWeight: 700, color: t.navy, background: t.coralTint, borderRadius: t.radiusSm, padding: '3px 9px' }}>${s.budget}/wk</span>}

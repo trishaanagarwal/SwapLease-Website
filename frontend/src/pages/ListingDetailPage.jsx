@@ -324,6 +324,11 @@ export default function ListingDetailPage() {
 
               <div style={{ borderTop: '1px solid #EFEBE2', paddingTop: 20 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: '#9AA0B0', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 }}>Listed by</div>
+                {listing.onBehalfOf && (
+                  <div style={{ background: '#F2EAD9', borderRadius: 8, padding: '10px 12px', marginBottom: 12, fontSize: 13, color: '#8a6a1f', lineHeight: 1.5 }}>
+                    Posted on behalf of <strong>{listing.onBehalfOf}</strong>. {listing.userName?.split(' ')[0]} manages this listing and will connect you with them.
+                  </div>
+                )}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   {lister?.photoURL && !lister?.deleted ? (
                     <img src={lister.photoURL} alt="" style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />

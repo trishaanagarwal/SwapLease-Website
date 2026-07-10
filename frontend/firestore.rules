@@ -60,7 +60,10 @@ service cloud.firestore {
         && request.resource.data.status == 'active'
         && request.resource.data.images is list
         && request.resource.data.images.size() <= 12
-        && (!('description' in request.resource.data) || request.resource.data.description.size() <= 5000);
+        && (!('description' in request.resource.data) || request.resource.data.description.size() <= 5000)
+        && (!('onBehalfOf' in request.resource.data)
+            || request.resource.data.onBehalfOf == null
+            || strLen(request.resource.data.onBehalfOf, 1, 60));
 
       // Owner-only edits; ownership and creation time are immutable, and the
       // same field constraints as create are re-validated to prevent tampering.
@@ -75,7 +78,10 @@ service cloud.firestore {
         && request.resource.data.status in ['active', 'taken']
         && request.resource.data.images is list
         && request.resource.data.images.size() <= 12
-        && (!('description' in request.resource.data) || request.resource.data.description.size() <= 5000);
+        && (!('description' in request.resource.data) || request.resource.data.description.size() <= 5000)
+        && (!('onBehalfOf' in request.resource.data)
+            || request.resource.data.onBehalfOf == null
+            || strLen(request.resource.data.onBehalfOf, 1, 60));
 
       allow delete: if signedIn() && resource.data.userId == request.auth.uid;
     }
@@ -91,7 +97,10 @@ service cloud.firestore {
         && (!('budget' in request.resource.data)
             || (request.resource.data.budget is number
                 && request.resource.data.budget >= 0
-                && request.resource.data.budget < 100000));
+                && request.resource.data.budget < 100000))
+        && (!('onBehalfOf' in request.resource.data)
+            || request.resource.data.onBehalfOf == null
+            || strLen(request.resource.data.onBehalfOf, 1, 60));
       allow delete: if isOwner(userId);
     }
 

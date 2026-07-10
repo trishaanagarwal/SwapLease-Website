@@ -66,7 +66,7 @@ export default function SeekersPage() {
     if (maxBudget > 0 && s.budget && s.budget > maxBudget) return false;
     if (search) {
       const q = search.toLowerCase();
-      const hay = [s.userName, s.about, s.areas, s.moveIn].filter(Boolean).join(' ').toLowerCase();
+      const hay = [s.userName, s.onBehalfOf, s.about, s.areas, s.moveIn].filter(Boolean).join(' ').toLowerCase();
       if (!hay.includes(q)) return false;
     }
     return true;
@@ -126,9 +126,14 @@ export default function SeekersPage() {
                   </div>
                 )}
                 <div style={{ padding: '14px 16px 16px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span className="font-display" style={{ fontSize: 18, fontWeight: 600, color: t.ink }}>{s.userName}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                    <span className="font-display" style={{ fontSize: 18, fontWeight: 600, color: t.ink }}>{s.onBehalfOf || s.userName}</span>
                     <BadgeCheck size={16} color={t.green} />
+                    {s.onBehalfOf && (
+                      <span style={{ fontSize: 11.5, fontWeight: 700, color: '#8a6a1f', background: t.honeyTint, borderRadius: t.radiusSm, padding: '3px 9px' }}>
+                        via {s.userName?.split(' ')[0]}
+                      </span>
+                    )}
                   </div>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '10px 0' }}>
                     {s.budget && <span style={{ fontSize: 12, fontWeight: 700, color: t.navy, background: t.coralTint, borderRadius: t.radiusSm, padding: '3px 9px' }}>${s.budget}/wk</span>}
