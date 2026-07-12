@@ -29,6 +29,7 @@ export function useMessageSeeker() {
           user1Id: user.id, user2Id: seeker.userId,
           user1Name: user.name, user2Name: seeker.userName,
           lastMessage: '', lastMessageAt: serverTimestamp(), createdAt: serverTimestamp(),
+          readBy: [user.id, seeker.userId],
         });
         convId = ref.id;
       }

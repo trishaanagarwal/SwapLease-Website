@@ -82,6 +82,7 @@ export default function ListingDetailPage() {
           lastMessage: '',
           lastMessageAt: serverTimestamp(),
           createdAt: serverTimestamp(),
+          readBy: [user.id, listing.userId],
         });
         convId = ref.id;
       }

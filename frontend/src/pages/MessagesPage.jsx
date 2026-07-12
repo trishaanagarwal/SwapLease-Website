@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   collection, query, where, orderBy, onSnapshot,
-  addDoc, doc, getDoc, updateDoc, serverTimestamp,
+  addDoc, doc, getDoc, updateDoc, serverTimestamp, arrayUnion,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { MessageSquare } from 'lucide-react';
@@ -95,6 +95,12 @@ export default function MessagesPage() {
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
+  // Mark conversation as read when opened.
+  useEffect(() => {
+    if (!activeConvId || !user) return;
+    updateDoc(doc(db, 'conversations', activeConvId), { readBy: arrayUnion(user.id) }).catch(() => {});
+  }, [activeConvId, user]);
+
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!newMsg.trim() || !activeConvId || sending) return;
@@ -111,6 +117,8 @@ export default function MessagesPage() {
       await updateDoc(doc(db, 'conversations', activeConvId), {
         lastMessage: content,
         lastMessageAt: serverTimestamp(),
+        lastSenderId: user.id,
+        readBy: [user.id],
       });
     } catch {
       setNewMsg(content);

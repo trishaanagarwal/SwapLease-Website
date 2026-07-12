@@ -4,10 +4,12 @@ import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, User, LogOut, ChevronDown, Plus, Bookmark, Users, Menu, X, Search } from 'lucide-react';
 import logoMark from '../assets/logo-mark.png';
 import { t } from '../theme';
+import { useUnreadCount } from '../hooks/useUnreadCount';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const unread = useUnreadCount(user?.id);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -50,8 +52,12 @@ export default function Navbar() {
               <Link to="/create-listing" className="btn btn-coral" style={{ fontSize: 14, padding: '9px 16px', marginLeft: 4 }}>
                 <Plus size={16} strokeWidth={2.4} /> <span className="nav-hide-xs">List your lease</span>
               </Link>
-              <Link to="/messages" className="nav-hide-sm" style={{ ...navLink, display: 'flex', alignItems: 'center', gap: 5 }}>
-                <MessageCircle size={17} /> Messages
+              <Link to="/messages" className="nav-hide-sm" style={{ ...navLink, display: 'flex', alignItems: 'center', gap: 5, position: 'relative' }}>
+                <span style={{ position: 'relative', display: 'inline-flex' }}>
+                  <MessageCircle size={17} />
+                  {unread > 0 && <span style={{ position: 'absolute', top: -3, right: -3, width: 8, height: 8, borderRadius: '50%', background: t.coral, border: '1.5px solid #F8F6F1' }} />}
+                </span>
+                Messages
               </Link>
               <div style={{ position: 'relative', marginLeft: 2 }} ref={dropdownRef}>
                 <button
@@ -98,7 +104,11 @@ export default function Navbar() {
                           onMouseEnter={e => e.currentTarget.style.background = t.cream}
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                           style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '10px 12px', textDecoration: 'none', color: t.ink, fontSize: 14, fontWeight: 600, borderRadius: t.radius }}>
-                          <item.icon size={17} color={t.inkSoft} /> {item.label}
+                          <span style={{ position: 'relative', display: 'inline-flex' }}>
+                            <item.icon size={17} color={t.inkSoft} />
+                            {item.to === '/messages' && unread > 0 && <span style={{ position: 'absolute', top: -3, right: -3, width: 8, height: 8, borderRadius: '50%', background: t.coral, border: '1.5px solid #fff' }} />}
+                          </span>
+                          {item.label}
                         </Link>
                       ))}
                     </div>
@@ -137,7 +147,11 @@ export default function Navbar() {
           ].map(item => (
             <Link key={item.to} to={item.to} onClick={() => setMenuOpen(false)}
               style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '12px 10px', textDecoration: 'none', color: t.ink, fontSize: 15, fontWeight: 600, borderRadius: t.radius }}>
-              <item.icon size={18} color={t.inkSoft} /> {item.label}
+              <span style={{ position: 'relative', display: 'inline-flex' }}>
+                <item.icon size={18} color={t.inkSoft} />
+                {item.to === '/messages' && unread > 0 && <span style={{ position: 'absolute', top: -3, right: -3, width: 8, height: 8, borderRadius: '50%', background: t.coral, border: '1.5px solid #F8F6F1' }} />}
+              </span>
+              {item.label}
             </Link>
           ))}
         </div>
