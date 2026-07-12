@@ -59,7 +59,7 @@ export default function ListingCard({ listing, horizontal = false }) {
               </div>
 
               <h3 className="font-display" style={{ fontSize: 20, fontWeight: 700, color: t.ink, margin: '0 0 4px', lineHeight: 1.2 }}>{listing.title}</h3>
-              <div style={{ fontSize: 13.5, color: t.inkSoft, marginBottom: 12 }}>{listing.suburb}, {listing.city}</div>
+              <div style={{ fontSize: 13.5, color: t.inkSoft, marginBottom: 12 }}>{[listing.suburb, listing.city].filter(Boolean).join(', ')}</div>
 
               <div style={{ display: 'flex', gap: 16, fontSize: 13.5, color: t.ink, fontWeight: 600 }}>
                 <span style={ico}><Bed size={16} /> {listing.bedrooms} bed</span>
@@ -110,11 +110,6 @@ export default function ListingCard({ listing, horizontal = false }) {
                 ★ Founding lister
               </div>
             )}
-            {listing.onBehalfOf && (
-              <div style={{ background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(4px)', borderRadius: t.radiusSm, padding: '4px 10px', fontSize: 11, fontWeight: 700, color: '#8a6a1f' }}>
-                For {listing.onBehalfOf}
-              </div>
-            )}
           </div>
           {listing.furnished && (
             <div style={{ position: 'absolute', bottom: 12, left: 12, background: t.sage, borderRadius: t.radiusSm, padding: '4px 10px', fontSize: 11.5, fontWeight: 700, color: '#fff' }}>Furnished</div>
@@ -123,7 +118,12 @@ export default function ListingCard({ listing, horizontal = false }) {
         </div>
         <div style={{ padding: '16px 18px 18px' }}>
           <h3 className="font-display" style={{ fontSize: 18, fontWeight: 700, color: t.ink, margin: '0 0 4px', lineHeight: 1.25 }}>{listing.title}</h3>
-          <div style={{ fontSize: 13, color: t.inkSoft, marginBottom: 10 }}>{listing.suburb}, {listing.city}</div>
+          <div style={{ fontSize: 13, color: t.inkSoft, marginBottom: 10 }}>{[listing.suburb, listing.city].filter(Boolean).join(', ')}</div>
+          {listing.onBehalfOf && (
+            <div style={{ display: 'inline-flex', alignItems: 'center', fontSize: 12, fontWeight: 700, color: '#8a6a1f', background: t.honeyTint, borderRadius: t.radiusSm, padding: '3px 9px', marginBottom: 10, marginRight: 6 }}>
+              For {listing.onBehalfOf}
+            </div>
+          )}
           {listing.availableFrom && (
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700, color: t.green, background: t.sageTint, borderRadius: t.radiusSm, padding: '3px 9px', marginBottom: 12 }}>
               <CalendarDays size={12} /> {listing.availableFrom}{listing.availableTo ? ` → ${listing.availableTo}` : ''}
