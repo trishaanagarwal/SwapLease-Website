@@ -47,7 +47,7 @@ export default function CreateListingPage() {
     title: '', description: '', address: '', suburb: '', city: '', state: '',
     rent: '', bond: '', availableFrom: '', availableTo: '',
     type: 'apartment', furnished: false, bedrooms: 1, bathrooms: 1, tenants: 1,
-    nearbyUnis: [], renewable: false, images: [], onBehalfOf: '',
+    nearbyUnis: [], renewable: false, images: [], onBehalfOf: '', contactLink: '',
   });
 
   // Load existing listing when editing; only the owner may edit.
@@ -64,7 +64,7 @@ export default function CreateListingPage() {
         type: d.type || 'apartment', furnished: !!d.furnished, bedrooms: d.bedrooms || 1,
         bathrooms: d.bathrooms || 1, tenants: d.tenants || 1,
         nearbyUnis: d.nearbyUnis || (d.nearbyUni ? [d.nearbyUni] : []), renewable: !!d.renewable,
-        images: d.images || [], onBehalfOf: d.onBehalfOf || '',
+        images: d.images || [], onBehalfOf: d.onBehalfOf || '', contactLink: d.contactLink || '',
       });
     });
   }, [isEdit, editId, user, navigate]);
@@ -133,6 +133,7 @@ export default function CreateListingPage() {
       nearbyUni: form.nearbyUnis.join(', '),
       renewable: form.renewable,
       onBehalfOf: clean(form.onBehalfOf) || null,
+      contactLink: clean(form.onBehalfOf) ? (clean(form.contactLink) || null) : null,
       images: form.images,
     };
     try {
@@ -192,9 +193,20 @@ export default function CreateListingPage() {
                 placeholder="Their first name, e.g. Sarah" maxLength={60} style={inputStyle}
                 onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
               <div style={{ fontSize: 12.5, color: '#9AA0B0', marginTop: 6 }}>
-                Only with their permission. The listing will say you posted it on their behalf, and messages come to you so you can connect people with them.
+                Only with their permission. The listing will say you posted it on their behalf.
               </div>
             </div>
+            {form.onBehalfOf.trim() && (
+              <div style={{ marginTop: 16 }}>
+                <label style={labelStyle}>{form.onBehalfOf.trim()}'s contact link (optional)</label>
+                <input value={form.contactLink} onChange={e => set('contactLink', e.target.value)}
+                  placeholder="Phone number, Instagram, or WhatsApp link" maxLength={200} style={inputStyle}
+                  onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
+                <div style={{ fontSize: 12.5, color: '#9AA0B0', marginTop: 6 }}>
+                  Add this and the “Contact” button will take interested people straight to {form.onBehalfOf.trim()}. Leave it blank to have messages come to your inbox instead.
+                </div>
+              </div>
+            )}
           </Section>
 
           <Section title="Location">

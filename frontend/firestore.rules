@@ -63,7 +63,10 @@ service cloud.firestore {
         && (!('description' in request.resource.data) || request.resource.data.description.size() <= 5000)
         && (!('onBehalfOf' in request.resource.data)
             || request.resource.data.onBehalfOf == null
-            || strLen(request.resource.data.onBehalfOf, 1, 60));
+            || strLen(request.resource.data.onBehalfOf, 1, 60))
+        && (!('contactLink' in request.resource.data)
+            || request.resource.data.contactLink == null
+            || strLen(request.resource.data.contactLink, 1, 200));
 
       // Owner-only edits; ownership and creation time are immutable, and the
       // same field constraints as create are re-validated to prevent tampering.
@@ -81,7 +84,10 @@ service cloud.firestore {
         && (!('description' in request.resource.data) || request.resource.data.description.size() <= 5000)
         && (!('onBehalfOf' in request.resource.data)
             || request.resource.data.onBehalfOf == null
-            || strLen(request.resource.data.onBehalfOf, 1, 60));
+            || strLen(request.resource.data.onBehalfOf, 1, 60))
+        && (!('contactLink' in request.resource.data)
+            || request.resource.data.contactLink == null
+            || strLen(request.resource.data.contactLink, 1, 200));
 
       allow delete: if signedIn() && resource.data.userId == request.auth.uid;
     }

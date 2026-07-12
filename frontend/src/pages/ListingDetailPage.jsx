@@ -16,6 +16,17 @@ function fmtDate(d) {
   catch { return d; }
 }
 
+// Turn a free-text contact into a usable href: phone → tel:, email → mailto:, otherwise a URL.
+function resolveContactHref(raw) {
+  const v = (raw || '').trim();
+  if (!v) return null;
+  if (/^https?:\/\//i.test(v)) return v;
+  if (/^www\./i.test(v)) return `https://${v}`;
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return `mailto:${v}`;
+  if (/^[+(]?[\d][\d\s()-]{5,}$/.test(v)) return `tel:${v.replace(/[\s()-]/g, '')}`;
+  return `https://${v}`;
+}
+
 export default function ListingDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -162,6 +173,9 @@ export default function ListingDetailPage() {
   const hasImages = images.length > 0;
   const isOwner = user?.id === listing.userId;
   const adminListed = ADMIN_EMAILS.includes(lister?.email);
+  // On-behalf listings can carry a direct contact link for the real leaseholder.
+  const contactHref = listing.onBehalfOf ? resolveContactHref(listing.contactLink) : null;
+  const contactIsExternal = contactHref ? /^https?:\/\//i.test(contactHref) : false;
 
   return (
     <div style={{ minHeight: '100vh', background: '#F8F6F1' }}>
@@ -289,10 +303,19 @@ export default function ListingDetailPage() {
               </div>
 
               {!isOwner ? (
-                <button onClick={handleContact} disabled={contacting}
-                  style={{ width: '100%', background: contacting ? '#5C7AA8' : '#1B3A6B', color: '#fff', border: 'none', borderRadius: 10, padding: 13, fontWeight: 700, fontSize: 16, cursor: contacting ? 'not-allowed' : 'pointer', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                  <MessageCircle size={18} /> {contacting ? 'Opening chat...' : (adminListed ? 'Message the SwapLease team' : `Message ${listing.userName?.split(' ')[0]}`)}
-                </button>
+                contactHref ? (
+                  <a href={contactHref}
+                    target={contactIsExternal ? '_blank' : undefined}
+                    rel={contactIsExternal ? 'noopener noreferrer' : undefined}
+                    style={{ width: '100%', boxSizing: 'border-box', background: '#1B3A6B', color: '#fff', borderRadius: 10, padding: 13, fontWeight: 700, fontSize: 16, textDecoration: 'none', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    <MessageCircle size={18} /> Contact {listing.onBehalfOf}
+                  </a>
+                ) : (
+                  <button onClick={handleContact} disabled={contacting}
+                    style={{ width: '100%', background: contacting ? '#5C7AA8' : '#1B3A6B', color: '#fff', border: 'none', borderRadius: 10, padding: 13, fontWeight: 700, fontSize: 16, cursor: contacting ? 'not-allowed' : 'pointer', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    <MessageCircle size={18} /> {contacting ? 'Opening chat...' : (adminListed ? 'Message the SwapLease team' : `Message ${listing.userName?.split(' ')[0]}`)}
+                  </button>
+                )
               ) : (
                 <div style={{ marginBottom: 20 }}>
                   <div style={{ background: '#E6EDE8', borderRadius: 10, padding: '12px 16px', marginBottom: 12, fontSize: 14, color: '#1C4D3E', fontWeight: 600, textAlign: 'center' }}>
@@ -319,7 +342,7 @@ export default function ListingDetailPage() {
                 </div>
               )}
 
-              {!user && (
+              {!user && !contactHref && (
                 <div style={{ textAlign: 'center', marginBottom: 20 }}>
                   <Link to="/login" style={{ color: '#1B3A6B', fontWeight: 700, textDecoration: 'none', fontSize: 14 }}>Sign in</Link>
                   <span style={{ color: '#586079', fontSize: 14 }}> to message the lister</span>
@@ -334,7 +357,9 @@ export default function ListingDetailPage() {
 
               {listing.onBehalfOf && (
                 <div style={{ background: '#F2EAD9', borderRadius: 8, padding: '10px 12px', marginBottom: 20, fontSize: 13, color: '#8a6a1f', lineHeight: 1.5 }}>
-                  Posted on behalf of <strong>{listing.onBehalfOf}</strong>. {adminListed ? 'The SwapLease team' : 'The lister'} manages this listing and will connect you with them.
+                  Posted on behalf of <strong>{listing.onBehalfOf}</strong>. {contactHref
+                    ? `The button above takes you straight to ${listing.onBehalfOf}.`
+                    : `${adminListed ? 'The SwapLease team' : 'The lister'} manages this listing and will connect you with them.`}
                 </div>
               )}
 
