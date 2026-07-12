@@ -160,6 +160,7 @@ export default function ListingDetailPage() {
   const images = listing.images?.length > 0 ? listing.images : [];
   const hasImages = images.length > 0;
   const isOwner = user?.id === listing.userId;
+  const adminListed = ADMIN_EMAILS.includes(lister?.email);
 
   return (
     <div style={{ minHeight: '100vh', background: '#F8F6F1' }}>
@@ -289,7 +290,7 @@ export default function ListingDetailPage() {
               {!isOwner ? (
                 <button onClick={handleContact} disabled={contacting}
                   style={{ width: '100%', background: contacting ? '#5C7AA8' : '#1B3A6B', color: '#fff', border: 'none', borderRadius: 10, padding: 13, fontWeight: 700, fontSize: 16, cursor: contacting ? 'not-allowed' : 'pointer', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                  <MessageCircle size={18} /> {contacting ? 'Opening chat...' : `Message ${listing.userName?.split(' ')[0]}`}
+                  <MessageCircle size={18} /> {contacting ? 'Opening chat...' : (adminListed ? 'Message the SwapLease team' : `Message ${listing.userName?.split(' ')[0]}`)}
                 </button>
               ) : (
                 <div style={{ marginBottom: 20 }}>
@@ -332,7 +333,7 @@ export default function ListingDetailPage() {
 
               {listing.onBehalfOf && (
                 <div style={{ background: '#F2EAD9', borderRadius: 8, padding: '10px 12px', marginBottom: 20, fontSize: 13, color: '#8a6a1f', lineHeight: 1.5 }}>
-                  Posted on behalf of <strong>{listing.onBehalfOf}</strong>. {listing.userName?.split(' ')[0]} manages this listing and will connect you with them.
+                  Posted on behalf of <strong>{listing.onBehalfOf}</strong>. {adminListed ? 'The SwapLease team' : 'The lister'} manages this listing and will connect you with them.
                 </div>
               )}
 
