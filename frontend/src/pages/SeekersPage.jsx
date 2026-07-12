@@ -1,26 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { collection, query, orderBy, getDocs, where, addDoc, serverTimestamp } from 'firebase/firestore';
-import { Users, MapPin, MessageCircle, ImageOff, PlusCircle, Search, BadgeCheck, CalendarDays, GraduationCap, Pencil } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { collection, query, orderBy, getDocs } from 'firebase/firestore';
+import { Users, MapPin, MessageCircle, PlusCircle, Search, BadgeCheck, CalendarDays, GraduationCap, Pencil } from 'lucide-react';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
+import SeekerPhoto from '../components/SeekerPhoto';
+import { useMessageSeeker } from '../hooks/useMessageSeeker';
 import { t } from '../theme';
-
-function Photo({ src }) {
-  if (src) return <img src={src} alt="" style={{ width: '100%', height: 200, objectFit: 'cover' }} />;
-  return (
-    <div style={{ width: '100%', height: 200, background: t.creamDeep, display: 'flex', alignItems: 'center', justifyContent: 'center', color: t.inkFaint }}>
-      <ImageOff size={28} />
-    </div>
-  );
-}
 
 export default function SeekersPage() {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const { messageSeeker: message, busy } = useMessageSeeker();
   const [seekers, setSeekers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState('');
   const [search, setSearch] = useState('');
   const [maxBudget, setMaxBudget] = useState(0);
 
@@ -30,35 +22,6 @@ export default function SeekersPage() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
-
-  const message = async (seeker) => {
-    if (!user) return navigate('/login');
-    if (!user.emailVerified) return navigate('/messages');
-    if (seeker.userId === user.id) return navigate('/roommates/edit');
-    setBusy(seeker.userId);
-    try {
-      const key = `roommate:${seeker.userId}`;
-      const snap = await getDocs(query(collection(db, 'conversations'),
-        where('listingId', '==', key), where('participants', 'array-contains', user.id)));
-      let convId;
-      if (!snap.empty) convId = snap.docs[0].id;
-      else {
-        const ref = await addDoc(collection(db, 'conversations'), {
-          listingId: key,
-          listingTitle: `${seeker.userName} · request`,
-          participants: [user.id, seeker.userId],
-          user1Id: user.id, user2Id: seeker.userId,
-          user1Name: user.name, user2Name: seeker.userName,
-          lastMessage: '', lastMessageAt: serverTimestamp(), createdAt: serverTimestamp(),
-        });
-        convId = ref.id;
-      }
-      navigate(`/messages?conv=${convId}`);
-    } catch {
-      alert('Could not start a conversation. Please try again.');
-      setBusy('');
-    }
-  };
 
   const myPost = user && seekers.find(s => s.userId === user.id);
 
@@ -117,7 +80,7 @@ export default function SeekersPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 22 }}>
             {filtered.map(s => (
               <div key={s.id} style={{ background: '#fff', border: `1px solid ${t.border}`, borderRadius: t.radiusLg, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                <Photo src={s.images?.[0]} />
+                <SeekerPhoto src={s.images?.[0]} />
                 {s.images?.length > 1 && (
                   <div style={{ display: 'flex', gap: 4, padding: '6px 6px 0' }}>
                     {s.images.slice(1, 4).map((img, i) => (

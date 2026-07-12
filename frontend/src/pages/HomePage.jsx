@@ -1,29 +1,21 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { collection, query, where, orderBy, limit, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import { Link } from 'react-router-dom';
+import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import ListingCard from '../components/ListingCard';
+import SeekerPhoto from '../components/SeekerPhoto';
+import { useMessageSeeker } from '../hooks/useMessageSeeker';
 import { t } from '../theme';
-import { PlusCircle, Search, Users, MessageCircle, ArrowRight, Home, MapPin, BadgeCheck, CalendarDays, ImageOff, GraduationCap, Pencil } from 'lucide-react';
-
-function SeekerPhoto({ src }) {
-  if (src) return <img src={src} alt="" style={{ width: '100%', height: 160, objectFit: 'cover' }} />;
-  return (
-    <div style={{ width: '100%', height: 160, background: t.creamDeep, display: 'flex', alignItems: 'center', justifyContent: 'center', color: t.inkFaint }}>
-      <ImageOff size={24} />
-    </div>
-  );
-}
+import { PlusCircle, Search, Users, MessageCircle, ArrowRight, Home, MapPin, BadgeCheck, CalendarDays, GraduationCap, Pencil } from 'lucide-react';
 
 export default function HomePage() {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const { messageSeeker, busy } = useMessageSeeker();
   const [listings, setListings] = useState([]);
   const [seekers, setSeekers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [seekersLoading, setSeekersLoading] = useState(true);
-  const [busy, setBusy] = useState('');
 
   useEffect(() => {
     getDocs(query(collection(db, 'listings'), where('status', '==', 'active'), orderBy('createdAt', 'desc'), limit(6)))
@@ -35,35 +27,6 @@ export default function HomePage() {
       .catch(() => {})
       .finally(() => setSeekersLoading(false));
   }, []);
-
-  // Same find-or-create flow as SeekersPage so conversations share one schema.
-  const messageSeeker = async (seeker) => {
-    if (!user) return navigate('/login');
-    if (!user.emailVerified) return navigate('/messages');
-    if (seeker.userId === user.id) return navigate('/roommates/edit');
-    setBusy(seeker.userId);
-    try {
-      const key = `roommate:${seeker.userId}`;
-      const snap = await getDocs(query(collection(db, 'conversations'),
-        where('listingId', '==', key), where('participants', 'array-contains', user.id)));
-      let convId;
-      if (!snap.empty) convId = snap.docs[0].id;
-      else {
-        const ref = await addDoc(collection(db, 'conversations'), {
-          listingId: key,
-          listingTitle: `${seeker.userName} · request`,
-          participants: [user.id, seeker.userId],
-          user1Id: user.id, user2Id: seeker.userId,
-          user1Name: user.name, user2Name: seeker.userName,
-          lastMessage: '', lastMessageAt: serverTimestamp(), createdAt: serverTimestamp(),
-        });
-        convId = ref.id;
-      }
-      navigate(`/messages?conv=${convId}`);
-    } catch {
-      setBusy('');
-    }
-  };
 
   const actions = [
     { to: '/create-listing', icon: PlusCircle, title: 'List your lease', desc: 'Post your place for someone to take over.', color: t.navy, tint: t.coralTint },
@@ -133,7 +96,7 @@ export default function HomePage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 22 }}>
             {seekers.map(s => (
               <div key={s.id} style={{ background: '#fff', border: `1px solid ${t.border}`, borderRadius: t.radiusLg, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                <SeekerPhoto src={s.images?.[0]} />
+                <SeekerPhoto src={s.images?.[0]} height={160} />
                 <div style={{ padding: '14px 16px 16px', display: 'flex', flexDirection: 'column', flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
                     <span className="font-display" style={{ fontSize: 17, fontWeight: 600, color: t.ink }}>{s.onBehalfOf || s.userName}</span>

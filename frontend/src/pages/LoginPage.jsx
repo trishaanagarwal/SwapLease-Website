@@ -1,14 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import DOMPurify from 'dompurify';
 import { sendEmailVerification, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import SocialAuth from '../components/SocialAuth';
 import logoMark from '../assets/logo-mark.png';
 import { t } from '../theme';
-
-const purify = (str) => DOMPurify.sanitize(str, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -40,7 +37,7 @@ export default function LoginPage() {
     setNeedsVerification(false);
     setLoading(true);
     try {
-      await login(purify(email.trim().toLowerCase()), password);
+      await login(email.trim().toLowerCase(), password);
       navigate('/');
     } catch (err) {
       if (err.needsVerification) {

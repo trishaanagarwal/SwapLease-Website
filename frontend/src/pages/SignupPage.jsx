@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import DOMPurify from 'dompurify';
 import { useAuth } from '../context/AuthContext';
 import { UNIVERSITIES } from '../constants';
 import { MailCheck } from 'lucide-react';
@@ -8,11 +7,9 @@ import SocialAuth from '../components/SocialAuth';
 import logoMark from '../assets/logo-mark.png';
 import { t } from '../theme';
 
-const purify = (str) => DOMPurify.sanitize(str, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
-
 function validate(form) {
   const errors = {};
-  const name = purify(form.name.trim());
+  const name = form.name.trim();
   if (name.length < 2) errors.name = 'Name must be at least 2 characters';
   if (!/^[\p{L}\s'.-]+$/u.test(name)) errors.name = 'Name may only contain letters and spaces';
   if (!form.email.includes('@')) errors.email = 'Enter a valid email address';
@@ -47,7 +44,7 @@ export default function SignupPage() {
     if (!agreed) { setAgreeError(true); return; }
     setLoading(true);
     try {
-      await register(purify(form.name.trim()), form.email.trim().toLowerCase(), form.password, form.university || '');
+      await register(form.name.trim(), form.email.trim().toLowerCase(), form.password, form.university || '');
       setSuccess(true);
     } catch (err) {
       if (err.code === 'auth/email-already-in-use') setServerError('An account with this email already exists.');

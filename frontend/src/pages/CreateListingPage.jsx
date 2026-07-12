@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { collection, addDoc, updateDoc, getDoc, doc, serverTimestamp } from 'firebase/firestore';
-import DOMPurify from 'dompurify';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import UniPicker from '../components/UniPicker';
@@ -9,8 +8,7 @@ import UniPicker from '../components/UniPicker';
 const CLOUDINARY_CLOUD = 'deewvfzpl';
 const CLOUDINARY_PRESET = 'slease';
 
-// Strip any HTML/script from user text (defense in depth; React also escapes on render).
-const clean = (str) => DOMPurify.sanitize((str || '').trim(), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+const clean = (str) => (str || '').trim();
 
 function Counter({ value, onChange, min = 1, max = 20 }) {
   return (

@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { doc, getDoc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
-import DOMPurify from 'dompurify';
 import { X } from 'lucide-react';
 import { db, auth } from '../firebase';
 import { useAuth } from '../context/AuthContext';
@@ -11,7 +10,7 @@ import { t } from '../theme';
 
 const CLOUDINARY_CLOUD = 'deewvfzpl';
 const CLOUDINARY_PRESET = 'slease';
-const clean = (s) => DOMPurify.sanitize((s || '').trim(), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+const clean = (s) => (s || '').trim();
 
 export default function EditSeekerPage() {
   const { user } = useAuth();
