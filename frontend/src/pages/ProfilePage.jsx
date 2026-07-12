@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Edit2, Save, X, PlusCircle, User, Mail, Trash2, Pencil, AlertTriangle, Camera } from 'lucide-react';
-import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { Edit2, Save, X, PlusCircle, User, Mail, Trash2, Pencil, AlertTriangle, Camera, Users, MapPin, CalendarDays } from 'lucide-react';
+import { collection, query, where, getDocs, doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import { UNIVERSITIES } from '../constants';
@@ -16,6 +16,7 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [listings, setListings] = useState([]);
+  const [myRequest, setMyRequest] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -57,6 +58,9 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!user) return;
+    getDoc(doc(db, 'seekers', user.id))
+      .then(snap => setMyRequest(snap.exists() ? snap.data() : null))
+      .catch(() => {});
     getDocs(query(collection(db, 'listings'), where('userId', '==', user.id)))
       .then(snap => {
         const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -322,6 +326,31 @@ export default function ProfilePage() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+
+        {/* ---- My request (roommate post) ---- */}
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+            <h2 className="font-display" style={{ fontSize: 24, fontWeight: 800, color: t.ink, margin: 0 }}>My Request</h2>
+            <Link to="/roommates/edit" className="btn btn-coral" style={{ fontSize: 14, padding: '10px 18px' }}>
+              {myRequest ? <><Pencil size={15} /> Edit Request</> : <><PlusCircle size={16} /> Post a Request</>}
+            </Link>
+          </div>
+          {myRequest ? (
+            <div style={{ background: '#fff', border: `1px solid ${t.border}`, borderRadius: t.radiusLg, padding: 20 }}>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+                {myRequest.budget && <span style={{ fontSize: 12, fontWeight: 700, color: t.navy, background: t.coralTint, borderRadius: t.radiusSm, padding: '3px 9px' }}>${myRequest.budget}/wk</span>}
+                {myRequest.areas && <span style={{ fontSize: 12, fontWeight: 700, color: t.inkSoft, background: t.cream, border: `1px solid ${t.border}`, borderRadius: t.radiusSm, padding: '3px 9px', display: 'inline-flex', alignItems: 'center', gap: 4 }}><MapPin size={12} /> {myRequest.areas}</span>}
+                {myRequest.moveIn && <span style={{ fontSize: 12, fontWeight: 700, color: t.inkSoft, background: t.cream, border: `1px solid ${t.border}`, borderRadius: t.radiusSm, padding: '3px 9px', display: 'inline-flex', alignItems: 'center', gap: 4 }}><CalendarDays size={12} /> {myRequest.moveIn}</span>}
+              </div>
+              <p style={{ fontSize: 14, color: t.inkSoft, lineHeight: 1.6, margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{myRequest.about}</p>
+            </div>
+          ) : (
+            <div style={{ background: '#fff', border: `1px solid ${t.border}`, borderRadius: t.radiusLg, padding: '28px 20px', textAlign: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10, color: t.inkFaint }}><Users size={30} /></div>
+              <p style={{ color: t.inkSoft, fontSize: 14.5, margin: 0 }}>No request yet. Post what you're looking for, a place, a room, or a roommate.</p>
             </div>
           )}
         </div>

@@ -5,7 +5,7 @@ import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import ListingCard from '../components/ListingCard';
 import { t } from '../theme';
-import { PlusCircle, Search, Users, MessageCircle, ArrowRight, Home, MapPin, BadgeCheck, CalendarDays, ImageOff, GraduationCap } from 'lucide-react';
+import { PlusCircle, Search, Users, MessageCircle, ArrowRight, Home, MapPin, BadgeCheck, CalendarDays, ImageOff, GraduationCap, Pencil } from 'lucide-react';
 
 function SeekerPhoto({ src }) {
   if (src) return <img src={src} alt="" style={{ width: '100%', height: 160, objectFit: 'cover' }} />;
@@ -152,7 +152,7 @@ export default function HomePage() {
                   </div>
                   <p style={{ fontSize: 13.5, color: t.inkSoft, lineHeight: 1.55, margin: '0 0 14px', flex: 1, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{s.about}</p>
                   <button onClick={() => messageSeeker(s)} disabled={busy === s.userId} className="btn btn-coral" style={{ padding: '10px 16px', fontSize: 14 }}>
-                    <MessageCircle size={15} /> {s.userId === user?.id ? 'This is you' : (busy === s.userId ? 'Opening…' : `Message ${s.userName?.split(' ')[0]}`)}
+                    {s.userId === user?.id ? <><Pencil size={14} /> Edit your request</> : <><MessageCircle size={15} /> {busy === s.userId ? 'Opening…' : `Message ${s.userName?.split(' ')[0]}`}</>}
                   </button>
                 </div>
               </div>
