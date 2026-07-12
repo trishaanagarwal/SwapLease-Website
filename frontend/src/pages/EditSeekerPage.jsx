@@ -5,6 +5,8 @@ import DOMPurify from 'dompurify';
 import { X } from 'lucide-react';
 import { db, auth } from '../firebase';
 import { useAuth } from '../context/AuthContext';
+import { SUBURBS } from '../constants';
+import UniPicker from '../components/UniPicker';
 import { t } from '../theme';
 
 const CLOUDINARY_CLOUD = 'deewvfzpl';
@@ -15,7 +17,7 @@ export default function EditSeekerPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const fileRef = useRef(null);
-  const [form, setForm] = useState({ about: '', budget: '', areas: '', moveInFrom: '', moveInTo: '', images: [], onBehalfOf: '' });
+  const [form, setForm] = useState({ about: '', budget: '', areaChips: [], areasExtra: '', unis: [], moveInFrom: '', moveInTo: '', images: [], onBehalfOf: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -28,7 +30,14 @@ export default function EditSeekerPage() {
     getDoc(doc(db, 'seekers', user.id)).then(s => {
       if (s.exists()) {
         const d = s.data();
-        setForm({ about: d.about || '', budget: d.budget ?? '', areas: d.areas || '', moveInFrom: d.moveInFrom || '', moveInTo: d.moveInTo || '', images: d.images || [], onBehalfOf: d.onBehalfOf || '' });
+        const parts = (d.areas || '').split(',').map(x => x.trim()).filter(Boolean);
+        setForm({
+          about: d.about || '', budget: d.budget ?? '',
+          areaChips: parts.filter(x => SUBURBS.includes(x)),
+          areasExtra: parts.filter(x => !SUBURBS.includes(x)).join(', '),
+          unis: d.unisList || [],
+          moveInFrom: d.moveInFrom || '', moveInTo: d.moveInTo || '', images: d.images || [], onBehalfOf: d.onBehalfOf || '',
+        });
       }
     }).finally(() => setLoading(false));
   }, [user]);
@@ -78,7 +87,9 @@ export default function EditSeekerPage() {
       userPhotoURL: user.photoURL || '',
       about: clean(form.about),
       budget: form.budget ? Number(form.budget) : null,
-      areas: clean(form.areas),
+      areas: [...form.areaChips, clean(form.areasExtra)].filter(Boolean).join(', '),
+      unis: form.unis.join(', '),
+      unisList: form.unis,
       moveIn: moveInDisplay(),
       moveInFrom: form.moveInFrom || '',
       moveInTo: form.moveInTo || '',
@@ -136,15 +147,34 @@ export default function EditSeekerPage() {
               placeholder="Who you are, what you study, what you're looking for in a place or roommate…"
               style={{ ...input, resize: 'vertical', lineHeight: 1.5 }} />
           </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={label}>Preferred areas</label>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {SUBURBS.map(sub => {
+                const on = form.areaChips.includes(sub);
+                return (
+                  <button key={sub} type="button"
+                    onClick={() => set('areaChips', on ? form.areaChips.filter(x => x !== sub) : [...form.areaChips, sub])}
+                    style={{ background: on ? t.navy : '#fff', color: on ? '#fff' : t.inkSoft, border: `1.5px solid ${on ? t.navy : t.borderStrong}`, borderRadius: t.pill, padding: '6px 13px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+                    {sub}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
             <div>
               <label style={label}>Weekly budget</label>
               <input type="number" value={form.budget} onChange={e => set('budget', e.target.value)} placeholder="e.g. 300" min="0" style={input} />
             </div>
             <div>
-              <label style={label}>Preferred areas</label>
-              <input value={form.areas} onChange={e => set('areas', e.target.value)} placeholder="e.g. Carlton, Parkville" style={input} />
+              <label style={label}>Other areas (optional)</label>
+              <input value={form.areasExtra} onChange={e => set('areasExtra', e.target.value)} placeholder="e.g. Coburg, Kensington" style={input} />
             </div>
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={label}>Near universities</label>
+            <UniPicker value={form.unis} onChange={v => set('unis', v)} />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
             <div>

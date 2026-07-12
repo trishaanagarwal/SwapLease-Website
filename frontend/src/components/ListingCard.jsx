@@ -53,6 +53,7 @@ export default function ListingCard({ listing, horizontal = false }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
                 <span style={chip(t.coralTint, t.coralDeep)}>{typeLabels[listing.type] || listing.type}</span>
                 {listing.furnished && <span style={chip(t.sageTint, t.sage)}>Furnished</span>}
+                {listing.renewable && <span style={chip(t.sageTint, t.sage)}>Renewable</span>}
                 {isFounding(listing) && <span style={chip(t.gold, '#fff')}>★ Founding lister</span>}
                 {listing.onBehalfOf && <span style={chip(t.honeyTint, '#8a6a1f')}>For {listing.onBehalfOf}</span>}
               </div>

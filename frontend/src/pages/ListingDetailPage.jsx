@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { MapPin, GraduationCap, MessageCircle, Flag, ImageOff, Share2, Check } from 'lucide-react';
 import BookmarkButton from '../components/BookmarkButton';
 import SafetyTips from '../components/SafetyTips';
+import { ADMIN_EMAILS } from '../constants';
 
 const typeLabels = { apartment: 'Apartment', house: 'House', studio: 'Studio', student_accom: 'Student Accommodation' };
 
@@ -47,7 +48,7 @@ export default function ListingDetailPage() {
     if (!listing?.userId) return;
     getDoc(doc(db, 'users', listing.userId))
       .then(s => setLister(s.exists()
-        ? { name: s.data().name, photoURL: s.data().photoURL || '' }
+        ? { name: s.data().name, photoURL: s.data().photoURL || '', email: (s.data().email || '').toLowerCase() }
         : { deleted: true }))
       .catch(() => {});
   }, [listing?.userId]);
@@ -251,6 +252,7 @@ export default function ListingDetailPage() {
                   { label: 'Bedrooms', value: `${listing.bedrooms}` },
                   { label: 'Bathrooms', value: `${listing.bathrooms}` },
                   { label: 'Total tenants', value: `${listing.tenants || 1}` },
+                  typeof listing.renewable === 'boolean' && { label: 'Renewable', value: listing.renewable ? 'Yes' : 'No' },
                   listing.availableFrom && { label: 'Available from', value: fmtDate(listing.availableFrom) },
                   listing.availableTo && { label: 'Lease ends', value: fmtDate(listing.availableTo) },
                 ].filter(Boolean).map((item, i) => (
@@ -322,30 +324,18 @@ export default function ListingDetailPage() {
                 </div>
               )}
 
-              <div style={{ borderTop: '1px solid #EFEBE2', paddingTop: 20 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: '#9AA0B0', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12 }}>Listed by</div>
-                {listing.onBehalfOf && (
-                  <div style={{ background: '#F2EAD9', borderRadius: 8, padding: '10px 12px', marginBottom: 12, fontSize: 13, color: '#8a6a1f', lineHeight: 1.5 }}>
-                    Posted on behalf of <strong>{listing.onBehalfOf}</strong>. {listing.userName?.split(' ')[0]} manages this listing and will connect you with them.
-                  </div>
-                )}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  {lister?.photoURL && !lister?.deleted ? (
-                    <img src={lister.photoURL} alt="" style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                  ) : (
-                    <div style={{ width: 44, height: 44, borderRadius: '50%', background: lister?.deleted ? '#9AA0B0' : '#1B3A6B', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 18, flexShrink: 0 }}>
-                      {lister?.deleted ? '?' : (listing.userName?.[0]?.toUpperCase())}
-                    </div>
-                  )}
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 15, color: lister?.deleted ? '#9AA0B0' : '#16223B', fontStyle: lister?.deleted ? 'italic' : 'normal' }}>
-                      {lister?.deleted ? 'Deleted profile' : (lister?.name || listing.userName)}
-                    </div>
-                    {!lister?.deleted && listing.userUniversity && <div style={{ fontSize: 13, color: '#586079', marginTop: 2 }}>{listing.userUniversity}</div>}
-                  </div>
+              {ADMIN_EMAILS.includes(lister?.email) && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, background: '#F2EAD9', borderRadius: 8, padding: '9px 12px', marginBottom: 20, fontSize: 13, color: '#8a6a1f', fontWeight: 700 }}>
+                  ★ Listed by the SwapLease team
                 </div>
-                {listing.userBio && <p style={{ fontSize: 13, color: '#586079', marginTop: 12, lineHeight: 1.5 }}>{listing.userBio}</p>}
-              </div>
+              )}
+
+              {listing.onBehalfOf && (
+                <div style={{ background: '#F2EAD9', borderRadius: 8, padding: '10px 12px', marginBottom: 20, fontSize: 13, color: '#8a6a1f', lineHeight: 1.5 }}>
+                  Posted on behalf of <strong>{listing.onBehalfOf}</strong>. {listing.userName?.split(' ')[0]} manages this listing and will connect you with them.
+                </div>
+              )}
+
 
               {!isOwner && (
                 <div style={{ borderTop: '1px solid #EFEBE2', paddingTop: 14, marginTop: 18, textAlign: 'center' }}>

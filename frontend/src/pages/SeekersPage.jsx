@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { collection, query, orderBy, getDocs, where, addDoc, serverTimestamp } from 'firebase/firestore';
-import { Users, MapPin, MessageCircle, ImageOff, PlusCircle, Search, BadgeCheck, CalendarDays } from 'lucide-react';
+import { Users, MapPin, MessageCircle, ImageOff, PlusCircle, Search, BadgeCheck, CalendarDays, GraduationCap } from 'lucide-react';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import { t } from '../theme';
@@ -66,7 +66,7 @@ export default function SeekersPage() {
     if (maxBudget > 0 && s.budget && s.budget > maxBudget) return false;
     if (search) {
       const q = search.toLowerCase();
-      const hay = [s.userName, s.onBehalfOf, s.about, s.areas, s.moveIn].filter(Boolean).join(' ').toLowerCase();
+      const hay = [s.userName, s.onBehalfOf, s.about, s.areas, s.unis, s.moveIn].filter(Boolean).join(' ').toLowerCase();
       if (!hay.includes(q)) return false;
     }
     return true;
@@ -139,6 +139,7 @@ export default function SeekersPage() {
                     {s.budget && <span style={{ fontSize: 12, fontWeight: 700, color: t.navy, background: t.coralTint, borderRadius: t.radiusSm, padding: '3px 9px' }}>${s.budget}/wk</span>}
                     {s.areas && <span style={{ fontSize: 12, fontWeight: 700, color: t.inkSoft, background: t.cream, border: `1px solid ${t.border}`, borderRadius: t.radiusSm, padding: '3px 9px', display: 'inline-flex', alignItems: 'center', gap: 4 }}><MapPin size={12} /> {s.areas}</span>}
                     {s.moveIn && <span style={{ fontSize: 12, fontWeight: 700, color: t.inkSoft, background: t.cream, border: `1px solid ${t.border}`, borderRadius: t.radiusSm, padding: '3px 9px', display: 'inline-flex', alignItems: 'center', gap: 4 }}><CalendarDays size={12} /> {s.moveIn}</span>}
+                    {s.unis && <span style={{ fontSize: 12, fontWeight: 700, color: t.plum, background: t.plumTint, borderRadius: t.radiusSm, padding: '3px 9px', display: 'inline-flex', alignItems: 'center', gap: 4 }}><GraduationCap size={12} /> {s.unis}</span>}
                   </div>
                   <p style={{ fontSize: 13.5, color: t.inkSoft, lineHeight: 1.55, margin: '0 0 14px', flex: 1, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{s.about}</p>
                   <button onClick={() => message(s)} disabled={busy === s.userId} className="btn btn-coral" style={{ padding: '10px 16px', fontSize: 14 }}>

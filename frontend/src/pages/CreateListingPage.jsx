@@ -4,7 +4,7 @@ import { collection, addDoc, updateDoc, getDoc, doc, serverTimestamp } from 'fir
 import DOMPurify from 'dompurify';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
-import { UNIVERSITIES } from '../constants';
+import UniPicker from '../components/UniPicker';
 
 const CLOUDINARY_CLOUD = 'deewvfzpl';
 const CLOUDINARY_PRESET = 'slease';
@@ -49,7 +49,7 @@ export default function CreateListingPage() {
     title: '', description: '', address: '', suburb: '', city: '', state: '',
     rent: '', bond: '', availableFrom: '', availableTo: '',
     type: 'apartment', furnished: false, bedrooms: 1, bathrooms: 1, tenants: 1,
-    nearbyUni: '', images: [], onBehalfOf: '',
+    nearbyUnis: [], renewable: false, images: [], onBehalfOf: '',
   });
 
   // Load existing listing when editing; only the owner may edit.
@@ -64,7 +64,9 @@ export default function CreateListingPage() {
         suburb: d.suburb || '', city: d.city || '', state: d.state || '',
         rent: d.rent ?? '', bond: d.bond ?? '', availableFrom: d.availableFrom || '', availableTo: d.availableTo || '',
         type: d.type || 'apartment', furnished: !!d.furnished, bedrooms: d.bedrooms || 1,
-        bathrooms: d.bathrooms || 1, tenants: d.tenants || 1, nearbyUni: d.nearbyUni || '', images: d.images || [], onBehalfOf: d.onBehalfOf || '',
+        bathrooms: d.bathrooms || 1, tenants: d.tenants || 1,
+        nearbyUnis: d.nearbyUnis || (d.nearbyUni ? [d.nearbyUni] : []), renewable: !!d.renewable,
+        images: d.images || [], onBehalfOf: d.onBehalfOf || '',
       });
     });
   }, [isEdit, editId, user, navigate]);
@@ -129,7 +131,9 @@ export default function CreateListingPage() {
       bedrooms: Number(form.bedrooms),
       bathrooms: Number(form.bathrooms),
       tenants: Number(form.tenants),
-      nearbyUni: form.nearbyUni || '',
+      nearbyUnis: form.nearbyUnis,
+      nearbyUni: form.nearbyUnis.join(', '),
+      renewable: form.renewable,
       onBehalfOf: clean(form.onBehalfOf) || null,
       images: form.images,
     };
@@ -215,12 +219,8 @@ export default function CreateListingPage() {
               </div>
             </div>
             <div>
-              <label style={labelStyle}>Nearby university</label>
-              <select value={form.nearbyUni} onChange={e => set('nearbyUni', e.target.value)}
-                style={{ ...inputStyle, background: '#fff', cursor: 'pointer', appearance: 'auto' }}>
-                <option value="">Select nearby university...</option>
-                {UNIVERSITIES.map(u => <option key={u} value={u}>{u}</option>)}
-              </select>
+              <label style={labelStyle}>Nearby universities</label>
+              <UniPicker value={form.nearbyUnis} onChange={v => set('nearbyUnis', v)} placeholder="Add nearby universities..." />
             </div>
           </Section>
 
@@ -286,6 +286,13 @@ export default function CreateListingPage() {
                 <div style={{ position: 'absolute', top: 3, left: form.furnished ? 23 : 3, width: 18, height: 18, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
               </div>
               <span style={{ fontSize: 14, fontWeight: 600, color: '#3E4763' }}>Furnished</span>
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', marginTop: 14 }}>
+              <div onClick={() => set('renewable', !form.renewable)}
+                style={{ width: 44, height: 24, borderRadius: 12, background: form.renewable ? '#1C4D3E' : '#D5CFC2', position: 'relative', transition: 'background 0.2s', cursor: 'pointer', flexShrink: 0 }}>
+                <div style={{ position: 'absolute', top: 3, left: form.renewable ? 23 : 3, width: 18, height: 18, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+              </div>
+              <span style={{ fontSize: 14, fontWeight: 600, color: '#3E4763' }}>Lease renewable after the end date</span>
             </label>
           </Section>
 

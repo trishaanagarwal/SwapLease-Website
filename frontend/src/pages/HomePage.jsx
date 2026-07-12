@@ -5,7 +5,7 @@ import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import ListingCard from '../components/ListingCard';
 import { t } from '../theme';
-import { PlusCircle, Search, Users, MessageCircle, ArrowRight, Home, MapPin, BadgeCheck, CalendarDays, ImageOff } from 'lucide-react';
+import { PlusCircle, Search, Users, MessageCircle, ArrowRight, Home, MapPin, BadgeCheck, CalendarDays, ImageOff, GraduationCap } from 'lucide-react';
 
 function SeekerPhoto({ src }) {
   if (src) return <img src={src} alt="" style={{ width: '100%', height: 160, objectFit: 'cover' }} />;
@@ -148,6 +148,7 @@ export default function HomePage() {
                     {s.budget && <span style={{ fontSize: 12, fontWeight: 700, color: t.navy, background: t.coralTint, borderRadius: t.radiusSm, padding: '3px 9px' }}>${s.budget}/wk</span>}
                     {s.areas && <span style={{ fontSize: 12, fontWeight: 700, color: t.inkSoft, background: t.cream, border: `1px solid ${t.border}`, borderRadius: t.radiusSm, padding: '3px 9px', display: 'inline-flex', alignItems: 'center', gap: 4 }}><MapPin size={11} /> {s.areas}</span>}
                     {s.moveIn && <span style={{ fontSize: 12, fontWeight: 700, color: t.inkSoft, background: t.cream, border: `1px solid ${t.border}`, borderRadius: t.radiusSm, padding: '3px 9px', display: 'inline-flex', alignItems: 'center', gap: 4 }}><CalendarDays size={11} /> {s.moveIn}</span>}
+                    {s.unis && <span style={{ fontSize: 12, fontWeight: 700, color: t.plum, background: t.plumTint, borderRadius: t.radiusSm, padding: '3px 9px', display: 'inline-flex', alignItems: 'center', gap: 4 }}><GraduationCap size={11} /> {s.unis}</span>}
                   </div>
                   <p style={{ fontSize: 13.5, color: t.inkSoft, lineHeight: 1.55, margin: '0 0 14px', flex: 1, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{s.about}</p>
                   <button onClick={() => messageSeeker(s)} disabled={busy === s.userId} className="btn btn-coral" style={{ padding: '10px 16px', fontSize: 14 }}>

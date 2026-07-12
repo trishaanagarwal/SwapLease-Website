@@ -37,3 +37,9 @@ export const UNIVERSITIES = [
   'Victoria University',
   'Western Sydney University',
 ].sort((a, b) => a.localeCompare(b));
+
+// Popular Melbourne suburbs offered as quick picks.
+export const SUBURBS = ['Carlton', 'Fitzroy', 'Southbank', 'Parkville', 'Brunswick', 'Clayton', 'Richmond', 'St Kilda', 'Footscray', 'Hawthorn', 'Docklands', 'CBD'];
+
+// Accounts shown with the SwapLease Admin badge.
+export const ADMIN_EMAILS = ['trishaan.agarwal@gmail.com'];
