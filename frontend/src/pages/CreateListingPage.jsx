@@ -75,7 +75,7 @@ export default function CreateListingPage() {
   const ratioLabel = form.tenants === 1
     ? `${form.bathrooms} bathroom${form.bathrooms > 1 ? 's' : ''} for 1 person`
     : `${form.bathrooms} bathroom${form.bathrooms > 1 ? 's' : ''} for ${form.tenants} people (${bathPerTenant} per person)`;
-  const ratioColor = (form.bathrooms / form.tenants) >= 1 ? '#1C4D3E' : (form.bathrooms / form.tenants) >= 0.5 ? '#d97706' : '#dc2626';
+  const ratioColor = '#586079';
 
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files);

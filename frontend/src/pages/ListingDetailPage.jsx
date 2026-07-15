@@ -105,6 +105,13 @@ export default function ListingDetailPage() {
     }
   };
 
+  // Open a share URL reliably: new tab where allowed, same-tab fallback so it
+  // never silently fails to open (some mobile browsers block target="_blank").
+  const openShare = (url) => {
+    const w = window.open(url, '_blank', 'noopener,noreferrer');
+    if (!w) window.location.href = url;
+  };
+
   // Share: native share sheet on mobile, copy-link fallback on desktop.
   const [copied, setCopied] = useState(false);
   const handleShare = async () => {
@@ -295,7 +302,8 @@ export default function ListingDetailPage() {
           </div>
 
           <div style={{ flex: '1 1 300px', maxWidth: 420, minWidth: 0 }}>
-            <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E1D8', padding: 24, position: 'sticky', top: 80 }}>
+            <div style={{ position: 'sticky', top: 80 }}>
+            <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E1D8', padding: 24 }}>
               <div style={{ marginBottom: 20 }}>
                 <span style={{ fontSize: 32, fontWeight: 900, color: '#16223B' }}>${listing.rent?.toLocaleString()}</span>
                 <span style={{ fontSize: 16, color: '#586079' }}> /week</span>
@@ -324,18 +332,16 @@ export default function ListingDetailPage() {
                   {/* Owner share row: put the listing where students actually look */}
                   <div style={{ fontSize: 13, fontWeight: 600, color: '#586079', marginBottom: 8 }}>Share it where students will see it:</div>
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <a href={`https://wa.me/?text=${encodeURIComponent(`Taking over my lease: ${listing.title}, ${listing.suburb} · $${listing.rent}/wk — ${window.location.href}`)}`}
-                      target="_blank" rel="noopener noreferrer"
-                      style={{ flex: 1, textAlign: 'center', textDecoration: 'none', background: '#1C4D3E', color: '#fff', borderRadius: 8, padding: '9px 0', fontSize: 13, fontWeight: 700 }}>
+                    <button onClick={() => openShare(`https://wa.me/?text=${encodeURIComponent(`Taking over my lease: ${listing.title}, ${listing.suburb} · $${listing.rent}/wk — ${window.location.href}`)}`)}
+                      style={{ flex: 1, textAlign: 'center', border: 'none', cursor: 'pointer', fontFamily: 'inherit', background: '#1C4D3E', color: '#fff', borderRadius: 8, padding: '9px 0', fontSize: 13, fontWeight: 700 }}>
                       WhatsApp
-                    </a>
-                    <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
-                      target="_blank" rel="noopener noreferrer"
-                      style={{ flex: 1, textAlign: 'center', textDecoration: 'none', background: '#1B3A6B', color: '#fff', borderRadius: 8, padding: '9px 0', fontSize: 13, fontWeight: 700 }}>
+                    </button>
+                    <button onClick={() => openShare(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`)}
+                      style={{ flex: 1, textAlign: 'center', border: 'none', cursor: 'pointer', fontFamily: 'inherit', background: '#1B3A6B', color: '#fff', borderRadius: 8, padding: '9px 0', fontSize: 13, fontWeight: 700 }}>
                       Facebook
-                    </a>
+                    </button>
                     <button onClick={handleShare}
-                      style={{ flex: 1, background: '#fff', border: '1.5px solid #D5CFC2', color: copied ? '#1C4D3E' : '#16223B', borderRadius: 8, padding: '9px 0', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                      style={{ flex: 1, background: '#fff', border: '1.5px solid #D5CFC2', cursor: 'pointer', fontFamily: 'inherit', color: copied ? '#1C4D3E' : '#16223B', borderRadius: 8, padding: '9px 0', fontSize: 13, fontWeight: 700 }}>
                       {copied ? 'Copied ✓' : 'Copy link'}
                     </button>
                   </div>
@@ -379,6 +385,7 @@ export default function ListingDetailPage() {
             </div>
 
             <div style={{ marginTop: 16 }}><SafetyTips compact /></div>
+            </div>
           </div>
         </div>
       </div>
