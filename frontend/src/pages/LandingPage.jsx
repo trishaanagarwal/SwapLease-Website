@@ -38,8 +38,8 @@ export default function LandingPage() {
           </div>
 
           <h1 className="font-display" style={{ fontSize: 'clamp(34px, 7vw, 64px)', fontWeight: 600, color: t.ink, lineHeight: 1.08, margin: '0 0 20px', letterSpacing: '-0.02em' }}>
-            Transfer your lease,<br />
-            <span style={{ fontStyle: 'italic', color: t.navy }}>without the agent.</span>
+            Skip the Fee.<br />
+            <span style={{ fontStyle: 'italic', color: t.navy }}>Find the Key.</span>
           </h1>
 
           <p style={{ fontSize: 'clamp(16px, 2.4vw, 18.5px)', color: t.inkSoft, margin: '0 0 30px', lineHeight: 1.65, maxWidth: 560, fontWeight: 500 }}>

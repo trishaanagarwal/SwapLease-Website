@@ -3,7 +3,7 @@
 // Humans get the same SPA shell; only the <head> meta differs.
 
 const PROJECT = 'swap-lease';
-const FALLBACK_IMG = 'https://swaplease.homes/og-image.png';
+const FALLBACK_IMG = 'https://swaplease.homes/og-image-v2.png';
 
 const esc = (s = '') =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

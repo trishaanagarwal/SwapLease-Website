@@ -51,7 +51,7 @@ export default function ListingDetailPage() {
   // Reflect the listing in the tab title (and restore on leave).
   useEffect(() => {
     if (listing?.title) document.title = `${listing.title} · $${listing.rent}/wk · SwapLease`;
-    return () => { document.title = 'SwapLease: Student Lease Transfers in Melbourne'; };
+    return () => { document.title = 'SwapLease — Skip the Fee. Find the Key.'; };
   }, [listing?.title, listing?.rent]);
 
   // Fetch the lister's current public profile (photo/name, or deleted state).
