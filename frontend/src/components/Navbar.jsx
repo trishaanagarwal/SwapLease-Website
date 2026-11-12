@@ -39,7 +39,7 @@ export default function Navbar() {
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none', flexShrink: 0 }}>
           <img src={logoMark} alt="" style={{ height: 28, width: 'auto', display: 'block' }} />
           <span className="font-display nav-wordmark" style={{ fontSize: 21, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1 }}>
-            <span style={{ color: t.navy }}>Swap</span><span style={{ color: t.green }}>Lease</span>
+            <span style={{ color: t.ink }}>Swap</span><span style={{ color: t.green }}>Lease</span>
           </span>
         </Link>
 
@@ -55,7 +55,7 @@ export default function Navbar() {
               <Link to="/messages" className="nav-hide-sm" style={{ ...navLink, display: 'flex', alignItems: 'center', gap: 5, position: 'relative' }}>
                 <span style={{ position: 'relative', display: 'inline-flex' }}>
                   <MessageCircle size={17} />
-                  {unread > 0 && <span style={{ position: 'absolute', top: -3, right: -3, width: 8, height: 8, borderRadius: '50%', background: t.coral, border: '1.5px solid #F8F6F1' }} />}
+                  {unread > 0 && <span style={{ position: 'absolute', top: -3, right: -3, width: 8, height: 8, borderRadius: '50%', background: t.coral, border: '1.5px solid #F8F8F8' }} />}
                 </span>
                 Messages
               </Link>
@@ -149,7 +149,7 @@ export default function Navbar() {
               style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '12px 10px', textDecoration: 'none', color: t.ink, fontSize: 15, fontWeight: 600, borderRadius: t.radius }}>
               <span style={{ position: 'relative', display: 'inline-flex' }}>
                 <item.icon size={18} color={t.inkSoft} />
-                {item.to === '/messages' && unread > 0 && <span style={{ position: 'absolute', top: -3, right: -3, width: 8, height: 8, borderRadius: '50%', background: t.coral, border: '1.5px solid #F8F6F1' }} />}
+                {item.to === '/messages' && unread > 0 && <span style={{ position: 'absolute', top: -3, right: -3, width: 8, height: 8, borderRadius: '50%', background: t.coral, border: '1.5px solid #F8F8F8' }} />}
               </span>
               {item.label}
             </Link>

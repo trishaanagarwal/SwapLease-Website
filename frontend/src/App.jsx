@@ -29,7 +29,7 @@ const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 function PageFallback() {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-      <div style={{ width: 36, height: 36, border: '3px solid #E5E1D8', borderTopColor: '#1B3A6B', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ width: 36, height: 36, border: '3px solid #E5E1D8', borderTopColor: '#1F6B3A', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
     </div>
   );
 }
@@ -47,7 +47,7 @@ function Layout({ children }) {
 function HomeRoute() {
   const { user, loading } = useAuth();
   if (loading) return null;
-  return user ? <HomePage /> : <LandingPage />;
+  return user ? <Layout><HomePage /></Layout> : <LandingPage />;
 }
 
 export default function App() {
@@ -62,7 +62,7 @@ export default function App() {
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/terms" element={<Layout><TermsPage /></Layout>} />
           <Route path="/privacy" element={<Layout><PrivacyPage /></Layout>} />
-          <Route path="/" element={<Layout><HomeRoute /></Layout>} />
+          <Route path="/" element={<HomeRoute />} />
           <Route path="/roommates" element={<Layout><SeekersPage /></Layout>} />
           <Route path="/roommates/edit" element={
             <Layout>

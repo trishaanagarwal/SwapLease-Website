@@ -15,7 +15,7 @@ function Counter({ value, onChange, min = 1, max = 20 }) {
     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
       <button type="button" onClick={() => onChange(Math.max(min, value - 1))}
         style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid #D5CFC2', background: '#fff', cursor: 'pointer', fontSize: 18, color: '#3E4763', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-      <span style={{ fontSize: 18, fontWeight: 700, color: '#16223B', minWidth: 24, textAlign: 'center' }}>{value}</span>
+      <span style={{ fontSize: 18, fontWeight: 700, color: '#0A0A0A', minWidth: 24, textAlign: 'center' }}>{value}</span>
       <button type="button" onClick={() => onChange(Math.min(max, value + 1))}
         style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid #D5CFC2', background: '#fff', cursor: 'pointer', fontSize: 18, color: '#3E4763', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
     </div>
@@ -25,14 +25,14 @@ function Counter({ value, onChange, min = 1, max = 20 }) {
 function Section({ title, children }) {
   return (
     <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E1D8', padding: '24px 28px', marginBottom: 16 }}>
-      <h2 className="font-display" style={{ fontSize: 18, fontWeight: 600, color: '#16223B', margin: '0 0 20px' }}>{title}</h2>
+      <h2 className="font-display" style={{ fontSize: 18, fontWeight: 600, color: '#0A0A0A', margin: '0 0 20px' }}>{title}</h2>
       {children}
     </div>
   );
 }
 
 const labelStyle = { display: 'block', fontSize: 13, fontWeight: 600, color: '#3E4763', marginBottom: 6 };
-const inputStyle = { width: '100%', border: '1px solid #D5CFC2', borderRadius: 8, padding: '10px 14px', fontSize: 14, color: '#16223B', outline: 'none', boxSizing: 'border-box' };
+const inputStyle = { width: '100%', border: '1px solid #D5CFC2', borderRadius: 8, padding: '10px 14px', fontSize: 14, color: '#0A0A0A', outline: 'none', boxSizing: 'border-box' };
 
 export default function CreateListingPage() {
   const navigate = useNavigate();
@@ -159,10 +159,10 @@ export default function CreateListingPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F8F6F1', padding: '32px 20px' }}>
+    <div style={{ minHeight: '100vh', background: '#F8F8F8', padding: '32px 20px' }}>
       <div style={{ maxWidth: 680, margin: '0 auto' }}>
         <div style={{ marginBottom: 28 }}>
-          <h1 className="font-display" style={{ fontSize: 28, fontWeight: 600, color: '#16223B', margin: '0 0 6px' }}>{isEdit ? 'Edit your listing' : 'List your lease'}</h1>
+          <h1 className="font-display" style={{ fontSize: 28, fontWeight: 600, color: '#0A0A0A', margin: '0 0 6px' }}>{isEdit ? 'Edit your listing' : 'List your lease'}</h1>
           <p style={{ color: '#586079', fontSize: 15, margin: 0 }}>{isEdit ? 'Update the details of your lease transfer listing' : 'Fill in the details to post your lease transfer listing'}</p>
         </div>
 
@@ -178,20 +178,20 @@ export default function CreateListingPage() {
               <label style={labelStyle}>Listing title *</label>
               <input value={form.title} onChange={e => set('title', e.target.value)}
                 placeholder="e.g. Modern 2BR Apartment Near Melbourne Uni" required style={inputStyle}
-                onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
+                onFocus={e => e.target.style.borderColor = '#1F6B3A'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
             </div>
             <div style={{ marginBottom: 16 }}>
               <label style={labelStyle}>Description</label>
               <textarea value={form.description} onChange={e => set('description', e.target.value)}
                 rows={5} placeholder="Describe the property, its features, why you're transferring your lease..."
                 style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.5 }}
-                onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
+                onFocus={e => e.target.style.borderColor = '#1F6B3A'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
             </div>
             <div>
               <label style={labelStyle}>Posting for someone else? (optional)</label>
               <input value={form.onBehalfOf} onChange={e => set('onBehalfOf', e.target.value)}
                 placeholder="Their first name, e.g. Sarah" maxLength={60} style={inputStyle}
-                onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
+                onFocus={e => e.target.style.borderColor = '#1F6B3A'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
               <div style={{ fontSize: 12.5, color: '#9AA0B0', marginTop: 6 }}>
                 Only with their permission. The listing will say you posted it on their behalf.
               </div>
@@ -201,7 +201,7 @@ export default function CreateListingPage() {
                 <label style={labelStyle}>{form.onBehalfOf.trim()}'s contact link (optional)</label>
                 <input value={form.contactLink} onChange={e => set('contactLink', e.target.value)}
                   placeholder="Phone number, Instagram, or WhatsApp link" maxLength={200} style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
+                  onFocus={e => e.target.style.borderColor = '#1F6B3A'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
                 <div style={{ fontSize: 12.5, color: '#9AA0B0', marginTop: 6 }}>
                   Add this and the “Contact” button will take interested people straight to {form.onBehalfOf.trim()}. Leave it blank to have messages come to your inbox instead.
                 </div>
@@ -214,18 +214,18 @@ export default function CreateListingPage() {
               <label style={labelStyle}>Street address</label>
               <input value={form.address} onChange={e => set('address', e.target.value)}
                 placeholder="e.g. 581 Swanston Street" style={inputStyle}
-                onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
+                onFocus={e => e.target.style.borderColor = '#1F6B3A'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
               <div>
                 <label style={labelStyle}>Suburb</label>
                 <input value={form.suburb} onChange={e => set('suburb', e.target.value)} placeholder="e.g. Carlton" style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
+                  onFocus={e => e.target.style.borderColor = '#1F6B3A'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
               </div>
               <div>
                 <label style={labelStyle}>City</label>
                 <input value={form.city} onChange={e => set('city', e.target.value)} placeholder="e.g. Melbourne" style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
+                  onFocus={e => e.target.style.borderColor = '#1F6B3A'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
               </div>
             </div>
             <div>
@@ -242,7 +242,7 @@ export default function CreateListingPage() {
                   <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9AA0B0', fontSize: 14 }}>$</span>
                   <input type="number" value={form.rent} onChange={e => set('rent', e.target.value)} placeholder="350" min="0" required
                     style={{ ...inputStyle, paddingLeft: 26 }}
-                    onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
+                    onFocus={e => e.target.style.borderColor = '#1F6B3A'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
                 </div>
               </div>
               <div>
@@ -251,7 +251,7 @@ export default function CreateListingPage() {
                   <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9AA0B0', fontSize: 14 }}>$</span>
                   <input type="number" value={form.bond} onChange={e => set('bond', e.target.value)} placeholder="1400" min="0"
                     style={{ ...inputStyle, paddingLeft: 26 }}
-                    onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
+                    onFocus={e => e.target.style.borderColor = '#1F6B3A'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
                 </div>
               </div>
             </div>
@@ -262,12 +262,12 @@ export default function CreateListingPage() {
               <div>
                 <label style={labelStyle}>Available from</label>
                 <input type="date" value={form.availableFrom} onChange={e => set('availableFrom', e.target.value)} style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
+                  onFocus={e => e.target.style.borderColor = '#1F6B3A'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
               </div>
               <div>
                 <label style={labelStyle}>Lease ends</label>
                 <input type="date" value={form.availableTo} onChange={e => set('availableTo', e.target.value)} style={inputStyle}
-                  onFocus={e => e.target.style.borderColor = '#1B3A6B'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
+                  onFocus={e => e.target.style.borderColor = '#1F6B3A'} onBlur={e => e.target.style.borderColor = '#D5CFC2'} />
               </div>
             </div>
           </Section>
@@ -287,12 +287,12 @@ export default function CreateListingPage() {
               <div><label style={labelStyle}>Bathrooms</label><Counter value={form.bathrooms} onChange={v => set('bathrooms', v)} /></div>
               <div><label style={labelStyle}>Total tenants</label><Counter value={form.tenants} onChange={v => set('tenants', v)} max={50} /></div>
             </div>
-            <div style={{ background: '#F8F6F1', borderRadius: 8, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+            <div style={{ background: '#F8F8F8', borderRadius: 8, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
               <span style={{ fontSize: 13, color: ratioColor, fontWeight: 600 }}>{ratioLabel}</span>
             </div>
             <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
               <div onClick={() => set('furnished', !form.furnished)}
-                style={{ width: 44, height: 24, borderRadius: 12, background: form.furnished ? '#1B3A6B' : '#D5CFC2', position: 'relative', transition: 'background 0.2s', cursor: 'pointer', flexShrink: 0 }}>
+                style={{ width: 44, height: 24, borderRadius: 12, background: form.furnished ? '#1F6B3A' : '#D5CFC2', position: 'relative', transition: 'background 0.2s', cursor: 'pointer', flexShrink: 0 }}>
                 <div style={{ position: 'absolute', top: 3, left: form.furnished ? 23 : 3, width: 18, height: 18, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
               </div>
               <span style={{ fontSize: 14, fontWeight: 600, color: '#3E4763' }}>Furnished</span>
@@ -309,14 +309,14 @@ export default function CreateListingPage() {
           <Section title="Photos">
             <input ref={fileInputRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handleFileChange} />
             <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading}
-              style={{ width: '100%', border: '2px dashed #D5CFC2', borderRadius: 10, padding: '28px 20px', textAlign: 'center', cursor: uploading ? 'not-allowed' : 'pointer', background: uploading ? '#F8F6F1' : '#FBFAF7', marginBottom: form.images.length > 0 ? 16 : 0 }}
-              onMouseEnter={e => !uploading && (e.currentTarget.style.borderColor = '#1B3A6B')}
+              style={{ width: '100%', border: '2px dashed #D5CFC2', borderRadius: 10, padding: '28px 20px', textAlign: 'center', cursor: uploading ? 'not-allowed' : 'pointer', background: uploading ? '#F8F8F8' : '#FBFAF7', marginBottom: form.images.length > 0 ? 16 : 0 }}
+              onMouseEnter={e => !uploading && (e.currentTarget.style.borderColor = '#1F6B3A')}
               onMouseLeave={e => (e.currentTarget.style.borderColor = '#D5CFC2')}>
               {uploading ? (
                 <div><div style={{ fontSize: 28, marginBottom: 8 }}>⏳</div><div style={{ fontSize: 14, color: '#586079', fontWeight: 600 }}>Uploading…</div></div>
               ) : (
                 <div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: '#16223B', marginBottom: 4 }}>Click to upload photos</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: '#0A0A0A', marginBottom: 4 }}>Click to upload photos</div>
                   <div style={{ fontSize: 13, color: '#9AA0B0' }}>JPG, PNG, WEBP or GIF · Max 5MB each</div>
                 </div>
               )}
@@ -335,7 +335,7 @@ export default function CreateListingPage() {
           </Section>
 
           <button type="submit" disabled={loading}
-            style={{ width: '100%', background: loading ? '#5C7AA8' : '#1B3A6B', color: '#fff', border: 'none', borderRadius: 10, padding: 14, fontWeight: 700, fontSize: 16, cursor: loading ? 'not-allowed' : 'pointer', marginTop: 8 }}>
+            style={{ width: '100%', background: loading ? '#5C7AA8' : '#1F6B3A', color: '#fff', border: 'none', borderRadius: 10, padding: 14, fontWeight: 700, fontSize: 16, cursor: loading ? 'not-allowed' : 'pointer', marginTop: 8 }}>
             {loading ? (isEdit ? 'Saving…' : 'Publishing…') : (isEdit ? 'Save changes' : 'Publish listing')}
           </button>
         </form>

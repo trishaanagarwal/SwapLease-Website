@@ -170,7 +170,7 @@ export default function ListingDetailPage() {
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-      <div style={{ width: 40, height: 40, border: '3px solid #E5E1D8', borderTopColor: '#1B3A6B', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ width: 40, height: 40, border: '3px solid #E5E1D8', borderTopColor: '#1F6B3A', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
     </div>
   );
 
@@ -185,7 +185,7 @@ export default function ListingDetailPage() {
   const contactIsExternal = contactHref ? /^https?:\/\//i.test(contactHref) : false;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F8F6F1' }}>
+    <div style={{ minHeight: '100vh', background: '#F8F8F8' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 20px' }}>
 
         <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#586079', fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, marginBottom: 20, padding: 0 }}>
@@ -225,7 +225,7 @@ export default function ListingDetailPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: '#1B3A6B', background: '#E8EDF6', borderRadius: 20, padding: '3px 12px' }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: '#1F6B3A', background: '#E8EDF6', borderRadius: 20, padding: '3px 12px' }}>
                       {typeLabels[listing.type] || listing.type}
                     </span>
                     {listing.status === 'taken' && (
@@ -235,21 +235,21 @@ export default function ListingDetailPage() {
                       <span style={{ fontSize: 12, fontWeight: 600, color: '#1C4D3E', background: '#E6EDE8', borderRadius: 20, padding: '3px 12px' }}>Furnished</span>
                     )}
                   </div>
-                  <h1 className="font-display" style={{ fontSize: 26, fontWeight: 600, color: '#16223B', margin: '0 0 8px', lineHeight: 1.2 }}>{listing.title}</h1>
+                  <h1 className="font-display" style={{ fontSize: 26, fontWeight: 600, color: '#0A0A0A', margin: '0 0 8px', lineHeight: 1.2 }}>{listing.title}</h1>
                   <p style={{ fontSize: 15, color: '#586079', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
                     <MapPin size={15} /> {[listing.address, listing.suburb, listing.city].filter(Boolean).join(', ')}
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                   <button onClick={handleShare}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff', border: '1.5px solid #D9D3C6', color: copied ? '#1C4D3E' : '#16223B', borderRadius: 8, padding: '7px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff', border: '1.5px solid #D9D3C6', color: copied ? '#1C4D3E' : '#0A0A0A', borderRadius: 8, padding: '7px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
                     {copied ? <><Check size={14} /> Link copied</> : <><Share2 size={14} /> Share</>}
                   </button>
                   {!isOwner && <BookmarkButton listingId={listing.id} variant="button" />}
                   {isOwner && (
                     <>
                       <Link to={`/listings/${id}/edit`}
-                        style={{ textDecoration: 'none', background: '#fff', border: '1.5px solid #D9D3C6', color: '#16223B', borderRadius: 8, padding: '7px 16px', fontSize: 13, fontWeight: 700 }}>
+                        style={{ textDecoration: 'none', background: '#fff', border: '1.5px solid #D9D3C6', color: '#0A0A0A', borderRadius: 8, padding: '7px 16px', fontSize: 13, fontWeight: 700 }}>
                         Edit
                       </Link>
                       <button onClick={toggleStatus}
@@ -267,7 +267,7 @@ export default function ListingDetailPage() {
             </div>
 
             <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E1D8', padding: '24px 28px', marginBottom: 16 }}>
-              <h2 style={{ fontSize: 17, fontWeight: 700, color: '#16223B', margin: '0 0 20px' }}>Property details</h2>
+              <h2 style={{ fontSize: 17, fontWeight: 700, color: '#0A0A0A', margin: '0 0 20px' }}>Property details</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 16 }}>
                 {[
                   { label: 'Weekly rent', value: `$${listing.rent?.toLocaleString()}/wk` },
@@ -279,9 +279,9 @@ export default function ListingDetailPage() {
                   listing.availableFrom && { label: 'Available from', value: fmtDate(listing.availableFrom) },
                   listing.availableTo && { label: 'Lease ends', value: fmtDate(listing.availableTo) },
                 ].filter(Boolean).map((item, i) => (
-                  <div key={i} style={{ background: '#F8F6F1', borderRadius: 10, padding: '14px 16px' }}>
+                  <div key={i} style={{ background: '#F8F8F8', borderRadius: 10, padding: '14px 16px' }}>
                     <div style={{ fontSize: 11, color: '#9AA0B0', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>{item.label}</div>
-                    <div style={{ fontSize: 16, fontWeight: 700, color: '#16223B' }}>{item.value}</div>
+                    <div style={{ fontSize: 16, fontWeight: 700, color: '#0A0A0A' }}>{item.value}</div>
                   </div>
                 ))}
               </div>
@@ -295,7 +295,7 @@ export default function ListingDetailPage() {
 
             {listing.description && (
               <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E1D8', padding: '24px 28px' }}>
-                <h2 style={{ fontSize: 17, fontWeight: 700, color: '#16223B', margin: '0 0 14px' }}>About this place</h2>
+                <h2 style={{ fontSize: 17, fontWeight: 700, color: '#0A0A0A', margin: '0 0 14px' }}>About this place</h2>
                 <p style={{ fontSize: 15, color: '#3E4763', lineHeight: 1.7, margin: 0, whiteSpace: 'pre-wrap' }}>{listing.description}</p>
               </div>
             )}
@@ -305,7 +305,7 @@ export default function ListingDetailPage() {
             <div style={{ position: 'sticky', top: 80 }}>
             <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E1D8', padding: 24 }}>
               <div style={{ marginBottom: 20 }}>
-                <span style={{ fontSize: 32, fontWeight: 900, color: '#16223B' }}>${listing.rent?.toLocaleString()}</span>
+                <span style={{ fontSize: 32, fontWeight: 900, color: '#0A0A0A' }}>${listing.rent?.toLocaleString()}</span>
                 <span style={{ fontSize: 16, color: '#586079' }}> /week</span>
                 {listing.bond && <div style={{ fontSize: 13, color: '#9AA0B0', marginTop: 4 }}>Bond: ${listing.bond?.toLocaleString()}</div>}
               </div>
@@ -315,12 +315,12 @@ export default function ListingDetailPage() {
                   <a href={contactHref}
                     target={contactIsExternal ? '_blank' : undefined}
                     rel={contactIsExternal ? 'noopener noreferrer' : undefined}
-                    style={{ width: '100%', boxSizing: 'border-box', background: '#1B3A6B', color: '#fff', borderRadius: 10, padding: 13, fontWeight: 700, fontSize: 16, textDecoration: 'none', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    style={{ width: '100%', boxSizing: 'border-box', background: '#1F6B3A', color: '#fff', borderRadius: 10, padding: 13, fontWeight: 700, fontSize: 16, textDecoration: 'none', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                     <MessageCircle size={18} /> Contact {listing.onBehalfOf}
                   </a>
                 ) : (
                   <button onClick={handleContact} disabled={contacting}
-                    style={{ width: '100%', background: contacting ? '#5C7AA8' : '#1B3A6B', color: '#fff', border: 'none', borderRadius: 10, padding: 13, fontWeight: 700, fontSize: 16, cursor: contacting ? 'not-allowed' : 'pointer', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    style={{ width: '100%', background: contacting ? '#5C7AA8' : '#1F6B3A', color: '#fff', border: 'none', borderRadius: 10, padding: 13, fontWeight: 700, fontSize: 16, cursor: contacting ? 'not-allowed' : 'pointer', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                     <MessageCircle size={18} /> {contacting ? 'Opening chat...' : (adminListed ? 'Message the SwapLease team' : `Message ${listing.userName?.split(' ')[0]}`)}
                   </button>
                 )
@@ -337,11 +337,11 @@ export default function ListingDetailPage() {
                       WhatsApp
                     </button>
                     <button onClick={() => openShare(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`)}
-                      style={{ flex: 1, textAlign: 'center', border: 'none', cursor: 'pointer', fontFamily: 'inherit', background: '#1B3A6B', color: '#fff', borderRadius: 8, padding: '9px 0', fontSize: 13, fontWeight: 700 }}>
+                      style={{ flex: 1, textAlign: 'center', border: 'none', cursor: 'pointer', fontFamily: 'inherit', background: '#1F6B3A', color: '#fff', borderRadius: 8, padding: '9px 0', fontSize: 13, fontWeight: 700 }}>
                       Facebook
                     </button>
                     <button onClick={handleShare}
-                      style={{ flex: 1, background: '#fff', border: '1.5px solid #D5CFC2', cursor: 'pointer', fontFamily: 'inherit', color: copied ? '#1C4D3E' : '#16223B', borderRadius: 8, padding: '9px 0', fontSize: 13, fontWeight: 700 }}>
+                      style={{ flex: 1, background: '#fff', border: '1.5px solid #D5CFC2', cursor: 'pointer', fontFamily: 'inherit', color: copied ? '#1C4D3E' : '#0A0A0A', borderRadius: 8, padding: '9px 0', fontSize: 13, fontWeight: 700 }}>
                       {copied ? 'Copied ✓' : 'Copy link'}
                     </button>
                   </div>
@@ -350,7 +350,7 @@ export default function ListingDetailPage() {
 
               {!user && !contactHref && (
                 <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                  <Link to="/login" style={{ color: '#1B3A6B', fontWeight: 700, textDecoration: 'none', fontSize: 14 }}>Sign in</Link>
+                  <Link to="/login" style={{ color: '#1F6B3A', fontWeight: 700, textDecoration: 'none', fontSize: 14 }}>Sign in</Link>
                   <span style={{ color: '#586079', fontSize: 14 }}> to message the lister</span>
                 </div>
               )}

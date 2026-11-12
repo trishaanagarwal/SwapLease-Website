@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# taste-skill build state and screenshots
+.taste-skill/
+shots/

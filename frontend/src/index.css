@@ -1,37 +1,39 @@
-/* Type: Fraunces (editorial display serif) + Plus Jakarta Sans (clean body) */
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-@import "tailwindcss";
+/* Type: Outfit, the landing page's face, across the app */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400..700&display=swap');
+@import "tailwindcss" source(".");
+/* the landing page uses the taste-skill kit grid classes; keep Tailwind from generating utilities for them, and scan only src (public holds the kit) */
+@source not "./pages/LandingPage.jsx";
 
 :root {
   /* Ivory base */
-  --cream: #F8F6F1;
-  --cream-deep: #F1ECE3;
+  --cream: #F8F8F8;
+  --cream-deep: #EEEEEE;
   --card: #FFFFFF;
-  --ink: #16223B;        /* deep navy-charcoal text */
-  --ink-soft: #586079;   /* muted slate */
-  --ink-faint: #9AA0B0;
-  --border: #E5E1D8;
-  --border-strong: #D5CFC2;
+  --ink: #0A0A0A;        /* deep navy-charcoal text */
+  --ink-soft: #5A5A5A;   /* muted slate */
+  --ink-faint: #8E8E8E;
+  --border: #E3E3E3;
+  --border-strong: #D0D0D0;
 
   /* Brand (flat, no gradients) */
-  --coral: #1B3A6B;       /* primary navy (kept name for compatibility) */
-  --coral-deep: #122A52;
-  --coral-tint: #ECEFF5;
-  --sage: #1C4D3E;        /* forest green */
-  --sage-tint: #E6EDE8;
+  --coral: #1F6B3A;       /* primary navy (kept name for compatibility) */
+  --coral-deep: #17522C;
+  --coral-tint: #E7F0EA;
+  --sage: #1F6B3A;        /* forest green */
+  --sage-tint: #E7F0EA;
   --plum: #4B3F72;
   --plum-tint: #ECE8F4;
   --honey: #B08433;       /* gold accent */
   --honey-tint: #F2EAD9;
 
-  --navy: #1B3A6B;
-  --navy-deep: #122A52;
-  --green: #1C4D3E;
+  --navy: #1F6B3A;
+  --navy-deep: #17522C;
+  --green: #1F6B3A;
   --gold: #B08433;
 
-  --shadow-sm: 0 1px 2px rgba(16, 28, 56, 0.05);
-  --shadow: 0 4px 16px rgba(16, 28, 56, 0.07);
-  --shadow-lg: 0 10px 30px rgba(16, 28, 56, 0.10);
+  --shadow-sm: 0 1px 2px rgba(10, 10, 10, 0.05);
+  --shadow: 0 4px 16px rgba(10, 10, 10, 0.07);
+  --shadow-lg: 0 10px 30px rgba(10, 10, 10, 0.10);
 
   /* Restrained radii, corners are softened, not pill-rounded */
   --radius-sm: 6px;
@@ -47,7 +49,7 @@ html { scroll-behavior: smooth; }
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background-color: var(--cream);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
@@ -74,10 +76,10 @@ img { display: block; max-width: 100%; }
 
 ::selection { background: rgba(176, 132, 51, 0.20); }
 
-/* Display headings use Fraunces */
+/* Display headings: Outfit with tight tracking */
 .font-display {
-  font-family: 'Fraunces', Georgia, serif;
-  letter-spacing: -0.01em;
+  font-family: 'Outfit', system-ui, sans-serif;
+  letter-spacing: -0.03em;
 }
 
 /* (kept class name for compatibility) flat accent text, no gradient */
