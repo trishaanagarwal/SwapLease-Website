@@ -4,9 +4,8 @@ import { collection, addDoc, updateDoc, getDoc, doc, serverTimestamp } from 'fir
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import UniPicker from '../components/UniPicker';
+import { uploadImage } from '../media';
 
-const CLOUDINARY_CLOUD = 'deewvfzpl';
-const CLOUDINARY_PRESET = 'slease';
 
 const clean = (str) => (str || '').trim();
 
@@ -88,15 +87,7 @@ export default function CreateListingPage() {
     setUploading(true);
     setError('');
     try {
-      const urls = await Promise.all(files.map(async (file) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', CLOUDINARY_PRESET);
-        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method: 'POST', body: formData });
-        const data = await res.json();
-        if (!data.secure_url) throw new Error('Upload failed');
-        return data.secure_url;
-      }));
+      const urls = await Promise.all(files.map(uploadImage));
       set('images', [...form.images, ...urls]);
     } catch {
       setError('Upload failed. Try again.');
@@ -148,7 +139,7 @@ export default function CreateListingPage() {
           userBio: user.bio || '',
           ...fields,
           status: 'active',
-          createdAt: serverTimestamp(),
+          createdAt: serverTimestamp(), // rules require the server time
         });
         navigate(`/listings/${ref_.id}`);
       }

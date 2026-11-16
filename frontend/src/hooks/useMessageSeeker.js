@@ -19,8 +19,9 @@ export function useMessageSeeker() {
       const snap = await getDocs(query(collection(db, 'conversations'),
         where('listingId', '==', key), where('participants', 'array-contains', user.id)));
       let convId;
-      if (!snap.empty) {
-        convId = snap.docs[0].id;
+      const existing = snap.docs.find(d => d.data().participants?.includes(seeker.userId));
+      if (existing) {
+        convId = existing.id;
       } else {
         const ref = await addDoc(collection(db, 'conversations'), {
           listingId: key,

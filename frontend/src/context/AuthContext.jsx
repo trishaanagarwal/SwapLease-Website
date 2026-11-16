@@ -20,6 +20,8 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc, deleteDoc, collection, query, where, getDocs, serverTimestamp, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { auth, db } from '../firebase';
+import { ADMIN_EMAILS } from '../constants';
+import { deleteListing, purgeMyImages } from '../media';
 
 const AuthContext = createContext(null);
 
@@ -37,6 +39,16 @@ async function ensureUserDoc(firebaseUser) {
   };
   await setDoc(ref, newData);
   return newData;
+}
+
+const isAdminUser = (u) => !!u.emailVerified && ADMIN_EMAILS.includes((u.email || '').toLowerCase());
+
+// Public subset of the profile (users/{uid} itself is owner-only). The rules
+// re-derive `admin` from the auth token, so it can't be self-granted.
+function syncProfile(firebaseUser, data) {
+  return setDoc(doc(db, 'profiles', firebaseUser.uid), {
+    name: data.name || 'User', photoURL: data.photoURL || '', admin: isAdminUser(firebaseUser),
+  }).catch(() => {});
 }
 
 // If the verified Auth email differs from the stored profile email
@@ -74,6 +86,7 @@ export function AuthProvider({ children }) {
         }
         if (snap.exists()) {
           const data = await syncEmail(firebaseUser, snap.data());
+          syncProfile(firebaseUser, data);
           setUser({ id: firebaseUser.uid, emailVerified: firebaseUser.emailVerified, ...data });
         } else {
           setUser(null);
@@ -109,6 +122,7 @@ export function AuthProvider({ children }) {
       createdAt: serverTimestamp(),
     };
     await setDoc(doc(db, 'users', cred.user.uid), data);
+    syncProfile(cred.user, data);
     await sendEmailVerification(cred.user);
     // Keep the user signed in (unverified); they can browse but must verify
     // before listing or messaging.
@@ -121,19 +135,14 @@ export function AuthProvider({ children }) {
     const cred = await signInWithPopup(auth, makeProvider(providerName));
     const data = await ensureUserDoc(cred.user);
     const synced = await syncEmail(cred.user, data);
-    setUser({ id: cred.user.uid, emailVerified: true, ...synced });
+    setUser({ id: cred.user.uid, emailVerified: cred.user.emailVerified, ...synced });
   };
 
   // Fallback for browsers that block popups (e.g. Brave/Safari with strict shields).
   const socialLoginRedirect = (providerName) => signInWithRedirect(auth, makeProvider(providerName));
 
   const resendVerification = async () => {
-    if (auth.currentUser) { await sendEmailVerification(auth.currentUser); return; }
-    if (pendingVerification) {
-      const cred = await signInWithEmailAndPassword(auth, pendingVerification.email, pendingVerification.password);
-      await sendEmailVerification(cred.user);
-      await signOut(auth);
-    }
+    if (auth.currentUser) await sendEmailVerification(auth.currentUser);
   };
 
   // Re-check verification status after the user clicks the email link.
@@ -151,6 +160,9 @@ export function AuthProvider({ children }) {
     setUser(u => ({ ...u, ...updates }));
     if (auth.currentUser) {
       updateDoc(doc(db, 'users', auth.currentUser.uid), updates).catch(() => {});
+      if ('name' in updates || 'photoURL' in updates) {
+        syncProfile(auth.currentUser, { ...user, ...updates });
+      }
     }
   };
 
@@ -203,10 +215,14 @@ export function AuthProvider({ children }) {
     } else {
       await reauthenticateWithPopup(u, makeProvider(providerId.includes('facebook') ? 'facebook' : 'google'));
     }
-    // Step 2, delete the user's own listings.
+    // Step 2, delete every uploaded photo (listings, seeker post, avatar).
+    await purgeMyImages();
+    // Step 3, delete the user's listings and roommate post.
     const snap = await getDocs(query(collection(db, 'listings'), where('userId', '==', u.uid)));
-    await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
-    // Step 3, delete the profile doc, then the Auth account.
+    await Promise.all(snap.docs.map(d => deleteListing({ id: d.id })));
+    await deleteDoc(doc(db, 'seekers', u.uid));
+    // Step 4, leave a no-PII "deleted" public stub, drop the private profile, then the Auth account.
+    await setDoc(doc(db, 'profiles', u.uid), { name: 'Deleted profile', photoURL: '', admin: isAdminUser(u), deleted: true }).catch(() => {});
     await deleteDoc(doc(db, 'users', u.uid));
     await deleteUser(u);
     setUser(null);

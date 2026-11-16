@@ -76,7 +76,7 @@ const sections = [
   {
     heading: 'Retention and deletion',
     body: [
-      'We keep your personal information only for as long as needed to provide the platform and for legitimate legal, security, or operational purposes. You may request deletion of your account and associated personal information by contacting us; some information may be retained where required by law or to resolve disputes and enforce our agreements.',
+      'We keep your personal information only for as long as needed to provide the platform and for legitimate legal, security, or operational purposes. Deleting a listing, roommate post or your account also deletes the photos uploaded with it. You may request deletion of your account and associated personal information by contacting us; some information may be retained where required by law or to resolve disputes and enforce our agreements.',
     ],
   },
   {

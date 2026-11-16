@@ -40,7 +40,7 @@ export default function MessagesPage() {
   const [profiles, setProfiles] = useState({}); // uid -> { name, photoURL, deleted }
   const messagesEndRef = useRef(null);
 
-  const otherIdOf = (conv) => (conv.user1Id === user?.id ? conv.user2Id : conv.user1Id);
+  const otherIdOf = (conv) => conv.participants?.find(id => id !== user?.id);
 
   // Fetch the live profile (photo + name, or deleted state) of each chat partner.
   useEffect(() => {
@@ -49,10 +49,10 @@ export default function MessagesPage() {
     ids.forEach(async (id) => {
       if (profiles[id]) return;
       try {
-        const snap = await getDoc(doc(db, 'users', id));
-        setProfiles(p => ({ ...p, [id]: snap.exists()
-          ? { name: snap.data().name, photoURL: snap.data().photoURL || '', deleted: false }
-          : { name: 'Deleted profile', photoURL: '', deleted: true } }));
+        const snap = await getDoc(doc(db, 'profiles', id));
+        if (!snap.exists()) return; // not migrated yet: fall back to the stored name
+        const d = snap.data();
+        setProfiles(p => ({ ...p, [id]: { name: d.name, photoURL: d.deleted ? '' : d.photoURL || '', deleted: !!d.deleted } }));
       } catch { /* ignore */ }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -60,7 +60,7 @@ export default function MessagesPage() {
 
   const profileOf = (conv) => {
     const id = otherIdOf(conv);
-    const denormName = conv.user1Id === user?.id ? conv.user2Name : conv.user1Name;
+    const denormName = id === conv.user2Id ? conv.user2Name : conv.user1Name;
     return profiles[id] || { name: denormName, photoURL: '', deleted: false };
   };
 

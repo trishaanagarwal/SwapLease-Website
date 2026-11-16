@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { doc, getDoc, deleteDoc, updateDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import { MapPin, GraduationCap, MessageCircle, Flag, ImageOff, Share2, Check } from 'lucide-react';
 import BookmarkButton from '../components/BookmarkButton';
 import SafetyTips from '../components/SafetyTips';
-import { ADMIN_EMAILS } from '../constants';
+import { deleteListing } from '../media';
 
 const typeLabels = { apartment: 'Apartment', house: 'House', studio: 'Studio', student_accom: 'Student Accommodation' };
 
@@ -36,7 +36,7 @@ export default function ListingDetailPage() {
   const [imgIdx, setImgIdx] = useState(0);
   const [deleting, setDeleting] = useState(false);
   const [contacting, setContacting] = useState(false);
-  const [lister, setLister] = useState(null); // { name, photoURL } or { deleted: true }
+  const [lister, setLister] = useState(null); // public profile: { admin }
 
   useEffect(() => {
     getDoc(doc(db, 'listings', id))
@@ -54,13 +54,11 @@ export default function ListingDetailPage() {
     return () => { document.title = 'SwapLease — Skip the Fee. Find the Key.'; };
   }, [listing?.title, listing?.rent]);
 
-  // Fetch the lister's current public profile (photo/name, or deleted state).
+  // Fetch the lister's public profile (admin flag is set by the rules, not the user).
   useEffect(() => {
     if (!listing?.userId) return;
-    getDoc(doc(db, 'users', listing.userId))
-      .then(s => setLister(s.exists()
-        ? { name: s.data().name, photoURL: s.data().photoURL || '', email: (s.data().email || '').toLowerCase() }
-        : { deleted: true }))
+    getDoc(doc(db, 'profiles', listing.userId))
+      .then(s => setLister({ admin: !!s.data()?.admin }))
       .catch(() => {});
   }, [listing?.userId]);
 
@@ -77,11 +75,12 @@ export default function ListingDetailPage() {
       );
       const snap = await getDocs(q);
       let convId;
-      if (!snap.empty) {
-        convId = snap.docs[0].id;
+      // Only reuse a conversation that is really with this listing's owner.
+      const existing = snap.docs.find(d => d.data().participants?.includes(listing.userId));
+      if (existing) {
+        convId = existing.id;
       } else {
-        const ownerSnap = await getDoc(doc(db, 'users', listing.userId));
-        const ownerName = ownerSnap.exists() ? ownerSnap.data().name : 'Unknown';
+        const ownerName = listing.userName || 'Lister';
         const ref = await addDoc(collection(db, 'conversations'), {
           listingId: id,
           listingTitle: listing.title,
@@ -160,7 +159,7 @@ export default function ListingDetailPage() {
     if (!confirm('Delete this listing?')) return;
     setDeleting(true);
     try {
-      await deleteDoc(doc(db, 'listings', id));
+      await deleteListing(listing);
       navigate('/listings');
     } catch {
       alert('Could not delete listing. Please try again.');
@@ -179,7 +178,7 @@ export default function ListingDetailPage() {
   const images = listing.images?.length > 0 ? listing.images : [];
   const hasImages = images.length > 0;
   const isOwner = user?.id === listing.userId;
-  const adminListed = ADMIN_EMAILS.includes(lister?.email);
+  const adminListed = !!lister?.admin;
   // On-behalf listings can carry a direct contact link for the real leaseholder.
   const contactHref = listing.onBehalfOf ? resolveContactHref(listing.contactLink) : null;
   const contactIsExternal = contactHref ? /^https?:\/\//i.test(contactHref) : false;
@@ -355,7 +354,7 @@ export default function ListingDetailPage() {
                 </div>
               )}
 
-              {ADMIN_EMAILS.includes(lister?.email) && (
+              {adminListed && (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, background: '#F2EAD9', borderRadius: 8, padding: '9px 12px', marginBottom: 20, fontSize: 13, color: '#8a6a1f', fontWeight: 700 }}>
                   ★ Listed by the SwapLease team
                 </div>

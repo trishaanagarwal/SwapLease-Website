@@ -7,9 +7,8 @@ import { useAuth } from '../context/AuthContext';
 import { SUBURBS } from '../constants';
 import UniPicker from '../components/UniPicker';
 import { t } from '../theme';
+import { uploadImage, destroyImages } from '../media';
 
-const CLOUDINARY_CLOUD = 'deewvfzpl';
-const CLOUDINARY_PRESET = 'slease';
 const clean = (s) => (s || '').trim();
 
 export default function EditSeekerPage() {
@@ -52,14 +51,7 @@ export default function EditSeekerPage() {
     }
     setUploading(true); setError('');
     try {
-      const urls = await Promise.all(files.slice(0, room).map(async (file) => {
-        const fd = new FormData();
-        fd.append('file', file); fd.append('upload_preset', CLOUDINARY_PRESET);
-        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method: 'POST', body: fd });
-        const data = await res.json();
-        if (!data.secure_url) throw new Error('fail');
-        return data.secure_url;
-      }));
+      const urls = await Promise.all(files.slice(0, room).map(uploadImage));
       set('images', [...form.images, ...urls]);
     } catch { setError('Upload failed. Please try again.'); }
     finally { setUploading(false); e.target.value = ''; }
@@ -122,7 +114,7 @@ export default function EditSeekerPage() {
 
   const removePost = async () => {
     if (!confirm('Remove your request?')) return;
-    try { await deleteDoc(doc(db, 'seekers', user.id)); navigate('/roommates'); }
+    try { await deleteDoc(doc(db, 'seekers', user.id)); destroyImages(form.images); navigate('/roommates'); }
     catch { setError('Could not remove the post.'); }
   };
 

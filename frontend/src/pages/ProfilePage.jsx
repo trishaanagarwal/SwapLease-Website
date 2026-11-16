@@ -1,15 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Edit2, Save, X, PlusCircle, User, Mail, Trash2, Pencil, AlertTriangle, Camera, Users, MapPin, CalendarDays } from 'lucide-react';
-import { collection, query, where, getDocs, doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import { UNIVERSITIES } from '../constants';
 import ListingCard from '../components/ListingCard';
 import { t } from '../theme';
+import { uploadImage, deleteListing } from '../media';
 
-const CLOUDINARY_CLOUD = 'deewvfzpl';
-const CLOUDINARY_PRESET = 'slease';
 
 export default function ProfilePage() {
   const { user, updateUser, changeEmail, deleteAccount, isPasswordUser } = useAuth();
@@ -109,7 +108,7 @@ export default function ProfilePage() {
   const removeListing = async (id) => {
     if (!confirm('Remove this listing permanently? This cannot be undone.')) return;
     try {
-      await deleteDoc(doc(db, 'listings', id));
+      await deleteListing(listings.find(l => l.id === id) || { id });
       setListings(ls => ls.filter(l => l.id !== id));
     } catch {
       alert('Could not remove the listing. Please try again.');
@@ -125,13 +124,7 @@ export default function ProfilePage() {
     if (file.size > 10 * 1024 * 1024) { alert('Image must be under 10MB.'); return; }
     setAvatarUploading(true);
     try {
-      const fd = new FormData();
-      fd.append('file', file);
-      fd.append('upload_preset', CLOUDINARY_PRESET);
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method: 'POST', body: fd });
-      const data = await res.json();
-      if (!data.secure_url) throw new Error('upload failed');
-      updateUser({ photoURL: data.secure_url });
+      updateUser({ photoURL: await uploadImage(file) });
     } catch {
       alert('Could not upload photo. Please try again.');
     } finally {

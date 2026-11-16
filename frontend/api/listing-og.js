@@ -45,15 +45,15 @@ export default async function handler(req, res) {
         const ogImg = esc(img);
 
         html = html
-          .replace(/<title>[\s\S]*?<\/title>/, `<title>${ogTitle} · SwapLease</title>`)
-          .replace(/<meta name="description"[^>]*>/, `<meta name="description" content="${ogDesc}" />`)
-          .replace(/<meta property="og:title"[^>]*>/, `<meta property="og:title" content="${ogTitle}" />`)
-          .replace(/<meta property="og:description"[^>]*>/, `<meta property="og:description" content="${ogDesc}" />`)
-          .replace(/<meta property="og:url"[^>]*>/, `<meta property="og:url" content="${ogUrl}" />`)
-          .replace(/<meta property="og:image"[^>]*>/, `<meta property="og:image" content="${ogImg}" />`)
-          .replace(/<meta name="twitter:title"[^>]*>/, `<meta name="twitter:title" content="${ogTitle}" />`)
-          .replace(/<meta name="twitter:description"[^>]*>/, `<meta name="twitter:description" content="${ogDesc}" />`)
-          .replace(/<meta name="twitter:image"[^>]*>/, `<meta name="twitter:image" content="${ogImg}" />`);
+          .replace(/<title>[\s\S]*?<\/title>/, () => `<title>${ogTitle} · SwapLease</title>`)
+          .replace(/<meta name="description"[^>]*>/, () => `<meta name="description" content="${ogDesc}" />`)
+          .replace(/<meta property="og:title"[^>]*>/, () => `<meta property="og:title" content="${ogTitle}" />`)
+          .replace(/<meta property="og:description"[^>]*>/, () => `<meta property="og:description" content="${ogDesc}" />`)
+          .replace(/<meta property="og:url"[^>]*>/, () => `<meta property="og:url" content="${ogUrl}" />`)
+          .replace(/<meta property="og:image"[^>]*>/, () => `<meta property="og:image" content="${ogImg}" />`)
+          .replace(/<meta name="twitter:title"[^>]*>/, () => `<meta name="twitter:title" content="${ogTitle}" />`)
+          .replace(/<meta name="twitter:description"[^>]*>/, () => `<meta name="twitter:description" content="${ogDesc}" />`)
+          .replace(/<meta name="twitter:image"[^>]*>/, () => `<meta name="twitter:image" content="${ogImg}" />`);
       }
     }
   } catch { /* serve the untouched shell on any failure */ }
