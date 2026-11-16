@@ -144,14 +144,12 @@ export default function ProfilePage() {
   };
 
   const card = { background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}`, boxShadow: t.shadowSm };
-  const lbl = { display: 'block', fontSize: 13, fontWeight: 700, color: t.ink, marginBottom: 7 };
-  const field = { width: '100%', fontFamily: 'inherit', fontSize: 14.5, color: t.ink, background: '#fff', border: `1.5px solid ${t.borderStrong}`, borderRadius: 12, padding: '10px 14px', outline: 'none', boxSizing: 'border-box' };
   const smallBtn = { display: 'flex', alignItems: 'center', gap: 6, fontSize: 13.5, fontWeight: 700, padding: '9px 16px', borderRadius: t.radius, cursor: 'pointer', fontFamily: 'inherit' };
   const infoBox = { padding: '14px 16px', background: t.cream, borderRadius: 14 };
 
   return (
-    <div style={{ minHeight: '100vh', background: t.cream, padding: '40px 0' }}>
-      <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 22px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div className="wrap page">
+      <div style={{ maxWidth: 960, display: 'flex', flexDirection: 'column', gap: 'var(--s-6)' }}>
 
         <div style={{ ...card, padding: 28 }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, gap: 16, flexWrap: 'wrap' }}>
@@ -196,23 +194,23 @@ export default function ProfilePage() {
           {editing ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
               <div>
-                <label style={lbl}>Full Name</label>
-                <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} style={field} />
+                <label className="label">Full Name</label>
+                <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="field" />
               </div>
               <div>
-                <label style={lbl}>University</label>
-                <select value={form.university} onChange={e => setForm(f => ({ ...f, university: e.target.value }))} style={{ ...field, cursor: 'pointer', appearance: 'auto' }}>
+                <label className="label">University</label>
+                <select value={form.university} onChange={e => setForm(f => ({ ...f, university: e.target.value }))} className="field" style={{ cursor: 'pointer', appearance: 'auto' }}>
                   <option value="">Select your university...</option>
                   {UNIVERSITIES.map(u => <option key={u} value={u}>{u}</option>)}
                 </select>
               </div>
               <div>
-                <label style={lbl}>Phone</label>
-                <input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="04XX XXX XXX" style={field} />
+                <label className="label">Phone</label>
+                <input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="04XX XXX XXX" className="field" />
               </div>
               <div style={{ gridColumn: '1 / -1' }}>
-                <label style={lbl}>Bio</label>
-                <textarea value={form.bio} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} rows={3} placeholder="Tell others a bit about yourself..." style={{ ...field, resize: 'vertical', lineHeight: 1.5 }} />
+                <label className="label">Bio</label>
+                <textarea value={form.bio} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} rows={3} placeholder="Tell others a bit about yourself..." className="field" style={{ resize: 'vertical', lineHeight: 1.5 }} />
               </div>
             </div>
           ) : (
@@ -261,12 +259,12 @@ export default function ProfilePage() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
             <div>
-              <label style={lbl}>New email address</label>
-              <input type="email" value={emailForm.newEmail} onChange={e => setEmailForm(f => ({ ...f, newEmail: e.target.value }))} placeholder="new@example.com" style={field} />
+              <label className="label">New email address</label>
+              <input type="email" value={emailForm.newEmail} onChange={e => setEmailForm(f => ({ ...f, newEmail: e.target.value }))} placeholder="new@example.com" className="field" />
             </div>
             <div>
-              <label style={lbl}>Confirm current password</label>
-              <input type="password" value={emailForm.password} onChange={e => setEmailForm(f => ({ ...f, password: e.target.value }))} placeholder="Your password" style={field} />
+              <label className="label">Confirm current password</label>
+              <input type="password" value={emailForm.password} onChange={e => setEmailForm(f => ({ ...f, password: e.target.value }))} placeholder="Your password" className="field" />
             </div>
           </div>
           <button onClick={handleEmailChange} disabled={emailBusy} className="btn btn-coral"
@@ -374,10 +372,10 @@ export default function ProfilePage() {
               )}
               {passwordUser && (
                 <input type="password" value={delPassword} onChange={e => setDelPassword(e.target.value)} placeholder="Your password"
-                  style={{ ...field, marginBottom: 10 }} />
+                  className="field" style={{ marginBottom: 10 }} />
               )}
               <input value={delConfirm} onChange={e => setDelConfirm(e.target.value)} placeholder="Type DELETE to confirm"
-                style={{ ...field, marginBottom: 14 }} />
+                className="field" style={{ marginBottom: 14 }} />
               <div style={{ display: 'flex', gap: 10 }}>
                 <button onClick={handleDeleteAccount} disabled={delBusy}
                   style={{ background: '#dc2626', border: 'none', color: '#fff', borderRadius: t.radius, padding: '10px 20px', fontSize: 14, fontWeight: 700, cursor: delBusy ? 'not-allowed' : 'pointer', opacity: delBusy ? 0.6 : 1, fontFamily: 'inherit' }}>

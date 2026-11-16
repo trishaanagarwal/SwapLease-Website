@@ -2,10 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { UNIVERSITIES } from '../constants';
-import { MailCheck } from 'lucide-react';
+import { MailCheck, Check } from 'lucide-react';
 import SocialAuth from '../components/SocialAuth';
-import logoMark from '../assets/logo-mark.png';
-import { t } from '../theme';
 
 function validate(form) {
   const errors = {};
@@ -55,149 +53,81 @@ export default function SignupPage() {
     }
   };
 
-  const lbl = { fontSize: 14, fontWeight: 700, color: t.ink };
-  const errStyle = { fontSize: 12.5, color: t.coralDeep, marginTop: 5, fontWeight: 600 };
-  const fieldStyle = (hasError) => ({
-    width: '100%', fontFamily: 'inherit', fontSize: 15, color: t.ink, marginTop: 7,
-    background: hasError ? t.coralTint : '#fff', border: `1.5px solid ${hasError ? t.coral : t.borderStrong}`,
-    borderRadius: 14, padding: '12px 16px', outline: 'none', boxSizing: 'border-box',
-  });
+  const err = (k) => errors[k] && <p className="field-err" id={`${k}-err`}>{errors[k]}</p>;
+  const bad = (k) => ({ 'aria-invalid': !!errors[k] || undefined, 'aria-describedby': errors[k] ? `${k}-err` : undefined });
 
   if (success) return (
-    <div style={{ minHeight: '100vh', background: t.cream, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div style={{ width: '100%', maxWidth: 440, background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}`, padding: 44, textAlign: 'center', boxShadow: t.shadow }}>
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20, color: t.coral }}><MailCheck size={52} /></div>
-        <h2 className="font-display" style={{ fontSize: 26, fontWeight: 800, color: t.ink, margin: '0 0 12px' }}>Check your email</h2>
-        <p style={{ color: t.inkSoft, fontSize: 15, lineHeight: 1.65, margin: '0 0 8px' }}>
-          You're all signed up! We sent a verification link to <strong style={{ color: t.ink }}>{form.email}</strong>. You can browse now, but you'll need to verify before posting a listing or messaging.
-        </p>
-        <p style={{ color: t.ink, fontSize: 14, lineHeight: 1.6, margin: '0 0 26px', fontWeight: 800 }}>
-          Can't find the email? Please check your spam or junk folder.
-        </p>
-        <button onClick={() => navigate('/')} className="btn btn-coral" style={{ padding: '13px 36px', fontSize: 15.5 }}>
-          Start browsing
-        </button>
+    <div className="wrap page auth">
+      <div className="auth__card stack-4">
+        <span className="action-card__icon" style={{ margin: 0 }}><MailCheck size={22} aria-hidden="true" /></span>
+        <h1 style={{ fontSize: 'var(--t-h3)' }}>Check your email</h1>
+        <p className="muted">We sent a verification link to <b style={{ color: 'var(--ink)', fontWeight: 500 }}>{form.email}</b>. You can browse now. Verify before you list a lease or message anyone.</p>
+        <p className="alert alert--note">If the email isn’t in your inbox, check the spam folder.</p>
+        <button type="button" onClick={() => navigate('/')} className="btn btn--primary">Browse leases</button>
       </div>
     </div>
   );
 
+  const checks = [
+    { label: '8+ characters', ok: form.password.length >= 8 },
+    { label: 'An uppercase letter', ok: /[A-Z]/.test(form.password) },
+    { label: 'A number', ok: /[0-9]/.test(form.password) },
+  ];
+
   return (
-    <div style={{ minHeight: '100vh', background: t.cream, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, position: 'relative', overflow: 'hidden' }}>
-      <div className="blob floaty" style={{ width: 400, height: 400, background: t.navy, top: -150, right: -110 }} />
-      <div className="blob floaty-slow" style={{ width: 340, height: 340, background: t.green, bottom: -130, left: -90 }} />
+    <div className="wrap page auth">
+      <div className="auth__card">
+        <header className="auth__head">
+          <h1>Create your SwapLease account</h1>
+          <p className="muted">For Melbourne students passing on or taking over a lease.</p>
+        </header>
 
-      <div className="fade-up" style={{ width: '100%', maxWidth: 460, position: 'relative' }}>
+        {serverError && <p className="alert alert--error" role="alert">{serverError}</p>}
 
-        <div style={{ textAlign: 'center', marginBottom: 30 }}>
-          <Link to="/" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-            <img src={logoMark} alt="" style={{ height: 38, width: 'auto' }} />
-            <span className="font-display" style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.02em' }}>
-              <span style={{ color: t.navy }}>Swap</span><span style={{ color: t.green }}>Lease</span>
-            </span>
-          </Link>
-          <h1 className="font-display" style={{ fontSize: 32, fontWeight: 800, margin: '24px 0 6px' }}><span className="grad-text">Create your account</span></h1>
-          <p style={{ color: t.inkSoft, fontSize: 15.5, margin: 0 }}>Join Melbourne students transferring leases</p>
-        </div>
-
-        <div className="glass" style={{ borderRadius: t.radiusLg, padding: 34, boxShadow: t.shadowLg }}>
-          {serverError && (
-            <div style={{ background: t.coralTint, border: `1px solid ${t.coral}`, color: t.coralDeep, borderRadius: 12, padding: '11px 15px', fontSize: 14, marginBottom: 20, fontWeight: 600 }}>
-              {serverError}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: 16 }}>
-              <label style={lbl}>Full name</label>
-              <input value={form.name} onChange={e => set('name', e.target.value)} placeholder="Jane Smith" required style={fieldStyle(!!errors.name)} />
-              {errors.name && <div style={errStyle}>{errors.name}</div>}
-            </div>
-
-            <div style={{ marginBottom: 16 }}>
-              <label style={lbl}>Email address</label>
-              <input type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="jane@example.com" required style={fieldStyle(!!errors.email)} />
-              {errors.email && <div style={errStyle}>{errors.email}</div>}
-            </div>
-
-            <div style={{ marginBottom: 16 }}>
-              <label style={lbl}>
-                Confirm email address
-                <span style={{ fontWeight: 400, color: t.inkFaint, fontSize: 12, marginLeft: 6 }}>must match above</span>
-              </label>
-              <input type="email" value={form.confirmEmail} onChange={e => set('confirmEmail', e.target.value)}
-                placeholder="jane@example.com" required style={fieldStyle(!!errors.confirmEmail)}
-                onPaste={e => e.preventDefault()} />
-              {errors.confirmEmail && <div style={errStyle}>{errors.confirmEmail}</div>}
-              {!errors.confirmEmail && form.confirmEmail && form.email && form.email.toLowerCase() === form.confirmEmail.toLowerCase() && (
-                <div style={{ fontSize: 12.5, color: t.sage, marginTop: 5, fontWeight: 600 }}>✓ Emails match</div>
-              )}
-            </div>
-
-            <div style={{ marginBottom: 16 }}>
-              <label style={lbl}>Password</label>
-              <input type="password" value={form.password} onChange={e => set('password', e.target.value)}
-                placeholder="Min 8 chars, 1 uppercase, 1 number" required style={fieldStyle(!!errors.password)} />
-              {errors.password && <div style={errStyle}>{errors.password}</div>}
-              {form.password.length > 0 && (
-                <div style={{ marginTop: 8, display: 'flex', gap: 6 }}>
-                  {[
-                    { label: '8+ chars', ok: form.password.length >= 8 },
-                    { label: 'Uppercase', ok: /[A-Z]/.test(form.password) },
-                    { label: 'Number', ok: /[0-9]/.test(form.password) },
-                  ].map(({ label, ok }) => (
-                    <span key={label} style={{ fontSize: 11.5, padding: '3px 10px', borderRadius: 999, background: ok ? t.sageTint : '#F1EADF', color: ok ? t.sage : t.inkFaint, fontWeight: 700 }}>
-                      {ok ? '✓' : '○'} {label}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div style={{ marginBottom: 26 }}>
-              <label style={lbl}>University <span style={{ color: t.inkFaint, fontWeight: 400 }}>(optional)</span></label>
-              <select value={form.university} onChange={e => set('university', e.target.value)}
-                style={{ ...fieldStyle(false), cursor: 'pointer', appearance: 'auto' }}>
-                <option value="">Select your university...</option>
-                {UNIVERSITIES.map(u => <option key={u} value={u}>{u}</option>)}
-              </select>
-            </div>
-
-            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 18, cursor: 'pointer' }}>
-              <input type="checkbox" checked={agreed}
-                onChange={e => { setAgreed(e.target.checked); if (e.target.checked) setAgreeError(false); }}
-                style={{ marginTop: 2, width: 17, height: 17, accentColor: t.coral, flexShrink: 0, cursor: 'pointer' }} />
-              <span style={{ fontSize: 13, color: t.inkSoft, lineHeight: 1.5 }}>
-                I have read and agree to SwapLease's{' '}
-                <Link to="/terms" target="_blank" style={{ color: t.coralDeep, fontWeight: 700, textDecoration: 'none' }}>Terms &amp; Conditions</Link>
-                {' '}and{' '}
-                <Link to="/privacy" target="_blank" style={{ color: t.coralDeep, fontWeight: 700, textDecoration: 'none' }}>Privacy Policy</Link>.
-              </span>
-            </label>
-            {agreeError && <div style={{ ...errStyle, marginTop: -8, marginBottom: 14 }}>Please accept the Terms &amp; Conditions and Privacy Policy to continue.</div>}
-
-            <button type="submit" disabled={loading} className="btn btn-coral"
-              style={{ width: '100%', padding: 14, fontSize: 16, opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}>
-              {loading ? 'Creating account…' : 'Create account'}
-            </button>
-          </form>
-
-          <SocialAuth label="Sign up" />
-          <p style={{ fontSize: 11.5, color: t.inkFaint, textAlign: 'center', margin: '4px 0 0', lineHeight: 1.5 }}>
-            By continuing with Google you agree to our{' '}
-            <Link to="/terms" target="_blank" style={{ color: t.coralDeep, fontWeight: 700, textDecoration: 'none' }}>Terms</Link>
-            {' '}and{' '}
-            <Link to="/privacy" target="_blank" style={{ color: t.coralDeep, fontWeight: 700, textDecoration: 'none' }}>Privacy Policy</Link>.
-          </p>
-
-          <div style={{ textAlign: 'center', marginTop: 24, paddingTop: 20, borderTop: `1px solid ${t.border}` }}>
-            <span style={{ fontSize: 14, color: t.inkSoft }}>Already have an account? </span>
-            <Link to="/login" style={{ fontSize: 14, fontWeight: 700, color: t.coralDeep, textDecoration: 'none' }}>Sign in</Link>
+        <form onSubmit={handleSubmit} className="form-grid" noValidate>
+          <div>
+            <label className="label" htmlFor="name">Full name</label>
+            <input id="name" className="field" autoComplete="name" value={form.name} onChange={e => set('name', e.target.value)} required {...bad('name')} />
+            {err('name')}
           </div>
-        </div>
+          <div>
+            <label className="label" htmlFor="email">Email</label>
+            <input id="email" className="field" type="email" autoComplete="email" value={form.email} onChange={e => set('email', e.target.value)} required {...bad('email')} />
+            {err('email')}
+          </div>
+          <div>
+            <label className="label" htmlFor="confirmEmail">Confirm email</label>
+            <input id="confirmEmail" className="field" type="email" value={form.confirmEmail} onChange={e => set('confirmEmail', e.target.value)} onPaste={e => e.preventDefault()} required {...bad('confirmEmail')} />
+            {err('confirmEmail')}
+            {!errors.confirmEmail && form.confirmEmail && form.email && form.email.toLowerCase() === form.confirmEmail.toLowerCase() && <p className="hint" style={{ color: 'var(--action)' }}>The emails match.</p>}
+          </div>
+          <div>
+            <label className="label" htmlFor="password">Password</label>
+            <input id="password" className="field" type="password" autoComplete="new-password" value={form.password} onChange={e => set('password', e.target.value)} required {...bad('password')} />
+            {err('password')}
+            <div className="chips" style={{ marginTop: 'var(--s-2)' }}>
+              {checks.map(c => <span key={c.label} className={`pill ${c.ok ? 'pill--accent' : 'pill--quiet'}`}>{c.ok && <Check aria-hidden="true" />}{c.label}</span>)}
+            </div>
+          </div>
+          <div>
+            <label className="label" htmlFor="university">University <span className="muted" style={{ fontWeight: 400 }}>(optional)</span></label>
+            <select id="university" className="field" value={form.university} onChange={e => set('university', e.target.value)}>
+              <option value="">Choose your university</option>
+              {UNIVERSITIES.map(u => <option key={u} value={u}>{u}</option>)}
+            </select>
+          </div>
+          <label className="check" style={{ alignItems: 'flex-start' }}>
+            <input type="checkbox" checked={agreed} style={{ marginTop: 3 }} onChange={e => { setAgreed(e.target.checked); if (e.target.checked) setAgreeError(false); }} />
+            <span className="t-small">I agree to the <Link className="link" to="/terms" target="_blank">Terms</Link> and the <Link className="link" to="/privacy" target="_blank">Privacy Policy</Link>.</span>
+          </label>
+          {agreeError && <p className="field-err">Tick the box to accept the Terms and the Privacy Policy.</p>}
+          <button type="submit" disabled={loading} className="btn btn--primary btn--block">{loading ? 'Creating your account' : 'Create account'}</button>
+        </form>
 
-        <p style={{ fontSize: 12, color: t.inkFaint, textAlign: 'center', marginTop: 16 }}>
-          You can read these any time from the footer of every page.
-        </p>
+        <SocialAuth label="Sign up" />
+        <p className="t-small muted" style={{ marginTop: 'var(--s-3)' }}>Signing up with Google means you agree to the <Link className="link" to="/terms" target="_blank">Terms</Link> and the <Link className="link" to="/privacy" target="_blank">Privacy Policy</Link>.</p>
+
+        <p className="auth__foot">Already have an account? <Link className="link" to="/login">Sign in</Link></p>
       </div>
     </div>
   );

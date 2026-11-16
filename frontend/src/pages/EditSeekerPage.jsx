@@ -118,28 +118,26 @@ export default function EditSeekerPage() {
     catch { setError('Could not remove the post.'); }
   };
 
-  const label = { display: 'block', fontSize: 13, fontWeight: 700, color: t.ink, marginBottom: 6 };
-  const input = { width: '100%', border: `1.5px solid ${t.borderStrong}`, borderRadius: t.radius, padding: '10px 14px', fontSize: 14.5, color: t.ink, background: '#fff', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' };
 
   if (loading) return <div style={{ minHeight: '60vh' }} />;
 
   return (
-    <div style={{ minHeight: '100vh', background: t.cream, padding: '32px 20px' }}>
-      <div style={{ maxWidth: 640, margin: '0 auto' }}>
-        <h1 className="font-display" style={{ fontSize: 28, fontWeight: 600, color: t.ink, margin: '0 0 6px' }}>Your request</h1>
+    <div className="wrap page">
+      <div className="form-page">
+        <h1 className="form-page__title">Your request</h1>
         <p style={{ color: t.inkSoft, fontSize: 15, margin: '0 0 24px' }}>Say what you're looking for, a place, a room, or a roommate, and add up to 4 photos. Others can message you directly.</p>
 
         {error && <div style={{ background: t.coralTint, border: `1px solid ${t.coral}`, color: t.coralDeep, borderRadius: t.radius, padding: '11px 15px', fontSize: 14, marginBottom: 16, fontWeight: 600 }}>{error}</div>}
 
         <div style={{ background: '#fff', border: `1px solid ${t.border}`, borderRadius: t.radiusLg, padding: 24 }}>
           <div style={{ marginBottom: 16 }}>
-            <label style={label}>About you *</label>
+            <label className="label">About you *</label>
             <textarea value={form.about} onChange={e => set('about', e.target.value)} rows={5}
               placeholder="Who you are, what you study, what you're looking for in a place or roommate…"
-              style={{ ...input, resize: 'vertical', lineHeight: 1.5 }} />
+              className="field" style={{ resize: 'vertical', lineHeight: 1.5 }} />
           </div>
           <div style={{ marginBottom: 16 }}>
-            <label style={label}>Preferred areas</label>
+            <label className="label">Preferred areas</label>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {SUBURBS.map(sub => {
                 const on = form.areaChips.includes(sub);
@@ -155,38 +153,38 @@ export default function EditSeekerPage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
             <div>
-              <label style={label}>Weekly budget</label>
-              <input type="number" value={form.budget} onChange={e => set('budget', e.target.value)} placeholder="e.g. 300" min="0" style={input} />
+              <label className="label">Weekly budget</label>
+              <input type="number" value={form.budget} onChange={e => set('budget', e.target.value)} placeholder="e.g. 300" min="0" className="field" />
             </div>
             <div>
-              <label style={label}>Other areas (optional)</label>
-              <input value={form.areasExtra} onChange={e => set('areasExtra', e.target.value)} placeholder="e.g. Coburg, Kensington" style={input} />
+              <label className="label">Other areas (optional)</label>
+              <input value={form.areasExtra} onChange={e => set('areasExtra', e.target.value)} placeholder="e.g. Coburg, Kensington" className="field" />
             </div>
           </div>
           <div style={{ marginBottom: 16 }}>
-            <label style={label}>Near universities</label>
+            <label className="label">Near universities</label>
             <UniPicker value={form.unis} onChange={v => set('unis', v)} />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
             <div>
-              <label style={label}>Available from</label>
-              <input type="date" value={form.moveInFrom} onChange={e => set('moveInFrom', e.target.value)} style={input} />
+              <label className="label">Available from</label>
+              <input type="date" value={form.moveInFrom} onChange={e => set('moveInFrom', e.target.value)} className="field" />
             </div>
             <div>
-              <label style={label}>Until (optional)</label>
-              <input type="date" value={form.moveInTo} min={form.moveInFrom || undefined} onChange={e => set('moveInTo', e.target.value)} style={input} />
+              <label className="label">Until (optional)</label>
+              <input type="date" value={form.moveInTo} min={form.moveInFrom || undefined} onChange={e => set('moveInTo', e.target.value)} className="field" />
             </div>
           </div>
 
           <div style={{ marginBottom: 20 }}>
-            <label style={label}>Posting for someone else? (optional)</label>
-            <input value={form.onBehalfOf} onChange={e => set('onBehalfOf', e.target.value)} placeholder="Their first name, e.g. Sarah" maxLength={60} style={input} />
+            <label className="label">Posting for someone else? (optional)</label>
+            <input value={form.onBehalfOf} onChange={e => set('onBehalfOf', e.target.value)} placeholder="Their first name, e.g. Sarah" maxLength={60} className="field" />
             <div style={{ fontSize: 12.5, color: t.inkFaint, marginTop: 6 }}>
               Only with their permission. The post will say you're posting on their behalf, and messages come to you so you can connect people with them.
             </div>
           </div>
 
-          <label style={label}>Photos ({form.images.length}/4)</label>
+          <label className="label">Photos ({form.images.length}/4)</label>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
             {form.images.map((img, i) => (
               <div key={i} style={{ position: 'relative', width: 96, height: 96, borderRadius: t.radius, overflow: 'hidden' }}>

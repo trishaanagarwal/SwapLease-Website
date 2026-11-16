@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
-import { Bookmark } from 'lucide-react';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import ListingCard from '../components/ListingCard';
-import { t } from '../theme';
 
 export default function SavedPage() {
   const { user } = useAuth();
@@ -29,37 +27,24 @@ export default function SavedPage() {
   }, [ids]);
 
   return (
-    <div style={{ minHeight: '100vh', background: t.cream }}>
-      <div style={{ background: '#fff', borderBottom: `1px solid ${t.border}`, padding: '34px 22px 26px' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Bookmark size={24} color={t.navy} />
-          <div>
-            <h1 className="font-display" style={{ fontSize: 'clamp(24px, 4vw, 32px)', fontWeight: 600, color: t.ink, margin: 0 }}>Saved listings</h1>
-            <p style={{ color: t.inkSoft, fontSize: 15, margin: '4px 0 0' }}>Listings you've bookmarked for later</p>
-          </div>
+    <div className="wrap page">
+      <header className="page-head">
+        <div>
+          <h1>Saved leases</h1>
+          <p>Leases you saved to come back to.</p>
         </div>
-      </div>
-
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 22px 64px' }}>
-        {loading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 22 }}>
-            {[...Array(3)].map((_, i) => <div key={i} style={{ height: 320, background: '#fff', borderRadius: t.radius, border: `1px solid ${t.border}` }} />)}
-          </div>
-        ) : listings.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 22 }}>
-            {listings.map(l => <ListingCard key={l.id} listing={l} />)}
-          </div>
-        ) : (
-          <div style={{ textAlign: 'center', padding: '72px 20px', background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}`, boxShadow: t.shadowSm }}>
-            <div style={{ width: 64, height: 64, background: t.coralTint, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}>
-              <Bookmark size={28} color={t.navy} />
-            </div>
-            <h3 className="font-display" style={{ fontSize: 21, fontWeight: 700, color: t.ink, marginBottom: 8 }}>No saved listings yet</h3>
-            <p style={{ color: t.inkSoft, fontSize: 14.5, marginBottom: 18 }}>Tap the bookmark icon on any listing to save it here.</p>
-            <Link to="/listings" className="btn btn-coral" style={{ padding: '11px 26px', fontSize: 14.5 }}>Browse listings</Link>
-          </div>
-        )}
-      </div>
+      </header>
+      {loading ? (
+        <div className="cards">{[...Array(3)].map((_, i) => <div key={i} className="skeleton" style={{ height: 380 }} />)}</div>
+      ) : listings.length > 0 ? (
+        <div className="cards">{listings.map(l => <ListingCard key={l.id} listing={l} />)}</div>
+      ) : (
+        <div className="empty">
+          <h3>No saved leases yet</h3>
+          <p>Tap the bookmark on any lease to keep it here.</p>
+          <Link to="/listings" className="btn btn--primary">Browse leases</Link>
+        </div>
+      )}
     </div>
   );
 }

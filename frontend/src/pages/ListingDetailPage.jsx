@@ -3,8 +3,9 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { doc, getDoc, updateDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
-import { MapPin, GraduationCap, MessageCircle, Flag, ImageOff, Share2, Check } from 'lucide-react';
+import { MapPin, GraduationCap, MessageCircle, Flag, Share2, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import BookmarkButton from '../components/BookmarkButton';
+import { NoPhoto } from '../components/ListingCard';
 import SafetyTips from '../components/SafetyTips';
 import { deleteListing } from '../media';
 
@@ -167,11 +168,7 @@ export default function ListingDetailPage() {
     }
   };
 
-  if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-      <div style={{ width: 40, height: 40, border: '3px solid #E5E1D8', borderTopColor: '#1F6B3A', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-    </div>
-  );
+  if (loading) return <div className="center-fill"><div className="spinner" role="status" aria-label="Loading" /></div>;
 
   if (!listing) return null;
 
@@ -183,210 +180,127 @@ export default function ListingDetailPage() {
   const contactHref = listing.onBehalfOf ? resolveContactHref(listing.contactLink) : null;
   const contactIsExternal = contactHref ? /^https?:\/\//i.test(contactHref) : false;
 
+  const firstName = listing.userName?.split(' ')[0] || 'the lister';
+  const shareText = `Taking over my lease: ${listing.title}, ${listing.suburb}, $${listing.rent}/wk. ${window.location.href}`;
+  const facts = [
+    { label: 'Weekly rent', value: `$${listing.rent?.toLocaleString()}` },
+    listing.bond && { label: 'Bond', value: `$${listing.bond?.toLocaleString()}` },
+    { label: 'Bedrooms', value: `${listing.bedrooms}` },
+    { label: 'Bathrooms', value: `${listing.bathrooms}` },
+    { label: 'Tenants in total', value: `${listing.tenants || 1}` },
+    typeof listing.renewable === 'boolean' && { label: 'Renewable', value: listing.renewable ? 'Yes' : 'No' },
+    listing.availableFrom && { label: 'Available from', value: fmtDate(listing.availableFrom) },
+    listing.availableTo && { label: 'Lease ends', value: fmtDate(listing.availableTo) },
+  ].filter(Boolean);
+
   return (
-    <div style={{ minHeight: '100vh', background: '#F8F8F8' }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 20px' }}>
+    <div className="wrap page--tight">
+      <button type="button" className="link back-link" onClick={() => navigate(-1)}>Back to leases</button>
 
-        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#586079', fontSize: 14, display: 'flex', alignItems: 'center', gap: 4, marginBottom: 20, padding: 0 }}>
-          ← Back to listings
-        </button>
+      <div className="detail">
+        <div className="detail__main">
+          <div className="gallery">
+            {hasImages ? <img src={images[imgIdx]} alt={listing.title} /> : <NoPhoto />}
+            {images.length > 1 && (
+              <>
+                <button type="button" className="icon-btn gallery__prev" aria-label="Previous photo" onClick={() => setImgIdx(i => (i - 1 + images.length) % images.length)}><ChevronLeft size={20} aria-hidden="true" /></button>
+                <button type="button" className="icon-btn gallery__next" aria-label="Next photo" onClick={() => setImgIdx(i => (i + 1) % images.length)}><ChevronRight size={20} aria-hidden="true" /></button>
+                <span className="pill gallery__count">{imgIdx + 1} of {images.length}</span>
+              </>
+            )}
+          </div>
+          {images.length > 1 && (
+            <div className="thumbs">
+              {images.map((src, i) => (
+                <button key={src} type="button" aria-label={`Photo ${i + 1}`} aria-pressed={i === imgIdx} onClick={() => setImgIdx(i)}><img src={src} alt="" loading="lazy" /></button>
+              ))}
+            </div>
+          )}
 
-        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-
-          <div style={{ flex: '1 1 480px', minWidth: 0 }}>
-            <div style={{ borderRadius: 12, overflow: 'hidden', position: 'relative', background: '#E5E1D8', marginBottom: 20, height: 380 }}>
-              {hasImages ? (
-                <img src={images[imgIdx]} alt={listing.title}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-              ) : (
-                <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, background: '#F1ECE3', color: '#9AA0B0' }}>
-                  <ImageOff size={42} />
-                  <span style={{ fontSize: 14, fontWeight: 700 }}>No photos provided</span>
-                </div>
-              )}
-              {images.length > 1 && (
+          <header className="detail__head">
+            <div className="chips">
+              <span className="pill">{typeLabels[listing.type] || listing.type}</span>
+              {listing.status === 'taken' && <span className="pill pill--gold">Taken</span>}
+              {listing.furnished && <span className="pill pill--quiet">Furnished</span>}
+              {listing.nearbyUni && <span className="pill pill--accent"><GraduationCap aria-hidden="true" />Near {listing.nearbyUni}</span>}
+            </div>
+            <h1>{listing.title}</h1>
+            <p className="muted" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><MapPin size={16} aria-hidden="true" />{[listing.address, listing.suburb, listing.city].filter(Boolean).join(', ')}</p>
+            <div className="btn-row">
+              <button type="button" className="btn btn--secondary" onClick={handleShare}>{copied ? <><Check size={16} aria-hidden="true" />Link copied</> : <><Share2 size={16} aria-hidden="true" />Share</>}</button>
+              {!isOwner && <BookmarkButton listingId={listing.id} variant="button" />}
+              {isOwner && (
                 <>
-                  <button onClick={() => setImgIdx(i => (i - 1 + images.length) % images.length)}
-                    style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.4)', color: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>‹</button>
-                  <button onClick={() => setImgIdx(i => (i + 1) % images.length)}
-                    style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.4)', color: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>›</button>
-                  <div style={{ position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6 }}>
-                    {images.map((_, i) => (
-                      <button key={i} onClick={() => setImgIdx(i)}
-                        style={{ width: 8, height: 8, borderRadius: '50%', background: i === imgIdx ? '#fff' : 'rgba(255,255,255,0.5)', border: 'none', cursor: 'pointer', padding: 0 }} />
-                    ))}
-                  </div>
+                  <Link to={`/listings/${id}/edit`} className="btn btn--secondary">Edit listing</Link>
+                  <button type="button" className="btn btn--secondary" onClick={toggleStatus}>{listing.status === 'taken' ? 'Mark as available' : 'Mark as taken'}</button>
+                  <button type="button" className="btn btn--secondary btn--danger" onClick={handleDelete} disabled={deleting}>{deleting ? 'Deleting' : 'Delete listing'}</button>
                 </>
               )}
             </div>
+          </header>
 
-            <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E1D8', padding: '24px 28px', marginBottom: 16 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: '#1F6B3A', background: '#E8EDF6', borderRadius: 20, padding: '3px 12px' }}>
-                      {typeLabels[listing.type] || listing.type}
-                    </span>
-                    {listing.status === 'taken' && (
-                      <span style={{ fontSize: 12, fontWeight: 700, color: '#fff', background: '#A87C33', borderRadius: 20, padding: '3px 12px' }}>Taken</span>
-                    )}
-                    {listing.furnished && (
-                      <span style={{ fontSize: 12, fontWeight: 600, color: '#1C4D3E', background: '#E6EDE8', borderRadius: 20, padding: '3px 12px' }}>Furnished</span>
-                    )}
-                  </div>
-                  <h1 className="font-display" style={{ fontSize: 26, fontWeight: 600, color: '#0A0A0A', margin: '0 0 8px', lineHeight: 1.2 }}>{listing.title}</h1>
-                  <p style={{ fontSize: 15, color: '#586079', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <MapPin size={15} /> {[listing.address, listing.suburb, listing.city].filter(Boolean).join(', ')}
-                  </p>
-                </div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <button onClick={handleShare}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff', border: '1.5px solid #D9D3C6', color: copied ? '#1C4D3E' : '#0A0A0A', borderRadius: 8, padding: '7px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-                    {copied ? <><Check size={14} /> Link copied</> : <><Share2 size={14} /> Share</>}
-                  </button>
-                  {!isOwner && <BookmarkButton listingId={listing.id} variant="button" />}
-                  {isOwner && (
-                    <>
-                      <Link to={`/listings/${id}/edit`}
-                        style={{ textDecoration: 'none', background: '#fff', border: '1.5px solid #D9D3C6', color: '#0A0A0A', borderRadius: 8, padding: '7px 16px', fontSize: 13, fontWeight: 700 }}>
-                        Edit
-                      </Link>
-                      <button onClick={toggleStatus}
-                        style={{ background: listing.status === 'taken' ? '#E2ECE6' : '#F4EBD7', border: 'none', color: listing.status === 'taken' ? '#1C4D3E' : '#A87C33', borderRadius: 8, padding: '8px 16px', fontSize: 13, cursor: 'pointer', fontWeight: 700 }}>
-                        {listing.status === 'taken' ? 'Mark as available' : 'Mark as taken'}
-                      </button>
-                      <button onClick={handleDelete} disabled={deleting}
-                        style={{ background: 'none', border: '1px solid #fecaca', color: '#dc2626', borderRadius: 8, padding: '7px 16px', fontSize: 13, cursor: 'pointer', fontWeight: 600 }}>
-                        {deleting ? 'Deleting...' : 'Delete'}
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
+          <section className="detail__block">
+            <h2>The lease</h2>
+            <dl className="facts">
+              {facts.map(f => <div key={f.label}><dt>{f.label}</dt><dd>{f.value}</dd></div>)}
+            </dl>
+          </section>
 
-            <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E1D8', padding: '24px 28px', marginBottom: 16 }}>
-              <h2 style={{ fontSize: 17, fontWeight: 700, color: '#0A0A0A', margin: '0 0 20px' }}>Property details</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 16 }}>
-                {[
-                  { label: 'Weekly rent', value: `$${listing.rent?.toLocaleString()}/wk` },
-                  listing.bond && { label: 'Bond', value: `$${listing.bond?.toLocaleString()}` },
-                  { label: 'Bedrooms', value: `${listing.bedrooms}` },
-                  { label: 'Bathrooms', value: `${listing.bathrooms}` },
-                  { label: 'Total tenants', value: `${listing.tenants || 1}` },
-                  typeof listing.renewable === 'boolean' && { label: 'Renewable', value: listing.renewable ? 'Yes' : 'No' },
-                  listing.availableFrom && { label: 'Available from', value: fmtDate(listing.availableFrom) },
-                  listing.availableTo && { label: 'Lease ends', value: fmtDate(listing.availableTo) },
-                ].filter(Boolean).map((item, i) => (
-                  <div key={i} style={{ background: '#F8F8F8', borderRadius: 10, padding: '14px 16px' }}>
-                    <div style={{ fontSize: 11, color: '#9AA0B0', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>{item.label}</div>
-                    <div style={{ fontSize: 16, fontWeight: 700, color: '#0A0A0A' }}>{item.value}</div>
-                  </div>
-                ))}
-              </div>
-              {listing.nearbyUni && (
-                <div style={{ marginTop: 16, background: '#E2ECE6', borderRadius: 10, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <GraduationCap size={17} color="#1C4D3E" />
-                  <span style={{ fontSize: 14, fontWeight: 600, color: '#1C4D3E' }}>Near {listing.nearbyUni}</span>
-                </div>
-              )}
-            </div>
+          {listing.description && (
+            <section className="detail__block">
+              <h2>About this place</h2>
+              <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.7, maxWidth: '68ch' }}>{listing.description}</p>
+            </section>
+          )}
+        </div>
 
-            {listing.description && (
-              <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E1D8', padding: '24px 28px' }}>
-                <h2 style={{ fontSize: 17, fontWeight: 700, color: '#0A0A0A', margin: '0 0 14px' }}>About this place</h2>
-                <p style={{ fontSize: 15, color: '#3E4763', lineHeight: 1.7, margin: 0, whiteSpace: 'pre-wrap' }}>{listing.description}</p>
+        <aside className="detail__side">
+          <div className="sheet sheet--pad stack-4">
+            <div className="lcard__price"><b style={{ fontSize: 40 }}>${listing.rent?.toLocaleString()}</b><span>per week</span></div>
+            {listing.bond && <p className="muted t-small" style={{ marginTop: 4 }}>Bond ${listing.bond?.toLocaleString()}</p>}
+
+            {!isOwner ? (
+              contactHref ? (
+                <a href={contactHref} target={contactIsExternal ? '_blank' : undefined} rel={contactIsExternal ? 'noopener noreferrer' : undefined} className="btn btn--primary btn--block">
+                  <MessageCircle size={18} aria-hidden="true" />Contact {listing.onBehalfOf}
+                </a>
+              ) : (
+                <button type="button" onClick={handleContact} disabled={contacting} className="btn btn--primary btn--block">
+                  <MessageCircle size={18} aria-hidden="true" />{contacting ? 'Opening chat' : (adminListed ? 'Message the SwapLease team' : `Message ${firstName}`)}
+                </button>
+              )
+            ) : (
+              <>
+                <p className="alert alert--ok">This is your listing.</p>
+                <p className="t-small muted">Share it where students look:</p>
+                <div className="btn-row">
+                  <button type="button" className="btn btn--secondary" onClick={() => openShare(`https://wa.me/?text=${encodeURIComponent(shareText)}`)}>WhatsApp</button>
+                  <button type="button" className="btn btn--secondary" onClick={() => openShare(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`)}>Facebook</button>
+                  <button type="button" className="btn btn--secondary" onClick={handleShare}>{copied ? 'Copied' : 'Copy link'}</button>
+                </div>
+              </>
+            )}
+
+            {!user && !contactHref && <p className="t-small muted"><Link className="link" to="/login">Sign in</Link> to message the lister.</p>}
+            {adminListed && <p className="alert alert--note">Listed by the SwapLease team</p>}
+            {listing.onBehalfOf && (
+              <p className="alert alert--note">
+                Posted for <b>{listing.onBehalfOf}</b>. {contactHref
+                  ? `The button above goes straight to ${listing.onBehalfOf}.`
+                  : `${adminListed ? 'The SwapLease team' : 'The lister'} manages this listing and will put you in touch.`}
+              </p>
+            )}
+
+            {!isOwner && (
+              <div style={{ borderTop: '1px solid var(--line)', paddingTop: 'var(--s-4)' }}>
+                {reported
+                  ? <p className="t-small" style={{ color: 'var(--action)' }}>Reported. Thank you.</p>
+                  : <button type="button" className="link t-small muted" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={handleReport}><Flag size={14} aria-hidden="true" />Report this listing</button>}
               </div>
             )}
           </div>
-
-          <div style={{ flex: '1 1 300px', maxWidth: 420, minWidth: 0 }}>
-            <div style={{ position: 'sticky', top: 80 }}>
-            <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #E5E1D8', padding: 24 }}>
-              <div style={{ marginBottom: 20 }}>
-                <span style={{ fontSize: 32, fontWeight: 900, color: '#0A0A0A' }}>${listing.rent?.toLocaleString()}</span>
-                <span style={{ fontSize: 16, color: '#586079' }}> /week</span>
-                {listing.bond && <div style={{ fontSize: 13, color: '#9AA0B0', marginTop: 4 }}>Bond: ${listing.bond?.toLocaleString()}</div>}
-              </div>
-
-              {!isOwner ? (
-                contactHref ? (
-                  <a href={contactHref}
-                    target={contactIsExternal ? '_blank' : undefined}
-                    rel={contactIsExternal ? 'noopener noreferrer' : undefined}
-                    style={{ width: '100%', boxSizing: 'border-box', background: '#1F6B3A', color: '#fff', borderRadius: 10, padding: 13, fontWeight: 700, fontSize: 16, textDecoration: 'none', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                    <MessageCircle size={18} /> Contact {listing.onBehalfOf}
-                  </a>
-                ) : (
-                  <button onClick={handleContact} disabled={contacting}
-                    style={{ width: '100%', background: contacting ? '#5C7AA8' : '#1F6B3A', color: '#fff', border: 'none', borderRadius: 10, padding: 13, fontWeight: 700, fontSize: 16, cursor: contacting ? 'not-allowed' : 'pointer', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                    <MessageCircle size={18} /> {contacting ? 'Opening chat...' : (adminListed ? 'Message the SwapLease team' : `Message ${listing.userName?.split(' ')[0]}`)}
-                  </button>
-                )
-              ) : (
-                <div style={{ marginBottom: 20 }}>
-                  <div style={{ background: '#E6EDE8', borderRadius: 10, padding: '12px 16px', marginBottom: 12, fontSize: 14, color: '#1C4D3E', fontWeight: 600, textAlign: 'center' }}>
-                    ✓ This is your listing
-                  </div>
-                  {/* Owner share row: put the listing where students actually look */}
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#586079', marginBottom: 8 }}>Share it where students will see it:</div>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => openShare(`https://wa.me/?text=${encodeURIComponent(`Taking over my lease: ${listing.title}, ${listing.suburb} · $${listing.rent}/wk — ${window.location.href}`)}`)}
-                      style={{ flex: 1, textAlign: 'center', border: 'none', cursor: 'pointer', fontFamily: 'inherit', background: '#1C4D3E', color: '#fff', borderRadius: 8, padding: '9px 0', fontSize: 13, fontWeight: 700 }}>
-                      WhatsApp
-                    </button>
-                    <button onClick={() => openShare(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`)}
-                      style={{ flex: 1, textAlign: 'center', border: 'none', cursor: 'pointer', fontFamily: 'inherit', background: '#1F6B3A', color: '#fff', borderRadius: 8, padding: '9px 0', fontSize: 13, fontWeight: 700 }}>
-                      Facebook
-                    </button>
-                    <button onClick={handleShare}
-                      style={{ flex: 1, background: '#fff', border: '1.5px solid #D5CFC2', cursor: 'pointer', fontFamily: 'inherit', color: copied ? '#1C4D3E' : '#0A0A0A', borderRadius: 8, padding: '9px 0', fontSize: 13, fontWeight: 700 }}>
-                      {copied ? 'Copied ✓' : 'Copy link'}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {!user && !contactHref && (
-                <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                  <Link to="/login" style={{ color: '#1F6B3A', fontWeight: 700, textDecoration: 'none', fontSize: 14 }}>Sign in</Link>
-                  <span style={{ color: '#586079', fontSize: 14 }}> to message the lister</span>
-                </div>
-              )}
-
-              {adminListed && (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, background: '#F2EAD9', borderRadius: 8, padding: '9px 12px', marginBottom: 20, fontSize: 13, color: '#8a6a1f', fontWeight: 700 }}>
-                  ★ Listed by the SwapLease team
-                </div>
-              )}
-
-              {listing.onBehalfOf && (
-                <div style={{ background: '#F2EAD9', borderRadius: 8, padding: '10px 12px', marginBottom: 20, fontSize: 13, color: '#8a6a1f', lineHeight: 1.5 }}>
-                  Posted on behalf of <strong>{listing.onBehalfOf}</strong>. {contactHref
-                    ? `The button above takes you straight to ${listing.onBehalfOf}.`
-                    : `${adminListed ? 'The SwapLease team' : 'The lister'} manages this listing and will connect you with them.`}
-                </div>
-              )}
-
-
-              {!isOwner && (
-                <div style={{ borderTop: '1px solid #EFEBE2', paddingTop: 14, marginTop: 18, textAlign: 'center' }}>
-                  {reported ? (
-                    <span style={{ fontSize: 13, color: '#1C4D3E', fontWeight: 600 }}>✓ Reported, thank you</span>
-                  ) : (
-                    <button onClick={handleReport}
-                      style={{ background: 'none', border: 'none', color: '#9AA0B0', fontSize: 13, cursor: 'pointer', fontWeight: 600, textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                      <Flag size={13} /> Report this listing
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div style={{ marginTop: 16 }}><SafetyTips compact /></div>
-            </div>
-          </div>
-        </div>
+          <SafetyTips compact />
+        </aside>
       </div>
     </div>
   );

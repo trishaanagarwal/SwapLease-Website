@@ -4,8 +4,6 @@ import { sendEmailVerification, signInWithEmailAndPassword } from 'firebase/auth
 import { auth } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import SocialAuth from '../components/SocialAuth';
-import logoMark from '../assets/logo-mark.png';
-import { t } from '../theme';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -65,88 +63,47 @@ export default function LoginPage() {
     }
   };
 
-  const inputStyle = {
-    display: 'block', width: '100%', border: `1.5px solid ${t.borderStrong}`, borderRadius: 14,
-    padding: '12px 16px', fontSize: 15, color: t.ink, outline: 'none',
-    boxSizing: 'border-box', background: '#fff', marginTop: 7, fontFamily: 'inherit',
-  };
-  const lbl = { fontSize: 14, fontWeight: 700, color: t.ink };
-
   return (
-    <div style={{ minHeight: '100vh', background: t.cream, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, position: 'relative', overflow: 'hidden' }}>
-      <div className="blob floaty" style={{ width: 380, height: 380, background: t.navy, top: -140, left: -100 }} />
-      <div className="blob floaty-slow" style={{ width: 340, height: 340, background: t.green, bottom: -130, right: -90 }} />
+    <div className="wrap page auth">
+      <div className="auth__card">
+        <header className="auth__head">
+          <h1>Sign in to SwapLease</h1>
+          <p className="muted">Message listers, save leases and post your own.</p>
+        </header>
 
-      <div className="fade-up" style={{ width: '100%', maxWidth: 410, position: 'relative' }}>
-
-        <div style={{ textAlign: 'center', marginBottom: 30 }}>
-          <Link to="/" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-            <img src={logoMark} alt="" style={{ height: 38, width: 'auto' }} />
-            <span className="font-display" style={{ fontSize: 26, fontWeight: 800, letterSpacing: '-0.02em' }}>
-              <span style={{ color: t.navy }}>Swap</span><span style={{ color: t.green }}>Lease</span>
-            </span>
-          </Link>
-          <h1 className="font-display" style={{ fontSize: 32, fontWeight: 800, margin: '24px 0 6px' }}><span className="grad-text">Welcome back</span></h1>
-          <p style={{ color: t.inkSoft, fontSize: 15.5, margin: 0 }}>Sign in to your account</p>
-        </div>
-
-        <div className="glass" style={{ borderRadius: t.radiusLg, padding: 34, boxShadow: t.shadowLg }}>
-          {error && (
-            <div style={{ background: t.coralTint, border: `1px solid ${t.coral}`, color: t.coralDeep, borderRadius: 12, padding: '12px 15px', fontSize: 14, marginBottom: 20, fontWeight: 600 }}>
-              {error}
-              {needsVerification && (
-                <div style={{ marginTop: 10 }}>
-                  {resendStatus === 'sent' ? (
-                    <span style={{ color: t.sage, fontWeight: 700 }}>✓ Verification email resent, check your inbox</span>
-                  ) : (
-                    <button onClick={resendVerification} disabled={resendStatus === 'sending'}
-                      style={{ background: 'none', border: 'none', color: t.coralDeep, fontWeight: 700, textDecoration: 'underline', cursor: 'pointer', padding: 0, fontSize: 14 }}>
-                      {resendStatus === 'sending' ? 'Resending...' : 'Resend verification email'}
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: 18 }}>
-              <label style={lbl}>Email address</label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="you@example.com" required style={inputStyle} />
-            </div>
-            <div style={{ marginBottom: 10 }}>
-              <label style={lbl}>Password</label>
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-                placeholder="Your password" required style={inputStyle} />
-            </div>
-
-            <div style={{ textAlign: 'right', marginBottom: 20 }}>
-              <button type="button" onClick={handleForgotPassword}
-                style={{ background: 'none', border: 'none', color: t.coralDeep, fontSize: 13, fontWeight: 700, cursor: 'pointer', padding: 0 }}>
-                Forgot password?
-              </button>
-            </div>
-
-            {resetMsg && (
-              <div style={{ background: t.sageTint, border: `1px solid ${t.sage}`, color: t.sage, borderRadius: 12, padding: '11px 14px', fontSize: 13.5, marginBottom: 18, fontWeight: 600, lineHeight: 1.5 }}>
-                {resetMsg}
+        {error && (
+          <div className="alert alert--error" role="alert">
+            {error}
+            {needsVerification && (
+              <div style={{ marginTop: 8 }}>
+                {resendStatus === 'sent'
+                  ? <span>Verification email sent. Check your inbox.</span>
+                  : <button type="button" className="link" onClick={resendVerification} disabled={resendStatus === 'sending'}>{resendStatus === 'sending' ? 'Sending' : 'Send the verification email again'}</button>}
+                {resendStatus === 'error' && <span> The email didn’t send. Try again in a minute.</span>}
               </div>
             )}
-
-            <button type="submit" disabled={loading} className="btn btn-coral"
-              style={{ width: '100%', padding: 14, fontSize: 16, opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}>
-              {loading ? 'Signing in…' : 'Sign in'}
-            </button>
-          </form>
-
-          <SocialAuth label="Sign in" />
-
-          <div style={{ textAlign: 'center', marginTop: 24, paddingTop: 20, borderTop: `1px solid ${t.border}` }}>
-            <span style={{ fontSize: 14, color: t.inkSoft }}>Don't have an account? </span>
-            <Link to="/signup" style={{ fontSize: 14, fontWeight: 700, color: t.coralDeep, textDecoration: 'none' }}>Sign up free</Link>
           </div>
-        </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="form-grid">
+          <div>
+            <label className="label" htmlFor="email">Email</label>
+            <input id="email" className="field" type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@student.unimelb.edu.au" required />
+          </div>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <label className="label" htmlFor="password">Password</label>
+              <button type="button" className="link t-small" onClick={handleForgotPassword}>Forgot password?</button>
+            </div>
+            <input id="password" className="field" type="password" autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} required />
+          </div>
+          {resetMsg && <p className="alert alert--ok" role="status">{resetMsg}</p>}
+          <button type="submit" disabled={loading} className="btn btn--primary btn--block">{loading ? 'Signing in' : 'Sign in'}</button>
+        </form>
+
+        <SocialAuth label="Sign in" />
+
+        <p className="auth__foot">New to SwapLease? <Link className="link" to="/signup">Create an account</Link></p>
       </div>
     </div>
   );

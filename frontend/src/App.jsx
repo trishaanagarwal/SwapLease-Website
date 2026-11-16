@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import RequireVerified from './components/RequireVerified';
@@ -28,9 +29,7 @@ const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 // Centered spinner shown while a page chunk loads.
 function PageFallback() {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-      <div style={{ width: 36, height: 36, border: '3px solid #E5E1D8', borderTopColor: '#1F6B3A', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-    </div>
+    <div className="center-fill"><div className="spinner" role="status" aria-label="Loading" /></div>
   );
 }
 
@@ -38,7 +37,8 @@ function Layout({ children }) {
   return (
     <>
       <Navbar />
-      <main>{children}</main>
+      <main id="content" className="app-main">{children}</main>
+      <Footer />
     </>
   );
 }
@@ -57,9 +57,9 @@ export default function App() {
       <AuthProvider>
         <Suspense fallback={<PageFallback />}>
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/login" element={<Layout><LoginPage /></Layout>} />
+          <Route path="/signup" element={<Layout><SignupPage /></Layout>} />
+          <Route path="/verify-email" element={<Layout><VerifyEmailPage /></Layout>} />
           <Route path="/terms" element={<Layout><TermsPage /></Layout>} />
           <Route path="/privacy" element={<Layout><PrivacyPage /></Layout>} />
           <Route path="/" element={<HomeRoute />} />

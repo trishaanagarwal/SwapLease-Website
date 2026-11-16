@@ -3,7 +3,6 @@ import { useSearchParams } from 'react-router-dom';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import ListingCard from '../components/ListingCard';
-import { t } from '../theme';
 import { Search } from 'lucide-react';
 
 const TYPES = [
@@ -19,6 +18,7 @@ const SUBURBS = ['Carlton', 'Fitzroy', 'Southbank', 'Parkville', 'Brunswick', 'C
 export default function ListingsPage() {
   const [searchParams] = useSearchParams();
   const [allListings, setAllListings] = useState([]);
+  const [showFilters, setShowFilters] = useState(false); // phones: filters fold away above the results
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState(searchParams.get('search') || '');
@@ -65,127 +65,105 @@ export default function ListingsPage() {
   const visible = listings.slice(0, page * PAGE_SIZE);
   const hasMore = visible.length < listings.length;
 
-  const inputStyle = { border: `1.5px solid ${t.borderStrong}`, borderRadius: 12, padding: '9px 13px', fontSize: 14, color: t.ink, background: '#fff', outline: 'none', width: '100%', fontFamily: 'inherit' };
-  const labelStyle = { display: 'block', fontSize: 12.5, fontWeight: 700, color: t.ink, marginBottom: 8 };
-
   const clearAll = () => { setType(''); setFurnished(false); setMaxRent(2000); setMinBeds(0); setSearch(''); setSearchInput(''); };
+  const filtered = type || furnished || maxRent < 2000 || minBeds > 0 || search;
 
   return (
-    <div style={{ minHeight: '100vh', background: t.cream }}>
-
-      <div style={{ background: '#fff', borderBottom: `1px solid ${t.border}`, padding: '34px 22px 26px' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <h1 className="font-display" style={{ fontSize: 'clamp(26px, 4vw, 36px)', fontWeight: 600, color: t.ink, margin: '0 0 6px' }}>Browse student leases</h1>
-          <p style={{ color: t.inkSoft, fontSize: 15, margin: '0 0 20px' }}>Find your next home across Melbourne, direct from students.</p>
-          <form onSubmit={e => { e.preventDefault(); setSearch(searchInput); }} style={{ display: 'flex', gap: 8, maxWidth: 600 }}>
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, paddingLeft: 14, background: '#fff', border: `1.5px solid ${t.borderStrong}`, borderRadius: t.radius }}>
-              <Search size={18} color={t.inkFaint} />
-              <input type="text" placeholder="Search suburb, street or university…"
-                value={searchInput} onChange={e => setSearchInput(e.target.value)}
-                style={{ flex: 1, border: 'none', outline: 'none', padding: '10px 4px', fontSize: 14.5, background: 'transparent', color: t.ink, fontFamily: 'inherit' }} />
-            </div>
-            <button type="submit" className="btn btn-coral" style={{ padding: '10px 24px', fontSize: 14.5 }}>Search</button>
-          </form>
+    <div className="wrap page">
+      <header className="page-head">
+        <div>
+          <h1>Student leases in Melbourne</h1>
+          <p>Places students are handing over, with the weekly rent, the dates and the nearest uni.</p>
         </div>
+      </header>
+
+      <form className="search-row" role="search" onSubmit={e => { e.preventDefault(); setSearch(searchInput); }}>
+        <label className="field-icon" style={{ flex: 1 }}>
+          <Search size={18} aria-hidden="true" />
+          <input className="field" type="search" aria-label="Search leases" placeholder="Suburb, street or university"
+            value={searchInput} onChange={e => setSearchInput(e.target.value)} />
+        </label>
+        <button type="submit" className="btn btn--primary">Search leases</button>
+      </form>
+
+      <div className="chips chips--scroll" style={{ margin: 'var(--s-5) 0 var(--s-7)' }}>
+        {SUBURBS.map(s => (
+          <button key={s} type="button" className="chip-btn" aria-pressed={search === s}
+            onClick={() => { const next = search === s ? '' : s; setSearch(next); setSearchInput(next); }}>{s}</button>
+        ))}
       </div>
 
-      <div className="listings-wrap" style={{ maxWidth: 1200, margin: '0 auto', padding: '26px 22px', display: 'flex', gap: 26, alignItems: 'flex-start' }}>
-
-        <aside className="listings-aside" style={{ width: 230, flexShrink: 0, background: '#fff', borderRadius: t.radius, border: `1px solid ${t.border}`, padding: 22, boxShadow: t.shadowSm }}>
-          <h3 className="font-display" style={{ fontSize: 18, fontWeight: 700, color: t.ink, margin: '0 0 20px' }}>Filters</h3>
-
-          <div style={{ marginBottom: 20 }}>
-            <label style={labelStyle}>Property type</label>
-            {TYPES.map(opt => (
-              <label key={opt.value} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 9, cursor: 'pointer', fontSize: 14, color: type === opt.value ? t.coralDeep : t.inkSoft, fontWeight: type === opt.value ? 700 : 500 }}>
-                <input type="radio" name="type" value={opt.value} checked={type === opt.value} onChange={() => setType(opt.value)} style={{ accentColor: t.coral }} />
-                {opt.label}
-              </label>
-            ))}
-          </div>
-
-          <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 20, marginBottom: 20 }}>
-            <label style={labelStyle}>Max rent: {maxRent === 2000 ? 'Any' : `$${maxRent}/wk`}</label>
-            <input type="range" min={100} max={2000} step={50} value={maxRent} onChange={e => setMaxRent(Number(e.target.value))} style={{ width: '100%', accentColor: t.coral }} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: t.inkFaint, marginTop: 4 }}>
-              <span>$100</span><span>$2000+</span>
-            </div>
-          </div>
-
-          <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 20, marginBottom: 20 }}>
-            <label style={labelStyle}>Bedrooms</label>
-            <div style={{ display: 'flex', gap: 6 }}>
-              {[0, 1, 2, 3, 4].map(n => (
-                <button key={n} onClick={() => setMinBeds(n)}
-                  style={{ flex: 1, background: minBeds === n ? t.coral : '#fff', color: minBeds === n ? '#fff' : t.inkSoft, border: `1.5px solid ${minBeds === n ? t.coral : t.border}`, borderRadius: 10, padding: '7px 0', fontSize: 13, cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}>
-                  {n === 0 ? 'Any' : `${n}+`}
-                </button>
+      <div className="browse">
+        <aside className="sheet sheet--pad browse__filters" aria-label="Filters" data-open={showFilters}>
+          <button type="button" className="btn btn--secondary btn--block btn--plain browse__toggle" aria-expanded={showFilters} onClick={() => setShowFilters(o => !o)}>
+            {showFilters ? 'Hide filters' : 'Filters and sort'}
+          </button>
+          <div className="form-grid browse__body">
+            <fieldset className="plain">
+              <legend className="label">Property type</legend>
+              {TYPES.map(opt => (
+                <label key={opt.value} className="check">
+                  <input type="radio" name="type" value={opt.value} checked={type === opt.value} onChange={() => setType(opt.value)} />
+                  {opt.label}
+                </label>
               ))}
-            </div>
-          </div>
+            </fieldset>
 
-          <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 20, marginBottom: 20 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 14, color: t.inkSoft, fontWeight: 600 }}>
-              <input type="checkbox" checked={furnished} onChange={e => setFurnished(e.target.checked)} style={{ accentColor: t.coral, width: 16, height: 16 }} />
+            <div>
+              <label className="label" htmlFor="max-rent">Max rent: {maxRent === 2000 ? 'any' : `$${maxRent}/wk`}</label>
+              <input id="max-rent" type="range" min={100} max={2000} step={50} value={maxRent} onChange={e => setMaxRent(Number(e.target.value))} />
+              <div className="t-small muted" style={{ display: 'flex', justifyContent: 'space-between' }}><span>$100</span><span>$2000+</span></div>
+            </div>
+
+            <fieldset className="plain">
+              <legend className="label">Bedrooms</legend>
+              <div className="chips chips--fill">
+                {[0, 1, 2, 3, 4].map(n => (
+                  <button key={n} type="button" className="chip-btn" aria-pressed={minBeds === n} onClick={() => setMinBeds(n)}>{n === 0 ? 'Any' : `${n}+`}</button>
+                ))}
+              </div>
+            </fieldset>
+
+            <label className="check">
+              <input type="checkbox" checked={furnished} onChange={e => setFurnished(e.target.checked)} />
               Furnished only
             </label>
-          </div>
 
-          <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 20 }}>
-            <label style={labelStyle}>Sort by</label>
-            <select value={sort} onChange={e => setSort(e.target.value)} style={inputStyle}>
-              <option value="newest">Newest first</option>
-              <option value="cheapest">Cheapest first</option>
-              <option value="expensive">Most expensive</option>
-              <option value="beds">Most bedrooms</option>
-            </select>
-          </div>
+            <div>
+              <label className="label" htmlFor="sort">Sort by</label>
+              <select id="sort" className="field" value={sort} onChange={e => setSort(e.target.value)}>
+                <option value="newest">Newest first</option>
+                <option value="cheapest">Cheapest first</option>
+                <option value="expensive">Most expensive</option>
+                <option value="beds">Most bedrooms</option>
+              </select>
+            </div>
 
-          {(type || furnished || maxRent < 2000 || minBeds > 0 || search) && (
-            <button onClick={clearAll}
-              style={{ marginTop: 16, background: 'none', border: `1.5px solid ${t.borderStrong}`, borderRadius: t.radius, padding: '8px 14px', fontSize: 13, color: t.inkSoft, cursor: 'pointer', width: '100%', fontWeight: 600, fontFamily: 'inherit' }}>
-              Clear filters
-            </button>
-          )}
+            {filtered && <button type="button" className="btn btn--secondary" onClick={clearAll}>Clear filters</button>}
+          </div>
         </aside>
 
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 18 }}>
-            {SUBURBS.map(s => (
-              <button key={s} onClick={() => { setSearch(s); setSearchInput(s); }}
-                style={{ background: search === s ? t.coral : '#fff', color: search === s ? '#fff' : t.inkSoft, border: `1.5px solid ${search === s ? t.coral : t.border}`, borderRadius: t.radius, padding: '6px 15px', fontSize: 13, cursor: 'pointer', fontWeight: search === s ? 700 : 600, fontFamily: 'inherit' }}>
-                {s}
-              </button>
-            ))}
-          </div>
-
-          <div style={{ fontSize: 14.5, color: t.inkSoft, marginBottom: 18, fontWeight: 600 }}>
-            {loading ? 'Searching…' : `${listings.length} ${listings.length === 1 ? 'listing' : 'listings'} found`}
-          </div>
+        <div>
+          <p className="t-small muted" style={{ marginBottom: 'var(--s-4)' }} aria-live="polite">
+            {loading ? 'Loading leases' : `${listings.length} ${listings.length === 1 ? 'lease' : 'leases'}`}
+          </p>
 
           {loading ? (
-            <div>
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="skeleton" style={{ borderRadius: t.radius, height: 200, marginBottom: 16 }} />
-              ))}
-            </div>
+            <div className="stack-list">{[...Array(3)].map((_, i) => <div key={i} className="skeleton" style={{ height: 220 }} />)}</div>
           ) : listings.length > 0 ? (
             <>
-              <div>{visible.map(l => <ListingCard key={l.id} listing={l} horizontal />)}</div>
+              <div className="stack-list">{visible.map(l => <ListingCard key={l.id} listing={l} horizontal />)}</div>
               {hasMore && (
-                <div style={{ textAlign: 'center', marginTop: 12 }}>
-                  <button onClick={() => setPage(p => p + 1)} className="btn btn-soft" style={{ padding: '12px 30px', fontSize: 14.5 }}>
-                    Load more ({listings.length - visible.length} more)
-                  </button>
+                <div style={{ marginTop: 'var(--s-6)' }}>
+                  <button type="button" onClick={() => setPage(p => p + 1)} className="btn btn--secondary">Show {Math.min(PAGE_SIZE, listings.length - visible.length)} more leases</button>
                 </div>
               )}
             </>
           ) : (
-            <div style={{ textAlign: 'center', padding: '80px 20px', background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}` }}>
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16, color: t.inkFaint }}><Search size={44} /></div>
-              <h3 className="font-display" style={{ fontSize: 21, fontWeight: 700, color: t.ink, marginBottom: 8 }}>No listings found</h3>
-              <p style={{ color: t.inkSoft, fontSize: 14.5, marginBottom: 18 }}>Try a different search or clear your filters</p>
-              <button onClick={clearAll} className="btn btn-coral" style={{ padding: '11px 26px', fontSize: 14.5 }}>Clear all</button>
+            <div className="empty">
+              <h3>No leases match</h3>
+              <p>Try another suburb, raise the rent limit or clear the filters.</p>
+              <button type="button" onClick={clearAll} className="btn btn--primary">Clear filters</button>
             </div>
           )}
         </div>

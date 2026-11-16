@@ -131,7 +131,7 @@ export default function MessagesPage() {
   const otherUser = activeConv ? profileOf(activeConv) : null;
 
   return (
-    <div className="msg-pane" data-active={activeConvId ? 'chat' : 'list'} style={{ display: 'flex', height: 'calc(100vh - 70px)', background: '#F8F8F8', overflow: 'hidden' }}>
+    <div className="msg-pane" data-active={activeConvId ? 'chat' : 'list'} style={{ display: 'flex', height: 'calc(100dvh - var(--nav))', background: 'var(--bg)', overflow: 'hidden' }}>
 
       <div className="msg-list" style={{ width: 320, flexShrink: 0, background: '#fff', borderRight: '1px solid #E5E1D8', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '20px 20px 14px', borderBottom: '1px solid #EFEBE2' }}>

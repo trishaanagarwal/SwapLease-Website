@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { MailCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { t } from '../theme';
 
 // Gates an action behind email verification. Verified users (incl. Google)
 // pass straight through; unverified users see a prompt to verify.
@@ -26,28 +25,17 @@ export default function RequireVerified({ children, action = 'do this' }) {
   };
 
   return (
-    <div style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: t.cream, padding: 24 }}>
-      <div style={{ maxWidth: 460, width: '100%', background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}`, boxShadow: t.shadow, padding: 40, textAlign: 'center' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18, color: t.coral }}><MailCheck size={48} /></div>
-        <h1 className="font-display" style={{ fontSize: 25, fontWeight: 800, color: t.ink, margin: '0 0 10px' }}>Verify your email first</h1>
-        <p style={{ color: t.inkSoft, fontSize: 15, lineHeight: 1.6, margin: '0 0 6px' }}>
-          To {action}, please verify your email address. We sent a link to <strong style={{ color: t.ink }}>{user?.email}</strong>.
-        </p>
-        <p style={{ color: t.inkFaint, fontSize: 13.5, lineHeight: 1.6, margin: '0 0 24px', fontWeight: 700 }}>
-          Can’t find it? Please check your spam or junk folder.
-        </p>
-
-        {status === 'sent' && <div style={{ color: t.sage, fontWeight: 700, fontSize: 14, marginBottom: 16 }}>Sent! Check your inbox, and your spam folder too.</div>}
-        {status === 'error' && <div style={{ color: t.coralDeep, fontWeight: 700, fontSize: 14, marginBottom: 16 }}>Couldn’t send that right now. Give it a moment and try again.</div>}
-        {status === 'still' && <div style={{ color: t.coralDeep, fontWeight: 700, fontSize: 14, marginBottom: 16 }}>Still not verified. Click the link in your email, then try again.</div>}
-
-        <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button onClick={recheck} disabled={checking} className="btn btn-coral" style={{ padding: '12px 24px', fontSize: 15 }}>
-            {checking ? 'Checking…' : 'I’ve verified'}
-          </button>
-          <button onClick={resend} disabled={status === 'sending'} className="btn btn-soft" style={{ padding: '12px 24px', fontSize: 15 }}>
-            {status === 'sending' ? 'Sending…' : 'Resend email'}
-          </button>
+    <div className="wrap page">
+      <div className="sheet sheet--pad narrow stack-4">
+        <span className="action-card__icon" style={{ margin: 0 }}><MailCheck size={22} aria-hidden="true" /></span>
+        <h1 style={{ fontSize: 'var(--t-h3)' }}>Verify your email to {action}</h1>
+        <p className="muted">We sent a link to <b style={{ color: 'var(--ink)', fontWeight: 500 }}>{user?.email}</b>. If it isn’t in your inbox, check the spam folder.</p>
+        {status === 'sent' && <p className="alert alert--ok" role="status">Sent. Check your inbox and your spam folder.</p>}
+        {status === 'error' && <p className="alert alert--error" role="alert">The email didn’t send. Wait a minute, then try again.</p>}
+        {status === 'still' && <p className="alert alert--error" role="alert">Your email isn’t verified yet. Open the link in the email, then try again.</p>}
+        <div className="btn-row">
+          <button type="button" onClick={recheck} disabled={checking} className="btn btn--primary">{checking ? 'Checking' : 'I’ve verified my email'}</button>
+          <button type="button" onClick={resend} disabled={status === 'sending'} className="btn btn--secondary">{status === 'sending' ? 'Sending' : 'Send the link again'}</button>
         </div>
       </div>
     </div>

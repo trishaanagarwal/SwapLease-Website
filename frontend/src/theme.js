@@ -1,42 +1,34 @@
-// Shared design tokens: the landing page's palette (off-white, near-black ink, green accent) and Outfit type.
-// Token NAMES are kept stable so existing pages recolor automatically.
+// JS mirror of the app palette (src/index.css :root, the landing page's dealt tokens) for the few inline
+// styles and icon colours left. Plain hex, so SVG attributes resolve them too. Prefer the CSS classes.
+const ink = '#0A0A0A';
+const muted = '#6A6A6A';
+const action = '#1F6B3A';
+const tint = '#E6EEE8';
+
 export const t = {
   cream: '#F8F8F8',
   creamDeep: '#EEEEEE',
   card: '#FFFFFF',
-  ink: '#0A0A0A',
-  inkSoft: '#5A5A5A',
-  inkFaint: '#8E8E8E',
+  ink,
+  inkSoft: muted,
+  inkFaint: '#9A9A9A',
   border: '#E3E3E3',
-  borderStrong: '#D0D0D0',
+  borderStrong: '#CFCFCF',
 
-  // "coral" slot holds the primary navy so existing buttons recolor
-  coral: '#1F6B3A',
-  coralDeep: '#17522C',
-  coralTint: '#E7F0EA',
+  coral: action, coralDeep: '#185730', coralTint: tint,
+  sage: action, sageTint: tint,
+  navy: action, navyDeep: '#185730', green: action,
+  plum: ink, plumTint: '#EEEEEE',
+  honey: '#7A5B17', honeyTint: '#F2EAD9', gold: '#7A5B17',
 
-  sage: '#1F6B3A',
-  sageTint: '#E7F0EA',
+  shadowSm: 'none',
+  shadow: '0 12px 32px -18px rgba(10, 10, 10, 0.35)',
+  shadowLg: '0 18px 40px -20px rgba(10, 10, 10, 0.40)',
+  shadow3d: '0 18px 40px -20px rgba(10, 10, 10, 0.40)',
 
-  plum: '#4B3F72',
-  plumTint: '#ECE8F4',
-
-  honey: '#B08433',
-  honeyTint: '#F2EAD9',
-
-  navy: '#1F6B3A',
-  navyDeep: '#17522C',
-  green: '#1F6B3A',
-  gold: '#B08433',
-
-  shadowSm: '0 1px 2px rgba(10, 10, 10, 0.05)',
-  shadow: '0 4px 16px rgba(10, 10, 10, 0.07)',
-  shadowLg: '0 10px 30px rgba(10, 10, 10, 0.10)',
-  shadow3d: '0 10px 30px rgba(10, 10, 10, 0.10)', // alias (kept for compatibility)
-
-  radiusSm: 6,
-  radius: 8,
-  radiusLg: 12,
+  radiusSm: 8,
+  radius: 12,
+  radiusLg: 20,
   pill: 999,
 
   display: "'Outfit', system-ui, sans-serif",
@@ -46,5 +38,5 @@ export const typeLabels = {
   apartment: 'Apartment',
   house: 'House',
   studio: 'Studio',
-  student_accom: 'Student Accom',
+  student_accom: 'Student accom',
 };

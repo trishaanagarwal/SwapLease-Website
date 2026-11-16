@@ -4,10 +4,9 @@ import { collection, query, where, orderBy, limit, getDocs } from 'firebase/fire
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import ListingCard from '../components/ListingCard';
-import SeekerPhoto from '../components/SeekerPhoto';
+import SeekerCard from '../components/SeekerCard';
 import { useMessageSeeker } from '../hooks/useMessageSeeker';
-import { t } from '../theme';
-import { PlusCircle, Search, Users, MessageCircle, ArrowRight, Home, MapPin, BadgeCheck, CalendarDays, GraduationCap, Pencil } from 'lucide-react';
+import { PlusCircle, Search, Users, MessageCircle } from 'lucide-react';
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -29,106 +28,64 @@ export default function HomePage() {
   }, []);
 
   const actions = [
-    { to: '/create-listing', icon: PlusCircle, title: 'List your lease', desc: 'Post your place for someone to take over.', color: t.navy, tint: t.coralTint },
-    { to: '/listings', icon: Search, title: 'Browse leases', desc: 'Find a place around Melbourne.', color: t.green, tint: t.sageTint },
-    { to: '/roommates', icon: Users, title: 'Post a request', desc: "Say what you're after, a place, room or roommate.", color: t.plum, tint: t.plumTint },
-    { to: '/messages', icon: MessageCircle, title: 'Messages', desc: 'Continue your conversations.', color: t.gold, tint: t.honeyTint },
+    { to: '/create-listing', icon: PlusCircle, title: 'List your lease', desc: 'Hand your place to another student.' },
+    { to: '/listings', icon: Search, title: 'Browse leases', desc: 'Places across Melbourne, by suburb.' },
+    { to: '/roommates/edit', icon: Users, title: 'Post a request', desc: 'Say what you need: a place, a room or a roommate.' },
+    { to: '/messages', icon: MessageCircle, title: 'Messages', desc: 'Pick up your conversations.' },
   ];
 
   const firstName = user?.name?.split(' ')[0] || 'there';
 
   return (
-    <div style={{ minHeight: '100vh', background: t.cream }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 22px 64px' }}>
-
-        <h1 className="font-display" style={{ fontSize: 'clamp(26px, 4vw, 34px)', fontWeight: 600, color: t.ink, margin: '0 0 4px' }}>
-          Welcome back, {firstName}
-        </h1>
-        <p style={{ color: t.inkSoft, fontSize: 15, margin: '0 0 28px' }}>What would you like to do today?</p>
-
-        {/* Quick actions */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, marginBottom: 48 }}>
-          {actions.map(a => (
-            <Link key={a.to} to={a.to} className="lift" style={{ textDecoration: 'none', background: '#fff', border: `1px solid ${t.border}`, borderRadius: t.radiusLg, padding: '22px 22px' }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: a.tint, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <a.icon size={22} color={a.color} strokeWidth={2} />
-              </div>
-              <div className="font-display" style={{ fontSize: 18, fontWeight: 600, color: t.ink, margin: '14px 0 6px' }}>{a.title}</div>
-              <div style={{ fontSize: 13.5, color: t.inkSoft, lineHeight: 1.5 }}>{a.desc}</div>
-            </Link>
-          ))}
+    <div className="wrap page">
+      <header className="page-head">
+        <div>
+          <h1>Welcome back, {firstName}</h1>
+          <p>New leases and requests from students, newest first.</p>
         </div>
+      </header>
 
-        {/* Freshly listed */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20 }}>
-          <h2 className="font-display" style={{ fontSize: 'clamp(22px, 4vw, 28px)', fontWeight: 600, color: t.ink, margin: 0 }}>Recently added</h2>
-          <Link to="/listings" style={{ color: t.navy, textDecoration: 'none', fontSize: 15, fontWeight: 700, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 5 }}>Explore more <ArrowRight size={16} /></Link>
-        </div>
-
-        {loading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 22 }}>
-            {[...Array(3)].map((_, i) => <div key={i} className="skeleton" style={{ borderRadius: t.radius, height: 320 }} />)}
-          </div>
-        ) : listings.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 22 }}>
-            {listings.map(l => <ListingCard key={l.id} listing={l} />)}
-          </div>
-        ) : (
-          <div style={{ textAlign: 'center', padding: '56px 20px', background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}` }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14, color: t.inkFaint }}><Home size={40} /></div>
-            <p style={{ fontSize: 16, color: t.ink, marginBottom: 6, fontWeight: 700 }}>Be the first to list, and get seen by everyone who joins</p>
-            <p style={{ fontSize: 14, color: t.inkSoft, marginBottom: 14 }}>Early listings carry a permanent gold Founding lister badge.</p>
-            <Link to="/create-listing" className="btn btn-coral" style={{ padding: '11px 22px', fontSize: 14.5 }}>List your lease →</Link>
-          </div>
-        )}
-
-        {/* Recent requests */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', margin: '52px 0 20px' }}>
-          <h2 className="font-display" style={{ fontSize: 'clamp(22px, 4vw, 28px)', fontWeight: 600, color: t.ink, margin: 0 }}>Recent requests</h2>
-          <Link to="/roommates" style={{ color: t.navy, textDecoration: 'none', fontSize: 15, fontWeight: 700, whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 5 }}>See all <ArrowRight size={16} /></Link>
-        </div>
-
-        {seekersLoading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 22 }}>
-            {[...Array(3)].map((_, i) => <div key={i} className="skeleton" style={{ borderRadius: t.radius, height: 300 }} />)}
-          </div>
-        ) : seekers.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 22 }}>
-            {seekers.map(s => (
-              <div key={s.id} style={{ background: '#fff', border: `1px solid ${t.border}`, borderRadius: t.radiusLg, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                <SeekerPhoto src={s.images?.[0]} height={160} />
-                <div style={{ padding: '14px 16px 16px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
-                    <span className="font-display" style={{ fontSize: 17, fontWeight: 600, color: t.ink }}>{s.onBehalfOf || s.userName}</span>
-                    <BadgeCheck size={15} color={t.green} />
-                    {s.onBehalfOf && (
-                      <span style={{ fontSize: 11.5, fontWeight: 700, color: '#8a6a1f', background: t.honeyTint, borderRadius: t.radiusSm, padding: '3px 9px' }}>
-                        via {s.userName?.split(' ')[0]}
-                      </span>
-                    )}
-                  </div>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
-                    {s.budget && <span style={{ fontSize: 12, fontWeight: 700, color: t.navy, background: t.coralTint, borderRadius: t.radiusSm, padding: '3px 9px' }}>${s.budget}/wk</span>}
-                    {s.areas && <span style={{ fontSize: 12, fontWeight: 700, color: t.inkSoft, background: t.cream, border: `1px solid ${t.border}`, borderRadius: t.radiusSm, padding: '3px 9px', display: 'inline-flex', alignItems: 'center', gap: 4 }}><MapPin size={11} /> {s.areas}</span>}
-                    {s.moveIn && <span style={{ fontSize: 12, fontWeight: 700, color: t.inkSoft, background: t.cream, border: `1px solid ${t.border}`, borderRadius: t.radiusSm, padding: '3px 9px', display: 'inline-flex', alignItems: 'center', gap: 4 }}><CalendarDays size={11} /> {s.moveIn}</span>}
-                    {s.unis && <span style={{ fontSize: 12, fontWeight: 700, color: t.plum, background: t.plumTint, borderRadius: t.radiusSm, padding: '3px 9px', display: 'inline-flex', alignItems: 'center', gap: 4 }}><GraduationCap size={11} /> {s.unis}</span>}
-                  </div>
-                  <p style={{ fontSize: 13.5, color: t.inkSoft, lineHeight: 1.55, margin: '0 0 14px', flex: 1, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{s.about}</p>
-                  <button onClick={() => messageSeeker(s)} disabled={busy === s.userId} className="btn btn-coral" style={{ padding: '10px 16px', fontSize: 14 }}>
-                    {s.userId === user?.id ? <><Pencil size={14} /> Edit your request</> : <><MessageCircle size={15} /> {busy === s.userId ? 'Opening…' : `Message ${s.userName?.split(' ')[0]}`}</>}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div style={{ textAlign: 'center', padding: '48px 20px', background: '#fff', borderRadius: t.radiusLg, border: `1px solid ${t.border}` }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14, color: t.inkFaint }}><Users size={40} /></div>
-            <p style={{ fontSize: 16, color: t.inkSoft, marginBottom: 8, fontWeight: 600 }}>No requests yet.</p>
-            <Link to="/roommates/edit" style={{ color: t.navy, textDecoration: 'none', fontWeight: 700 }}>Post yours →</Link>
-          </div>
-        )}
+      <div className="grid">
+        {actions.map(a => (
+          <Link key={a.to} to={a.to} className="lcard action-card span-3">
+            <span className="action-card__icon"><a.icon size={20} aria-hidden="true" /></span>
+            <span className="lcard__title">{a.title}</span>
+            <span className="muted t-small">{a.desc}</span>
+          </Link>
+        ))}
       </div>
+
+      <div className="head-row">
+        <h2>New leases</h2>
+        <Link to="/listings" className="link">Browse leases</Link>
+      </div>
+      {loading ? (
+        <div className="cards">{[...Array(3)].map((_, i) => <div key={i} className="skeleton" style={{ height: 380 }} />)}</div>
+      ) : listings.length > 0 ? (
+        <div className="cards">{listings.map(l => <ListingCard key={l.id} listing={l} />)}</div>
+      ) : (
+        <div className="empty">
+          <h3>No leases listed yet</h3>
+          <p>Early listings carry a permanent Founding lister badge.</p>
+          <Link to="/create-listing" className="btn btn--primary">List your lease</Link>
+        </div>
+      )}
+
+      <div className="head-row">
+        <h2>New requests</h2>
+        <Link to="/roommates" className="link">Browse requests</Link>
+      </div>
+      {seekersLoading ? (
+        <div className="cards">{[...Array(3)].map((_, i) => <div key={i} className="skeleton" style={{ height: 420 }} />)}</div>
+      ) : seekers.length > 0 ? (
+        <div className="cards">{seekers.map(s => <SeekerCard key={s.id} s={s} user={user} busy={busy} onMessage={messageSeeker} />)}</div>
+      ) : (
+        <div className="empty">
+          <h3>No requests yet</h3>
+          <p>Post what you need and students leaving a place can message you first.</p>
+          <Link to="/roommates/edit" className="btn btn--primary">Post a request</Link>
+        </div>
+      )}
     </div>
   );
 }

@@ -12,10 +12,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const CSS = [
-  'https://fonts.googleapis.com/css2?family=Outfit:wght@400..700&family=DM+Mono:wght@400;500&display=swap',
-  '/assets/system.css',
   '/assets/ui/cards.css',
-  '/assets/motion/motion.css',
   '/assets/backgrounds/backgrounds.css',
   '/assets/layout/layout.css',
   '/assets/icons/icon.css',
@@ -24,7 +21,7 @@ const CSS = [
   ...['window', 'chat', 'checklist', 'search', 'notify', 'doc'].map(n => `/assets/ui/${n}/fragment.css`),
 ];
 const SCRIPTS = ['/assets/system.js', '/assets/motion/motion.js', '/assets/layout/layout.js'];
-const HTML_ATTRS = { 'data-type': 'software', 'data-radius': 'soft', 'data-ground': 'sage', 'data-buttons': 'pill', 'data-motion': '' };
+const HTML_ATTRS = { 'data-type': 'software', 'data-ground': 'sage', 'data-motion': '' }; // data-radius and data-buttons are set app-wide in index.html
 const METAS = { 'site-kind': 'software', 'page-type': 'software' };
 const KIT_CLASSES = ['m-enter', 'm-enter-done', 'mo-js', 'mo-safe'];
 

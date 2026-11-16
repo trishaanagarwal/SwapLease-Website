@@ -1,11 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Bed, Bath, Users, GraduationCap, ImageOff, CalendarDays } from 'lucide-react';
-import { t, typeLabels } from '../theme';
+import { typeLabels } from '../theme';
 import BookmarkButton from './BookmarkButton';
 
-const ico = { display: 'inline-flex', alignItems: 'center', gap: 5 };
-
-// Listings created during the launch window carry a permanent gold badge.
+// Listings created during the launch window carry a permanent founding badge.
 const FOUNDING_CUTOFF = new Date('2026-10-01');
 const isFounding = (listing) => {
   const ts = listing.createdAt;
@@ -13,133 +11,59 @@ const isFounding = (listing) => {
   return d && d < FOUNDING_CUTOFF;
 };
 
-const chip = (bg, color) => ({ fontSize: 11.5, fontWeight: 700, color, background: bg, borderRadius: t.radiusSm, padding: '3px 9px', display: 'inline-block' });
-
-function NoPhoto() {
-  return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, background: t.creamDeep, color: t.inkFaint }}>
-      <ImageOff size={28} />
-      <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.02em' }}>No photo yet</span>
-    </div>
-  );
+export function NoPhoto() {
+  return <div className="no-photo"><ImageOff size={26} aria-hidden="true" /><span>No photo yet</span></div>;
 }
 
-function TakenTag() {
+const dates = (l) => l.availableFrom ? `${l.availableFrom}${l.availableTo ? ` to ${l.availableTo}` : ''}` : null;
+
+// One card for every listing: a column on the home page, a wide row (`horizontal`) on Browse.
+export default function ListingCard({ listing: l, horizontal = false }) {
+  const image = l.images?.[0];
+  const where = [l.suburb, l.city].filter(Boolean).join(', ');
+  const when = dates(l);
+
   return (
-    <div style={{ position: 'absolute', inset: 0, background: 'rgba(22,34,59,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <span style={{ background: '#fff', color: t.ink, fontWeight: 800, fontSize: 13, padding: '7px 16px', borderRadius: t.radiusSm, letterSpacing: '0.02em' }}>Taken</span>
-    </div>
-  );
-}
-
-export default function ListingCard({ listing, horizontal = false }) {
-  const image = listing.images?.[0] || null;
-  const taken = listing.status === 'taken';
-
-  if (horizontal) {
-    return (
-      <Link to={`/listings/${listing.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-        <div className="lift" style={{ background: t.card, borderRadius: t.radius, overflow: 'hidden', marginBottom: 16, display: 'flex', border: `1px solid ${t.border}`, boxShadow: t.shadowSm }}>
-          <div style={{ width: 250, minWidth: 250, height: 200, position: 'relative', overflow: 'hidden', background: t.creamDeep, flexShrink: 0 }}>
-            {image ? (
-              <img src={image} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            ) : <NoPhoto />}
-            {taken && <TakenTag />}
-            <div style={{ position: 'absolute', top: 10, right: 10 }}><BookmarkButton listingId={listing.id} /></div>
-          </div>
-
-          <div style={{ flex: 1, padding: '20px 24px', display: 'flex', justifyContent: 'space-between', gap: 16, minWidth: 0 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
-                <span style={chip(t.coralTint, t.coralDeep)}>{typeLabels[listing.type] || listing.type}</span>
-                {listing.furnished && <span style={chip(t.sageTint, t.sage)}>Furnished</span>}
-                {listing.renewable && <span style={chip(t.sageTint, t.sage)}>Renewable</span>}
-                {isFounding(listing) && <span style={chip(t.gold, '#fff')}>★ Founding lister</span>}
-                {listing.onBehalfOf && <span style={chip(t.honeyTint, '#8a6a1f')}>For {listing.onBehalfOf}</span>}
-              </div>
-
-              <h3 className="font-display" style={{ fontSize: 20, fontWeight: 700, color: t.ink, margin: '0 0 4px', lineHeight: 1.2 }}>{listing.title}</h3>
-              <div style={{ fontSize: 13.5, color: t.inkSoft, marginBottom: 12 }}>{[listing.suburb, listing.city].filter(Boolean).join(', ')}</div>
-
-              <div style={{ display: 'flex', gap: 16, fontSize: 13.5, color: t.ink, fontWeight: 600 }}>
-                <span style={ico}><Bed size={16} /> {listing.bedrooms} bed</span>
-                <span style={ico}><Bath size={16} /> {listing.bathrooms} bath</span>
-                {listing.tenants > 1 && <span style={{ ...ico, color: t.plum }}><Users size={16} /> {listing.tenants} tenants</span>}
-              </div>
-
-              {listing.nearbyUni && (
-                <div style={{ marginTop: 12 }}><span style={{ ...chip(t.plumTint, t.plum), display: 'inline-flex', alignItems: 'center', gap: 5 }}><GraduationCap size={14} /> {listing.nearbyUni}</span></div>
-              )}
-
-              {listing.availableFrom && (
-                <div style={{ marginTop: 10, fontSize: 12.5, color: t.inkSoft }}>
-                  Available {listing.availableFrom}{listing.availableTo ? ` → ${listing.availableTo}` : ''}
-                </div>
-              )}
-            </div>
-
-            <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              <div style={{ fontSize: 24, fontWeight: 800, color: t.ink, whiteSpace: 'nowrap' }}>${listing.rent?.toLocaleString()}</div>
-              <div style={{ fontSize: 12.5, color: t.inkSoft }}>per week</div>
-              {listing.bond && <div style={{ fontSize: 12.5, color: t.inkSoft, marginTop: 4 }}>Bond ${listing.bond?.toLocaleString()}</div>}
-              <div style={{ marginTop: 18 }}>
-                <span className="btn btn-coral" style={{ fontSize: 13, padding: '9px 20px' }}>View listing</span>
-              </div>
-            </div>
-          </div>
+    <Link to={`/listings/${l.id}`} className={`lcard${horizontal ? ' lcard--row' : ''}`}>
+      <div className="lcard__media">
+        {image ? <img src={image} alt="" loading="lazy" /> : <NoPhoto />}
+        {l.status === 'taken' && <div className="lcard__taken"><span className="pill">Taken</span></div>}
+        <div className="lcard__tags">
+          <span className="pill">{typeLabels[l.type] || l.type}</span>
+          {isFounding(l) && <span className="pill pill--gold">Founding lister</span>}
         </div>
-      </Link>
-    );
-  }
+        <div className="lcard__save"><BookmarkButton listingId={l.id} /></div>
+      </div>
 
-  // Vertical card
-  return (
-    <Link to={`/listings/${listing.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-      <div className="lift" style={{ background: t.card, borderRadius: t.radius, overflow: 'hidden', border: `1px solid ${t.border}`, boxShadow: t.shadowSm }}>
-        <div style={{ position: 'relative', height: 200, overflow: 'hidden', background: t.creamDeep }}>
-          {image ? (
-            <img src={image} alt={listing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          ) : <NoPhoto />}
-          {taken && <TakenTag />}
-          <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
-            <div style={{ background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(4px)', borderRadius: t.radiusSm, padding: '4px 10px', fontSize: 11.5, fontWeight: 700, color: t.ink }}>
-              {typeLabels[listing.type] || listing.type}
-            </div>
-            {isFounding(listing) && (
-              <div style={{ background: t.gold, borderRadius: t.radiusSm, padding: '4px 10px', fontSize: 11, fontWeight: 800, color: '#fff', letterSpacing: '0.02em' }}>
-                ★ Founding lister
-              </div>
-            )}
-          </div>
-          {listing.furnished && (
-            <div style={{ position: 'absolute', bottom: 12, left: 12, background: t.sage, borderRadius: t.radiusSm, padding: '4px 10px', fontSize: 11.5, fontWeight: 700, color: '#fff' }}>Furnished</div>
-          )}
-          <div style={{ position: 'absolute', top: 12, right: 12 }}><BookmarkButton listingId={listing.id} /></div>
+      <div className="lcard__body">
+        <h3 className="lcard__title">{l.title}</h3>
+        {where && <p className="lcard__where">{where}</p>}
+        <div className="lcard__facts">
+          <span><Bed aria-hidden="true" />{l.bedrooms} bed</span>
+          <span><Bath aria-hidden="true" />{l.bathrooms} bath</span>
+          {l.tenants > 1 && <span><Users aria-hidden="true" />{l.tenants} tenants</span>}
+          {when && <span><CalendarDays aria-hidden="true" />{when}</span>}
         </div>
-        <div style={{ padding: '16px 18px 18px' }}>
-          <h3 className="font-display" style={{ fontSize: 18, fontWeight: 700, color: t.ink, margin: '0 0 4px', lineHeight: 1.25 }}>{listing.title}</h3>
-          <div style={{ fontSize: 13, color: t.inkSoft, marginBottom: 10 }}>{[listing.suburb, listing.city].filter(Boolean).join(', ')}</div>
-          {listing.onBehalfOf && (
-            <div style={{ display: 'inline-flex', alignItems: 'center', fontSize: 12, fontWeight: 700, color: '#8a6a1f', background: t.honeyTint, borderRadius: t.radiusSm, padding: '3px 9px', marginBottom: 10, marginRight: 6 }}>
-              For {listing.onBehalfOf}
-            </div>
-          )}
-          {listing.availableFrom && (
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700, color: t.green, background: t.sageTint, borderRadius: t.radiusSm, padding: '3px 9px', marginBottom: 12 }}>
-              <CalendarDays size={12} /> {listing.availableFrom}{listing.availableTo ? ` → ${listing.availableTo}` : ''}
-            </div>
-          )}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', gap: 14, fontSize: 13.5, color: t.ink, fontWeight: 600 }}>
-              <span style={ico}><Bed size={16} /> {listing.bedrooms}</span>
-              <span style={ico}><Bath size={16} /> {listing.bathrooms}</span>
-            </div>
-            <div>
-              <span style={{ fontSize: 20, fontWeight: 800, color: t.ink }}>${listing.rent}</span>
-              <span style={{ fontSize: 12.5, color: t.inkSoft }}>pw</span>
-            </div>
+        {(l.furnished || l.renewable || l.onBehalfOf || (horizontal && l.nearbyUni)) && (
+          <div className="chips">
+            {l.furnished && <span className="pill pill--quiet">Furnished</span>}
+            {l.renewable && <span className="pill pill--quiet">Renewable</span>}
+            {l.onBehalfOf && <span className="pill pill--quiet">For {l.onBehalfOf}</span>}
+            {horizontal && l.nearbyUni && <span className="pill pill--quiet"><GraduationCap aria-hidden="true" />{l.nearbyUni}</span>}
           </div>
-        </div>
+        )}
+
+        {horizontal ? (
+          <div className="lcard__side">
+            <div className="lcard__price"><b>${l.rent?.toLocaleString()}</b><span>/wk</span></div>
+            {l.bond && <span className="muted">Bond ${l.bond.toLocaleString()}</span>}
+          </div>
+        ) : (
+          <div className="lcard__foot">
+            <div className="lcard__price"><b>${l.rent?.toLocaleString()}</b><span>/wk</span></div>
+            {l.bond && <span className="muted t-small">Bond ${l.bond.toLocaleString()}</span>}
+          </div>
+        )}
       </div>
     </Link>
   );

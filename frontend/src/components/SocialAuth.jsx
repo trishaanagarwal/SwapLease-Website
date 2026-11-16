@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { t } from '../theme';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
@@ -44,29 +43,12 @@ export default function SocialAuth({ label = 'Continue' }) {
     }
   };
 
-  const btn = {
-    width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-    padding: '12px 16px', borderRadius: 14, fontSize: 14.5, fontWeight: 700, cursor: 'pointer',
-    fontFamily: 'inherit', marginBottom: 10, transition: 'opacity 0.15s ease',
-  };
-
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0' }}>
-        <div style={{ flex: 1, height: 1, background: t.border }} />
-        <span style={{ fontSize: 12.5, color: t.inkFaint, fontWeight: 600 }}>or</span>
-        <div style={{ flex: 1, height: 1, background: t.border }} />
-      </div>
-
-      {error && (
-        <div style={{ background: t.coralTint, border: `1px solid ${t.coral}`, color: t.coralDeep, borderRadius: 12, padding: '10px 14px', fontSize: 13.5, marginBottom: 12, fontWeight: 600 }}>
-          {error}
-        </div>
-      )}
-
-      <button onClick={() => handle('google')} disabled={!!busy}
-        style={{ ...btn, background: '#fff', color: t.ink, border: `1.5px solid ${t.borderStrong}`, opacity: busy === 'google' ? 0.6 : 1 }}>
-        <GoogleIcon /> {busy === 'google' ? 'Connecting…' : `${label} with Google`}
+    <div className="stack-4" style={{ marginTop: 'var(--s-5)' }}>
+      <div className="or-rule"><span>or</span></div>
+      {error && <p className="alert alert--error" role="alert">{error}</p>}
+      <button type="button" onClick={() => handle('google')} disabled={!!busy} className="btn btn--secondary btn--block btn--plain">
+        <GoogleIcon /> {busy === 'google' ? 'Connecting to Google' : `${label} with Google`}
       </button>
     </div>
   );
